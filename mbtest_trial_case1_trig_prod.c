@@ -1399,8 +1399,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	// send configuration data
 	/* inpf = fopen("/home/ub/config_files_041712/feb_fpga_080612","r"); */
-	/* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
-	inpf = fopen("/home/ub/module1x_140820_chi_12_8_2014.rbf","r");
+	inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r");
+	/* inpf = fopen("/home/ub/module1x_140820_chi_12_8_2014.rbf","r"); */
 	ichip=mb_feb_conf_add; //ichip=mb_feb_config_add(=2) is for configuration chip
 	buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
 	i=1;
@@ -2163,7 +2163,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 		  if(iround == 0) idir = 1;
 		  iround = iround + idir;
 		  in= ibase + iround;
-		  if( (ik > 240) & (ik <247)) in=300+ibase;
+		  if( (ik > 40) & (ik <47)) in=300+ibase;
 		  
 		  /* if(il%4 == 0) { */
 		    //if(ik == 0) printf(" channel %d fake data \n",il);
