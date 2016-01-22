@@ -1,0 +1,134 @@
+
+Start time of program: 1453414430 sec 527744 usec
+
+PCIE diagnostic utility.
+Application accesses hardware using WinDriver.
+
+Found 1 matching device [ Vendor ID 0x1172, Device ID 0x4 ]:
+
+ 1. Vendor ID: 0x1172, Device ID: 0x4
+    Location: Bus 0x4, Slot 0x0, Function 0x0
+    Memory range [BAR 0]: base 0xDFDC0000, size 0x40000
+    Memory range [BAR 1]: base 0xDFE00000, size 0x40000
+    Memory range [BAR 2]: base 0xC0000000, size 0x10000000
+    Memory range [BAR 3]: base 0xDFE40000, size 0x40000
+    Memory range [BAR 4]: base 0xDFE80000, size 0x40000
+    Memory range [BAR 5]: base 0xDFEC0000, size 0x40000
+    Interrupt: IRQ 16
+    Interrupt Options (supported interrupts):
+        Message-Signaled Interrupt (MSI)
+        Level-Sensitive Interrupt
+
+
+Found 1 matching device [ Vendor ID 0x1172, Device ID 0x5 ]:
+
+ 1. Vendor ID: 0x1172, Device ID: 0x5
+    Location: Bus 0x3, Slot 0x0, Function 0x0
+    Memory range [BAR 0]: base 0xF7BC0000, size 0x40000
+    Memory range [BAR 1]: base 0xF7C00000, size 0x40000
+    Memory range [BAR 2]: base 0xE0000000, size 0x10000000
+    Memory range [BAR 3]: base 0xF7C40000, size 0x40000
+    Memory range [BAR 4]: base 0xF7C80000, size 0x40000
+    Memory range [BAR 5]: base 0xF7CC0000, size 0x40000
+    Interrupt: IRQ 30
+    Interrupt Options (supported interrupts):
+        Message-Signaled Interrupt (MSI)
+        Level-Sensitive Interrupt
+
+DeviceFind: Failed scanning the PCI bus.
+Error: 0x2000000f - Device not found
+DeviceFind: Failed scanning the PCI bus.
+Error: 0x2000000f - Device not found
+DeviceFind: Failed scanning the PCI bus.
+Error: 0x2000000f - Device not found
+DeviceFind: Failed scanning the PCI bus.
+Error: 0x2000000f - Device not found
+Input the command code for test......
+     (1) SuperNova readout test -- 2 buffer mode 
+     (2) SuperNova readout test -- multiple boards 
+     (3) Neutrino event readout -- multiple baotrds 
+     (4) Dev1 -- Neutrino event readout -- multiple baotrds 
+     (5) SuperNova readout test -- thread 
+ SuperNova readout test 
+ enable number of loop
+type 1 for print out debug information in dma loop
+ boot xmit module 
+ counta = 1000, first word = ff1700, ff, ff ff ff 
+ counta = 2000, first word = 1700, 0, 0 0 0 
+ counta = 3000, first word = 1700, 0, 0 0 0 
+ counta = 4000, first word = 1700, 0, 0 0 0 
+ counta = 5000, first word = 1700, 0, 0 0 0 
+ counta = 6000, first word = 1700, 0, 0 0 0 
+You have reached the end-of-file word count= 3699963 963
+ik= 483
+Last data = 473, ff00ff
+Last data = 474, ff00ff
+Last data = 475, ff00ff
+Last data = 476, ff00ff
+Last data = 477, ff00ff
+Last data = 478, ff00ff
+Last data = 479, ff00ff
+Last data = 480, ff00ff
+Last data = 481, ff00ff
+Last data = 482, 0
+Last data = 483, 12000000
+ xmit done, booting FEM 
+ counta = 1000, first word = ff1f00, ff, ff ff ff 
+ counta = 2000, first word = 1f00, 0, 0 0 0 
+ counta = 3000, first word = 181f00, 18, 18 18 18 
+ counta = 4000, first word = 1f00, 0, 0 0 20 
+ counta = 5000, first word = 81f00, 8, 8 8 84 
+ counta = 6000, first word = 21f00, 2, 2 2 4 
+You have reached the end-of-file word count= 5926664 664
+ik= 334
+Last data = 324, ff00ff
+Last data = 325, ff00ff
+Last data = 326, ff00ff
+Last data = 327, ff00ff
+Last data = 328, ff00ff
+Last data = 329, ff00ff
+Last data = 330, ff00ff
+Last data = 331, ff00ff
+Last data = 332, ff
+Last data = 333, 800000
+Last data = 334, 1a000000
+ number of words for hold be send back = 3fff
+ set up the hold condition 
+ enter 1 to reset the dram 
+ status word before read = 80000000, 0 
+ status word after read = 80000000, 0 
+receive data word = ffffffff, ffffffff 
+ loading zero suppression parameter 
+ enter 1 to reset the DPA 
+ XMIT FIFO reset 
+ reset the link PLL for module 3 
+ status word before read = 80000000, 0 
+ status word after read = 80000000, 0 
+FEM module 3 status word after PLL reset = ffffffff, ffffffff 
+ XMIT FIFO reset 
+ set last module on, module address 3
+ status word before read = 40000004, 0 
+ status word after read = 80000000, 0 
+xmit status word = 31fff00, ffffffff 
+ finish XMIT alignment 
+ XMIT re-align done 
+ DMA will run 1 loop
+ buffer allocation 1
+ buffer allocation lower address = 300c0000
+ buffer allocation higher address = 3
+ buffer allocation 2
+ buffer allocation 2 lower address = 30580000
+ buffer allocation 2 higher address = 3
+ initial abort finished 
+. use 4dw 
+ enter 1 to set the RUN on 
+ status word for channel 1 after read = 40030d40, 0 
+ status word for channel 2 after read = 40030d40, 0 
+ status word for channel 1 after read = 40030d40, 0 
+ status word for channel 2 after read = 40030d40, 0 
+ loop 0, DMA is not finished 
+ DMA word count = 30d40
+ number of words received 0 0 0 25000
+ enter 1 to contrinue 1073941824 25000 0
+ nremain = -1073741824, nremain/4 = -268435456 
+ enter 1 to contrinue 200000 25000 0
