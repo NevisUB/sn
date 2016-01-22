@@ -138,6 +138,19 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev,WDC_DEVICE_HANDLE hDev1 ,WDC_DEVIC
 
 /* static void MenuMBtest(WDC_DEVICE_HANDLE hDev,WDC_DEVICE_HANDLE hDev1 ,WDC_DEVICE_HANDLE hDev2, */
 /* WDC_DEVICE_HANDLE hDev3, WDC_DEVICE_HANDLE hDev4, WDC_DEVICE_HANDLE hDev5); */
+
+
+static int check_status(WDC_DEVICE_HANDLE hDevPMT,
+			WDC_DEVICE_HANDLE hDevTPC,
+			int imod_trig,
+			int imod_fem_pmt_start,
+			int imod_fem_pmt_end,
+			int imod_fem_tpc_start,
+			int imod_fem_tpc_end,
+			int imod_xmit_pmt,
+			int imod_xmit_tpc);
+
+
 static int pcie_send(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff_send);
 static int pcie_send_6_1(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff_send);
 static int pcie_send_1(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff_send);
@@ -210,6 +223,26 @@ static int buffer_ev_n_tpc[jbuf_ev_size], buffer_ev_s_tpc[jbuf_ev_size];
 
     PVOID pbuf_rec_n2;
     WD_DMA *pDma_rec_n2;
+//georgia
+static long tnum;
+char name[150];
+
+//variables for data checking
+static int nc=0;
+static int nwords=0;
+static int ibin=1;
+static int ih=0;
+static int set=0;
+static long long int adc1,adc2;
+static long nmod;
+static int femfakedata;
+static UINT32 im,iwritem,iwrited,iline,dmasizewrite,firstokayk,icompare,ipause,firstokay,incomp,in;
+static UINT32 evno,evnob4,frno,frnob4,ch,fevno[20],fevnob4[20],ffrno[20],ffrnob4[20];
+static UINT32 read_arrayy[40000];
+static UINT32 read_array_c[40000];
+static UINT32 read_comp[40000];
+static UINT32 read_array_compare[40000000],read_array_1st[40000000];
+//geoergia
 
 
     PVOID pbuf_rec_s;
@@ -884,12 +917,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 #define  dma_buffer_size        40000000
 
-    static DWORD dwAddrSpace;
+  static DWORD dwAddrSpace;
 
-    static UINT32 u32Data;
-    static unsigned short u16Data;
-    static unsigned long long u64Data, u64Data1;
-    static DWORD dwOffset;
+  static UINT32 u32Data;
+  static unsigned short u16Data;
+  static unsigned long long u64Data, u64Data1;
+  static DWORD dwOffset;
     static long imod,ichip;
     unsigned short *buffp;
 
@@ -905,7 +938,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 */
     static UINT32 i,j,k,ifr,nread,iprint,iwrite,ik,il,is,checksum;
     static UINT32 istop,newcmd,irand,ioffset,kword,lastchnl,ib;
-    static UINT32 send_array[40000],read_array[dma_buffer_size],read_array1[40000];
+    static UINT32 send_array[40000][20],read_array[dma_buffer_size],read_array1[40000];
     static UINT32 read_array_c[40000];
     static UINT32 read_comp[8000];
     static UINT32 nmask,index,itmp,nword_tot,nevent,iv,ijk,islow_read;
@@ -961,7 +994,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     struct timeval start;
     
     
-    static int fd_sn;
+    static int fd_sn,ooo;
     //
     void *status_pt;
     size_t stacksize;
@@ -1049,736 +1082,707 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     
     
     case 1:
-      
-      pFilee = fopen("sn_tester_trig.txt","a");
-
-      printf(" SuperNova readout test \n");
-      printf(" enable number of loop\n");
-      /* scanf("%d",&nloop); */
-      nloop = 1;
-      //     printf(" enter 1 to turn on huffman encoding \n");
-      //     scanf("%d",&ihuff);
+      //idebug=1;
+      //iprint=1;
+      //irawprint=1;
+      printf("Using trigger issued through the controller, and fake FEM data.\n");
      
-      //vic
-      ihuff = 1;
-      //     printf("tyep 1 to compare with the 1st event\n");
-      //     scanf("%d",&comp_s);
-      printf("type 1 for print out debug information in dma loop\n");
-      /* scanf("%d",&idebug); */
+      printf("\n-----------------------------\n");
+      printf("RUN OPTIONS:\n");
 
-      idebug = 0;
-      /* printf("type 1 for raw data print \n"); */
-      /* scanf("%d",&irawprint); */
-      irawprint = 0;
-      /* printf(" enter buffer size in bytes \n"); */
-      /* scanf("%d",&dwDMABufSize); */
+      printf("\n\tEnter number of triggers (events):\t");
+      scanf("%d",&nevent);
+
+      printf("\n-----------------------------\n");
+      printf("CRATE CONFIGURATION:\n");
+
+      printf("\n\tHow many FEB modules?\t\t");
+      scanf("%d",&nmod);
+      //      nmod=17;//15 new FEMs at a time
+
+      printf("\n\tXMIT slot number (count from right, starting at 1)?\t");
+      scanf("%d",&imod_xmit);
+      //      imod_xmit=1;
+
+      imod_st=imod_xmit+nmod;
+      
+      printf("\n\tProceeding with module numbers:\n\t");
+      for (i=0; i<nmod; i++){
+	printf("%d\t",imod_xmit+1+i);
+      }
+      printf("\n\tLast FEM module: %d",imod_st);
+      printf("\n");
+      
+
+      printf("\n-----------------------------\n");
+      printf("DATA TYPE OPTIONS:\n");
+
+      femfakedata=1;
+      printf("\n\tUse random FEM data?\t");
+      scanf("%d",&irand);
+      //	irand=1;
+
+      //      printf("\n\tUse huffman compression?\t");
+      //      scanf("%d",&ihuff);
+      //      ihuff =1; //xxxxx need to predict event size 
+      ihuff=0;
+
+      //      printf("\n\tDMA buffer size?\t");
+      //      scanf("%d",&dwDMABufSize);
+      dwDMABufSize = 4000000;
+
+      printf("\n-----------------------------\n");
+      printf("OUTPUT OPTIONS:\n");
+      
+      printf("\n\tWrite data to binary file?\t");
+      scanf("%d",&iwrite);
+      if(iwrite == 1) {
+	printf("\n\tTest number (for output file name)?\t");
+	scanf("%d",&tnum);
+	//      tnum=0;	
+	printf("\n\tWrite multiple binaries?\t");
+	scanf("%d",&iwritem);
+	//	iwritem=0;
+	if (iwritem==0){
+	  printf("\n\tWrite on every DMA?\t");
+	  scanf("%d",&dmasizewrite);
+	  sprintf(name,"output/fem_testing_xmitnu_%i.dat",tnum);
+	  fd = creat(name,0755);
+	  printf("\n\tOutput file: %s\n",name);
+	}
+      }
+
+      printf("\n\tWrite data to text formated file?\t");
+      scanf("%d",&iwrited);
+      //      iwrited=0;
+
+      if (iwrited==1){
+	printf("\n\tTest number (for output file name)?\t");
+	scanf("%d",&tnum);
+	//      tnum=0;	
+	sprintf(name,"output/fem_testing_xmitnu_txt_%i.dat",tnum);
+	outf = fopen(name,"w");
+	printf("\n\tOutput file: %s\n",name);
+      }
+	
+
+      printf("\n-----------------------------\n");
+      printf("DATA CHECKING OPTIONS:\n");
+      
+      //      printf("\n\tType 1 for print out debug information in dma loop:\t");
+      //      scanf("%d",&idebug);
+      //idebug=1;
+
+      printf("\n\tType 1 to check data integrity during running:\t");
+      scanf("%d",&irawprint);
+      //      irawprint=1;
+      
+      if (irawprint==1){
+	printf("\n\tCompare to first event? (Note: if not, new data will be generated for each event, which is slow.)\t");
+	scanf("%d",&icompare);
+
+	if (icompare==0){
+	  printf("\n\tPause between events?\t");
+	  scanf("%d",&ipause);
+	}
+	else {
+	  ipause=0;
+	}
+      }
+
+      if (icompare==1 && femfakedata==0){
+	printf("\nWARNING: You are not using fake data. Events will differ! Enter 1 to acknowledge this.\n");
+	scanf("%d",&ifr);
+      }
+
+      printf("\n*****************************************************\n");
+      printf("*****************************************************\n");
 
 
-      //     printf(" 1 for checking the event \n");
-      //     scanf("%d",&icheck);
-      //     printf(" type 1 to use random number \n");
-      //     scanf("%d",&irand);
+      iframe_length = 25599; //25599 corresponds to nominal 1.6ms
+      //iframe_length = 8191; //25599 corresponds to nominal 1.6ms
+      itrig_delay = 16;//4112;//12,2064;//1610;//wraparound skipped
+      timesize = 3199;//199; //3199 cprresponds to nominal 1.6ms
+
+      printf("\nUsing:\n\t frame size = %d\n\t drift time = %d\n", iframe_length, timesize);
+
       icheck =0;
       ifr=0;
-      irand = 0;
+      //irand = 0;
       islow_read =0;
-      //     if(icheck != 1) {
-      //      printf(" 1 for print event\n");
-      //      scanf("%d",&iprint);
-      //    }
-      //     else iprint =0;
-      iprint = 1;
-      //     printf(" number event \n");
-      //     scanf("%d",&nevent);
+      //iprint = 1;
 
-      //     printf(" enter number of words per packet \n");
-      //     scanf("%d",&nsend);
       nsend=500;
-      /* imod_xmit=8; */
-      /* imod_fem =9; */
 
+      //******************************************************
+      //Initialize XMIT neutrino PCIe
+      
+      //god
+      dwAddrSpace =2;
+      u32Data = 0;
+      dwOffset = 0x1c;
+      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+      printf ("\n\t==> status T1 word before config = %x ~ ",u32Data);
+      dwAddrSpace = 2;
+      u32Data =0;
+      dwOffset = 0x24;
+      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+      printf ("status T2 word after before = %x\n\n",u32Data);
+      //god
 
-      imod_xmit=2;
-      imod_fem =3;
-     
-      // once the fpga is booted we should let system receive fill frame before send any data.
-      // set system with normal transmitter mode
-
+      
+      
       dwAddrSpace =2;
       u32Data = 0x20000000;    // initial transmitter, no hold
       dwOffset = 0x18;
       WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
       dwAddrSpace =2;
-     u32Data = 0x20000000;    // initial transmitter, no hold
-     dwOffset = 0x20;
-     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+      u32Data = 0x20000000;    // initial transmitter, no hold
+      dwOffset = 0x20;
+      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+      
+      dwAddrSpace =2;
+      u32Data = 0x20000000;    // initial receiver
+      dwOffset = 0x1c;
+      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+      dwAddrSpace =2;
+      u32Data = 0x20000000;   // initial receiver
+      dwOffset = 0x24;
+      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
 
-     dwAddrSpace =2;
-     u32Data = 0x20000000;    // initial receiver
-     dwOffset = 0x1c;
-     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-     dwAddrSpace =2;
-     u32Data = 0x20000000;   // initial receiver
-     dwOffset = 0x24;
-     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+
+      //god
+      dwAddrSpace =2;
+      u32Data = 0;
+      dwOffset = 0x1c;
+      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+      printf ("\n\t==> status T1 word after config = %x ~ ",u32Data);
+      dwAddrSpace = 2;
+      u32Data =0;
+      dwOffset = 0x24;
+      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+      printf ("status T2 word after config = %x\n\n",u32Data);
+      //god
+
+      
+      dwAddrSpace =2;
+      u32Data = 0xfff;    // set mode off with 0xfff...
+      dwOffset = 0x28;
+      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+      
+     
+      //******************************************************
+      //lock buffers for i/o communication
+
+      px = &buf_send;
+      py = &read_array;
+     
+
+      //******************************************************
+      //init controller module first
+
+      imod =0;  /* controller module */
+
+      //initialize      
+      buf_send[0]=0x0;
+      buf_send[1]=0x0;
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
+
+      // set offline test
+      imod=0;
+      ichip=1;
+      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_test_on)+(0x0<<16); //enable offline run on
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
+
+      //disable the run command, from the controller
+      imod=0;
+      ichip=1;
+      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_off)+(0x0<<16); //trun off run
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
 
 
-     dwAddrSpace =2;
-     u32Data = 0xfff;    // set mode off with 0xfff...
-     dwOffset = 0x28;
-     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+      //******************************************************
+      //    boot up xmit module 1st
 
-//
-//
-//
-     px = &buf_send;
-     py = &read_array;
-     imod =0;  /* controller module */
-/** initialize **/
-     buf_send[0]=0x0;
-     buf_send[1]=0x0;
-     i=1;
-     k=1;
-     i = pcie_send(hDev3, i, k, px);
-// set offline test
-     imod=0;
-     ichip=1;
-     buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_test_on)+(0x0<<16); //enable offline run on
-     i=1;
-     k=1;
-     i = pcie_send(hDev3, i, k, px);
- //disable the run command
-     imod=0;
-     ichip=1;
-     buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_off)+(0x0<<16); //trun off run
-     i=1;
-     k=1;
-     i = pcie_send(hDev3, i, k, px);
- // turn on the Stratix III power supply
-     imod=imod_fem;
-     ichip =1;
-     buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_power_add+(0x0<<16); //turn module 11 power on
-     i=1;
-     k=1;
-     i = pcie_send(hDev3, i, k, px);
-     usleep(200000);  // wait for 200 ms
-//     printf(" enable number of loop\n");
-//     scanf("%d",&nloop);
-     for (j=0; j<nloop; j++) {
-      usleep(10000); // wait for 10ms
-
-//
-//    boot up xmit module 1st
-//
-      printf(" boot xmit module \n");
-      inpf = fopen("/home/ub/xmit_fpga_link_header","r");
+      printf("\nBooting XMIT module...\n\n");
+      /* inpf = fopen("/home/ub/config_files_041712/xmit_fpga_080612","r"); */
+      inpf = fopen("/home/ub/config_files_040213/xmit_fpga_040213","r");
       imod=imod_xmit;
       ichip=mb_xmit_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-//      for (i=0; i<100000; i++) {
-//          ik= i%2;
-//          dummy1= (ik+i)*(ik+i);
-//      }
 
-
-        /* read data as characters (28941) */
-      usleep(1000);   // wait fior a while
+      /* read data as characters (28941) */
+      usleep(1000);   // wait for a while
       count = 0;
       counta= 0;
       ichip_c = 7; // set ichip_c to stay away from any other command in the
       dummy1 =0;
       while (fread(&charchannel,sizeof(char),1,inpf)==1) {
-       carray[count] = charchannel;
-       count++;
-       counta++;
-       if((count%(nsend*2)) == 0) {
-//        printf(" loop = %d\n",dummy1);
-        buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
-        send_array[0] =buf_send[0];
-        if(dummy1 <= 5 ) printf(" counta = %d, first word = %x, %x, %x %x %x \n",counta,buf_send[0], carray[0], carray[1]
-        ,carray[2], carray[3]);
-        for (ij=0; ij< nsend; ij++) {
-         if(ij== (nsend-1)) buf_send[ij+1] = carray[2*ij+1]+(0x0<<16);
-         else buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
-//         buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
-         send_array[ij+1] = buf_send[ij+1];
-        }
-        nword =nsend+1;
-        i=1;
-//       if(dummy1 == 0)
-        ij = pcie_send(hDev3, i, nword, px);
-        nanosleep(&tim , &tim2);
-        dummy1 = dummy1+1;
-        count =0;
-       }
+	carray[count] = charchannel;
+	count++;
+	counta++;
+	if((count%(nsend*2)) == 0) {
+	  buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
+	  send_array[0][0] = buf_send[0];
+	  if(dummy1 <= 5 ) if (iprint==1) printf(" counta = %d, first word = %x, %x, %x %x %x \n",counta,buf_send[0], carray[0], carray[1] ,carray[2], carray[3]);
+	  for (ij=0; ij< nsend; ij++) {
+	    if(ij== (nsend-1)) buf_send[ij+1] = carray[2*ij+1]+(0x0<<16);
+	    else buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
+	    send_array[ij+1][0] = buf_send[ij+1];
+	  }
+	  nword =nsend+1;
+	  i=1;
+	  ij = pcie_send(hDev3, i, nword, px);
+	  nanosleep(&tim , &tim2);
+	  dummy1 = dummy1+1;
+	  count =0;
+	}
       }
       if(feof(inpf)) {
-       printf("You have reached the end-of-file word count= %d %d\n", counta, count);
-       buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
-       if ( count > 1) {
-        if( ((count-1)%2) ==0) {
-         ik =(count-1)/2;
-        }
-        else {
-         ik =(count-1)/2+1;
-        }
-        ik=ik+2;   // add one more for safety
-        printf("ik= %d\n",ik);
-        for (ij=0; ij<ik; ij++){
-         if(ij == (ik-1)) buf_send[ij+1] = carray[(2*ij)+1]+(((imod<<11)+(ichip<<8)+0x0)<<16);
-         else buf_send[ij+1] = carray[(2*ij)+1]+ (carray[(2*ij)+2]<<16);
-         send_array[ij+1] = buf_send[ij+1];
-        }
-       }
-       else ik=1;
-
-           for (ij=ik-10; ij< ik+1; ij++) {
-            printf("Last data = %d, %x\n",ij,buf_send[ij]);
-           }
-
-       nword =ik+1;
-       i=1;
-       i = pcie_send(hDev3, i, nword, px);
+	if (iprint==1) printf(" You have reached the end-of-file word count= %d %d\n", counta, count);
+	buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
+	if ( count > 1) {
+	  if( ((count-1)%2) ==0) {
+	    ik =(count-1)/2;
+	  }
+	  else {
+	    ik =(count-1)/2+1;
+	  }
+	  ik=ik+2;   // add one more for safety
+	  if (iprint==1) printf(" ik= %d\n",ik);
+	  for (ij=0; ij<ik; ij++){
+	    if(ij == (ik-1)) buf_send[ij+1] = carray[(2*ij)+1]+(((imod<<11)+(ichip<<8)+0x0)<<16);
+	    else buf_send[ij+1] = carray[(2*ij)+1]+ (carray[(2*ij)+2]<<16);
+	    send_array[ij+1][0] = buf_send[ij+1];
+	  }
+	}
+	else ik=1;
+	for (ij=ik-10; ij< ik+1; ij++) {
+	  if (iprint==1) printf(" Last data = %d, %x\n",ij,buf_send[ij]);
+	}
+	nword =ik+1;
+	i=1;
+	i = pcie_send(hDev3, i, nword, px);
       }
       usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
       fclose(inpf);
-//
-      printf(" xmit done, booting FEM \n");
-      /* scanf("%d",&ik); */
-
-//
-//    Boot stratix after XMIT module
-//
       
-      /* inpf = fopen("/home/ub/feb_fpga_test_new_head_zero","r"); */
-      //vic
-      inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r");
-      imod = imod_fem;
-      ichip=mb_feb_conf_add;
-      buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
+      printf("\n...XMIT booting DONE\n");
+
+
+      //******************************************************
+      //turn on Stratix III power supply
+      printf("\n\nBooting FEBs...\n");
+
+
+      for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {//loop over module numbers
+
+	imod = imod_fem;
+	printf("\n Booting module in slot %d \n", imod);
+
+	// turn on the Stratix III power supply
+	ichip =1;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_power_add+(0x0<<16); //turn module 11 power on
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+	usleep(200000);  // wait for 200 ms
+
+	// send configuration data
+	/* inpf = fopen("/home/ub/config_files_041712/feb_fpga_080612","r"); */
+	/* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
+	inpf = fopen("/home/ub/module1x_140820_chi_12_8_2014.rbf","r");
+	ichip=mb_feb_conf_add; //ichip=mb_feb_config_add(=2) is for configuration chip
+	buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	usleep(1000);   // wait for a while
+
+	count=0; //keeps track of config file data sent      
+	counta=0; //keeps track of total config file data read
+	ichip_c=7; //this chip number is actually a "ghost"; it doesn't exist; it's just there so the config chip 
+	//doesn't treat the first data word i'll be sending as a command designated for the config chip (had i used ichip_c=1)
+
+	nsend=500; //this defines number of 32bit-word-sized packets I'm allowed to use to send config file data
+	dummy1 =0;
+
+	//read info character by character
+	while (fread(&charchannel,sizeof(char),1,inpf)==1) {
+	  carray[count] = charchannel;
+	  count++;
+	  counta++;
+	  if((count%(nsend*2)) == 0) {
+	    buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
+	    send_array[0][0] =buf_send[0];
+	    if(dummy1 <= 5 ) if (iprint==1) printf(" counta = %d, first word = %x, %x, %x %x %x \n",counta,buf_send[0], carray[0], carray[1], carray[2], carray[3]);
+	    for (ij=0; ij< nsend; ij++) {
+	      if(ij== (nsend-1)) buf_send[ij+1] = carray[2*ij+1]+(0x0<<16);
+	      else buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
+	      send_array[ij+1][0] = buf_send[ij+1];
+	    }
+	    nword =nsend+1;
+	    i=1;
+	    ij = pcie_send(hDev3, i, nword, px);
+	    nanosleep(&tim , &tim2);
+	    dummy1 = dummy1+1;
+	    count =0;
+	  }
+	}
+	if(feof(inpf)) {
+	  if (iprint==1) printf(" You have reached the end-of-file word count= %d %d\n", counta, count);
+	  buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
+	  if ( count > 1) {
+	    if( ((count-1)%2) ==0) {
+	      ik =(count-1)/2;
+	    }
+	    else {
+	      ik =(count-1)/2+1;
+	    }
+	    ik=ik+2;   // add one more for safety
+	    if (iprint==1) printf(" ik= %d\n",ik);
+	    for (ij=0; ij<ik; ij++){
+	      if(ij == (ik-1)) buf_send[ij+1] = carray[(2*ij)+1]+(((imod<<11)+(ichip<<8)+0x0)<<16);
+	      else buf_send[ij+1] = carray[(2*ij)+1]+ (carray[(2*ij)+2]<<16);
+	      send_array[ij+1][0] = buf_send[ij+1];
+	    }
+	  }
+	  else ik=1;
+	  
+	  for (ij=ik-10; ij< ik+1; ij++) {
+	    if (iprint==1) printf(" Last data = %d, %x\n",ij,buf_send[ij]);
+	  }
+	  
+	  nword =ik+1;
+	  i=1;
+	  i = pcie_send(hDev3, i, nword, px);
+	}
+	usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
+
+	fclose(inpf);
+
+	printf(" Configuration for module in slot %d COMPLETE.\n",imod);
+
+      }
+      printf("\n...FEB booting done \n");
+
+
+      //******************************************************
+      /* set tx mode register */
+
+      u32Data = 0x00003fff;  // set up number of words hold coming back from the XMIT module
+      if (iprint==1) printf("\nNumber of words for hold be send back = %x\n",u32Data);
+      dwOffset = 0x28;
+      dwAddrSpace =2;
+      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+
+      //   set up hold
+      printf("Setting up hold condition \n");
+      dwAddrSpace =2;
+      u32Data = 0x8000000;    // set up transmitter to return the hold -- upper transciever
+      dwOffset = 0x18;
+      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+      dwAddrSpace =2;
+      u32Data = 0x8000000;    // set up transmitter to return the hold -- lower transciever
+      dwOffset = 0x20;
+      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+      
+
+
+      //******************************************************
+      //Set frame information
+
+      imod=0;
+      ichip=1;
+      iframe= iframe_length;    //1023
+      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_frame)+((iframe & 0xffff)<<16); //enable test mode
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-//      for (i=0; i<100000; i++) {
-//          ik= i%2;
-//          dummy1= (ik+i)*(ik+i);
-//      }
+
+      // load trig 1 position relative to the frame..
+      imod=0;
+      ichip=1;
+      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_trig_pos)+((itrig_delay & 0xffff)<<16); //enable test mode
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
 
 
-        /* read data as characters (28941) */
-      usleep(1000);   // wait fior a while
-      count = 0;
-      counta= 0;
-      ichip_c = 7; // set ichip_c to stay away from any other command in the
-      dummy1 =0;
-      while (fread(&charchannel,sizeof(char),1,inpf)==1) {
-       carray[count] = charchannel;
-       count++;
-       counta++;
-       if((count%(nsend*2)) == 0) {
-//        printf(" loop = %d\n",dummy1);
-        buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
-        send_array[0] =buf_send[0];
-        if(dummy1 <= 5 ) printf(" counta = %d, first word = %x, %x, %x %x %x \n",counta,buf_send[0], carray[0], carray[1]
-        ,carray[2], carray[3]);
-        for (ij=0; ij< nsend; ij++) {
-         if(ij== (nsend-1)) buf_send[ij+1] = carray[2*ij+1]+(0x0<<16);
-         else buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
-//         buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
-         send_array[ij+1] = buf_send[ij+1];
-        }
-        nword =nsend+1;
-        i=1;
-//       if(dummy1 == 0)
-        ij = pcie_send(hDev3, i, nword, px);
-        nanosleep(&tim , &tim2);
-        dummy1 = dummy1+1;
-        count =0;
-       }
+      //******************************************************
+      //FEB settings
+      
+      printf("\nSetting up FEB's...\n");
+
+      for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
+
+	imod=imod_fem;
+
+
+	//reset FEB DRAM (step 1)
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_dram_reset+(0x1<<16);  // turm the DRAM reset on
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	//reset FEB DRAM (step 2)
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_dram_reset+(0x0<<16);  // turm the DRAM reset off
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+	
+	usleep(5000);    // wait for 5 ms for DRAM to be initialized
+
+	//set module number
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_mod_number+(imod<<16);  // set module number
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+	
+	//******************************************************
+	//set test mode
+	ichip=mb_feb_pass_add;
+	if (femfakedata==1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_test_source+(0x2<<16);  // set test source to 2
+	else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_test_source+(0x0<<16);
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	//Data map load moved to the beginning of each event
+
+	/* //load fake FEM data or set up ADC */
+	/* if (femfakedata==1){ */
+
+	/*   printf("\nLoading fake FEM data, module %d\n",imod); */
+	/*   //start loading the test 2 data memory */
+	/*   ichip=3; */
+	/*   for (is=0; is<64; is++) { */
+	/*     ik = 0x4000+is;                        // load channel address */
+	/*     buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); // load channe address */
+	/*     i = pcie_send(hDev3, 1, 1, px); */
+	/*     ibase = 32*is; */
+	/*     il = is%8; */
+	/*     if(il == 0 && idebug==1) printf(" loading channel %d\n",is); */
+	/*     for (ik=0; ik< 256; ik++) {                 // loop over all possible address */
+	/*       if(irand ==1) ijk = (rand()) & 0xfff ;        // use random number */
+	/*       else ijk= (ibase+ik*8) & 0xfff; */
+	/*       //	      if(ihuff == 1) { */
+	/* 	if((ik%4) ==0) ic =ijk;        // set data to repeat for 4 samples.... */
+	/* 	ijk=ic; */
+	/* 	//	      } */
+	/*       k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data */
+	/*       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data */
+	/*       i = pcie_send(hDev3, 1, 1, px); */
+	/*       send_array[is*256+ik][im]=ijk;           //load up data map */
+	/*     } */
+	/*   } */
+	/* } */
+
+	//******************************************************
+	//set compression state    
+	imod=imod_fem;
+	ichip=3;
+	if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
+	else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x1<<16);  // set b channel no compression
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+	
+	//sn loop xxx
+	imod=imod_fem;
+	ichip=3;
+	if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_nocomp+(0x0<<16);  // turn the compression
+	else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_nocomp+(0x1<<16);  // set b channel no compression
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	//******************************************************
+	//set drift size
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_timesize+(timesize<<16);  // set drift time size
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	//set id
+	a_id =0xf;
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_id+(a_id<<16);  // set a_id
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	ichip=4;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_id+(a_id<<16);  // set b_id
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	//set max word in the pre-buffer memory
+	ik=8000;
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_max+(ik<<16);  // set pre-buffer max word
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	//enable hold
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_hold_enable+(0x1<<16);  // enable the hold
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+
+	//this was in SN loop
+         if(imod == imod_st) {
+	   if (iprint==1) printf(" set last module, module address %d\n", imod);
+          ichip=4;
+          buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_on+(0x0<<16);    // set last module on
+          i=1;
+          k=1;
+          i = pcie_send(hDev3, i, k, px);
+         }  else {
+	   if (iprint==1) printf(" set last module off, module address %d\n", imod);
+          ichip=4;
+          buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_off+(0x0<<16);    // set last module on
+          i=1;
+          k=1;
+          i = pcie_send(hDev3, i, k, px);
+         }
+
+
+      }//end loop over FEMs
+      
+
+      //******************************************************     
+      //     now reset all the link port receiver PLL
+      for (imod_fem = (imod_st-1); imod_fem > imod_xmit; imod_fem--) {
+	imod=imod_fem;
+	printf("Resetting link PLL for module %x \n", imod);
+	ichip=4;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_pll_reset+(0x0<<16);    // reset LINKIN PLL
+	i=1;
+	k=1;
+	i = pcie_send(hDev3, i, k, px);
+	usleep(1000);   // give PLL time to reset
       }
-      if(feof(inpf)) {
-       printf("You have reached the end-of-file word count= %d %d\n", counta, count);
-       buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
-       if ( count > 1) {
-        if( ((count-1)%2) ==0) {
-         ik =(count-1)/2;
-        }
-        else {
-         ik =(count-1)/2+1;
-        }
-        ik=ik+2;   // add one more for safety
-        printf("ik= %d\n",ik);
-        for (ij=0; ij<ik; ij++){
-         if(ij == (ik-1)) buf_send[ij+1] = carray[(2*ij)+1]+(((imod<<11)+(ichip<<8)+0x0)<<16);
-         else buf_send[ij+1] = carray[(2*ij)+1]+ (carray[(2*ij)+2]<<16);
-         send_array[ij+1] = buf_send[ij+1];
-        }
-       }
-       else ik=1;
 
-           for (ij=ik-10; ij< ik+1; ij++) {
-            printf("Last data = %d, %x\n",ij,buf_send[ij]);
-           }
+      //******************************************************
+      //read back status
+      for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
+	for(ooo = 0; ooo < 5; ++ooo) {
+	  i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
+	  imod=imod_fem;
+	  ichip=3;
+	  buf_send[0]=(imod<<11)+(ichip<<8)+20+(0x0<<16);  // read out status
+	  i=1;
+	  k=1;
+	  i = pcie_send(hDev3, i, k, px);
+	  py = &read_array;
+	  i = pcie_rec(hDev3,0,2,nword,iprint,py);     // read out 2 32 bits words
+	  printf("\t Sleeping ooo = %d \n", ooo);
+	  usleep(5000);
+	}
 
-       nword =ik+1;
-       i=1;
-       i = pcie_send(hDev3, i, nword, px);
+	printf("\nReceived FEB %d (slot %d) status data word = %x, %x \n", imod, imod, read_array[0], read_array[1]);
+	    
+	printf("----------------------------\n");
+	printf("FEB %d (slot %d) status \n", imod,imod);
+	printf("----------------------------\n");
+	printf("cmd return (20)       : %d\n",(read_array[0] & 0xFF)); //bits 7:0
+	printf("check bits 10:8 (0)   : %d\n",((read_array[0]>>8) & 0x7)); //bits 10:8
+	printf("module number (%d)    : %d\n",imod,((read_array[0]>>11) & 0x1F)); //bits 15:11
+	printf("----------------------------\n");
+	printf("check bit  0 (0)      : %d\n",(read_array[0]>>16) & 0x1);
+	printf("Right ADC DPA locked  : %d\n",(read_array[0]>>17) & 0x1);
+	printf("Left  ADC DPA locked  : %d\n",(read_array[0]>>18) & 0x1);
+	printf("SN pre-buf err        : %d\n",(read_array[0]>>19) & 0x1);
+	printf("Neutrino pre-buf err  : %d\n",(read_array[0]>>20) & 0x1);
+	printf("PLL locked            : %d\n",(read_array[0]>>21) & 0x1);
+	printf("SN memory ready       : %d\n",(read_array[0]>>22) & 0x1);
+	printf("Neutrino memory ready : %d\n",(read_array[0]>>23) & 0x1);
+	printf("ADC lock right        : %d\n",(read_array[0]>>24) & 0x1);
+	printf("ADC lock left         : %d\n",(read_array[0]>>25) & 0x1);
+	printf("ADC align right       : %d\n",(read_array[0]>>26) & 0x1);
+	printf("ADC align left        : %d\n",(read_array[0]>>27) & 0x1);
+	printf("check bits 15:12 (0)  : %d\n",(read_array[0]>>28) & 0xf);
+	printf("----------------------------\n");
       }
-      usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
-      fclose(inpf);
-//
-//    both FEM and XMIT bootted.
-//
-//
-//   /* set tx mode register */
-//
-     u32Data = 0x00003fff;  // set up number of words hold coming back from the XMIT module
-     printf(" number of words for hold be send back = %x\n",u32Data);
-     dwOffset = 0x28;
-     dwAddrSpace =2;
-     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-//
-//   set up hold
-//
-     printf(" set up the hold condition \n");
-     dwAddrSpace =2;
-     u32Data = 0x8000000;    // set up transmitter to return the hold -- upper transciever
-     dwOffset = 0x18;
-     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-     dwAddrSpace =2;
-     u32Data = 0x8000000;    // set up transmitter to return the hold -- lower transciever
-     dwOffset = 0x20;
-     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-
-
-
-//
-//    start testing routine
-//
-       printf(" enter 1 to reset the dram \n");
-       /* scanf("%d",&ik); */
- //      ik =1;
-       if(ik ==1) {
-         imod=imod_fem;
-         ichip=3;
-         buf_send[0]=(imod<<11)+(ichip<<8)+31+(0x1<<16);  // turm the DRAM reset on
-         i=1;
-         k=1;
-         i = pcie_send(hDev3, i, k, px);
-         imod=imod_fem;
-         ichip=3;
-         buf_send[0]=(imod<<11)+(ichip<<8)+31+(0x0<<16);  // turm the DRAM reset off
-         i=1;
-         k=1;
-         i = pcie_send(hDev3, i, k, px);
-
-         usleep(5000);    // wait for 5 ms for DRAM to be initialized
-
-         imod=imod_fem;
-         ichip=3;
-         buf_send[0]=(imod<<11)+(ichip<<8)+6+(imod<<16);  // set module number
-         i=1;
-         k=1;
-         i = pcie_send(hDev3, i, k, px);
-
-
-       }
-//       printf(" enter 1 to read system status \n");
-//       scanf("%d",&ik);
-       ik=1;
-       nword =1;
-       if(ik ==1) {
-
-
-         i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
-
-         imod=imod_fem;
-         ichip=3;
-         buf_send[0]=(imod<<11)+(ichip<<8)+20+(0x0<<16);  // read out status
-         i=1;
-         k=1;
-         i = pcie_send(hDev3, i, k, px);
-         py = &read_array;
-         i = pcie_rec(hDev3,0,2,nword,iprint,py);     // read out 2 32 bits words
-         printf("receive data word = %x, %x \n", read_array[0], read_array[1]);
-       }
-//       printf(" enter L1 trigger delay \n");
-//       scanf("%d",&itrig_delay);
-       itrig_delay = 51;
-       nword =1;
-//
-// set to use test generator 2, set test =2
-//
-       imod=imod_fem;
-       ichip=mb_feb_pass_add;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_test_source+(0x2<<16);  // set test source to 2
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-//
-// set frame set to be 255 --- there will be 256/8 = 32 adc samples.
-//
-       imod=0;
-       ichip=1;
-       iframe= 8191;    //1023
-       /* iframe= 25599;    //1023 */
-       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_frame)+((iframe & 0xffff)<<16); //enable test mode
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-
-
-//
-// load trig 1 position relative to the frame..
-//
-       imod=0;
-       ichip=1;
-       //itrig_delay = 51;
-       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_trig_pos)+((itrig_delay & 0xffff)<<16); //enable test mode
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-//
-//    start loading the test 2 data memory
-//
-       imod =imod_fem;
-       iround =0;
-       idir =1;
-       
-       
-       
-
-       sprintf(title1,"joses_data_01212015_min_%d_max_%d.txt",min__,max__);       
-       outfile = fopen(title1, "w");
-       
-       
-       ichip=3;
-       for (is=0; is<64; is++) {
-        ik = 0x4000+is;                        // load channel address
-        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); // load channe address
-        i = pcie_send(hDev3, 1, 1, px);
-        ibase = is+1;    // set the base value of the ADC data
-//        printf("channel = %d, ibase = %x\n", is,ibase);
-//        scanf("%d", &ijk);
-        for (ik=0; ik< 256; ik++) {
-//         if((ik > ibeg) && (ik <= (ibeg+iwidth))) {
-//           ijk= ibase+(ik-ibeg)*islope;
-//         }
-//         else ijk=ibase;
-         if(iround == 3) idir =-1;
-         if(iround == 0) idir = 1;
-         iround = iround + idir;
-         ijk= ibase + iround;
-         
-	 if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase;
-	 
-	 //if( (ik > 240) & (ik <247)) ijk=300+ibase;
-	 
-
-	 if(ik == 0) fprintf(outfile,"Channel %d fake data\n", is);
-	 fprintf(outfile,"\t%4d",ijk);
-	 if(((ik+1)%16)==0) fprintf(outfile,"\n");	     
-	 
-         /* } */
-	 
-	 
-	 /* //         if ((ik>247)) ijk=300+ibase; */
-         //if(is%4 == 0) {
-	   //           if(ik == 0) printf(" channel %d fake data \n",is);
-           //printf(" %4d", ijk);
-           //if(((ik+1)%16)==0) printf("\n");
-         //}
-         k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
- //        printf("k = %x\n", k);
- //        scanf("%d", &ijk);
-         buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
-         i = pcie_send(hDev3, 1, 1, px);
-         send_array[is*256+ik]=ijk;           //load up data map
-        }
-       }
-       
-       
-       
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_nocomp+(0x1<<16);  // set a channel no compression                                   
-       i=1;
-       k=1;
-       i = pcie_send(hDev, i, k, px);
-       
-       
-       //No using SN stream...
-       
-       //ichip=3;
-       //if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
-       //else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x1<<16);  // set b channel no compression
-       //i=1;
-       //k=1;
-       //i = pcie_send(hDev3, i, k, px);
-
-//      }
-//
-//
-//
-      ichip =3;
-      printf(" loading zero suppression parameter \n");
-      imod=imod_fem;
-      for (ik=0; ik< 64; ik++) {
-
-       ibase =ik+1;
-       ijk=ik+10;     // threshold
-       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
-       i = pcie_send(hDev3, 1, 1, px);
-       usleep(10);
-
-//        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_baseline+ik)+((ibase & 0xffff)<< 16); // load baseline
-//        i = pcie_send(hDev3, 1, 1, px);
-//        usleep(10);
-//        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
-//        i = pcie_send(hDev3, 1, 1, px);
-//        usleep(10);
-      }
-      ijk=2;
-      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
-      i = pcie_send(hDev3, 1, 1, px);
-      usleep(10);
-
-      ijk=3;     //was 4
-      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
-      i = pcie_send(hDev3, 1, 1, px);
-      usleep(10);
-//
-//      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_combase)+((1 & 0xffff)<< 16); // channel baseline
-//       i = pcie_send(hDev3, 1, 1, px);
-//       usleep(10);
-//
-      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_comthres)+((1 & 0xffff)<< 16); // channel threshold
-      i = pcie_send(hDev3, 1, 1, px);
-      usleep(10);
-//
-      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no biploar
-      i = pcie_send(hDev3, 1, 1, px);
-      usleep(10);
-//
-//
-      ijk=10;
-      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16); // load preample
-      i = pcie_send(hDev3, 1, 1, px);
-      usleep(10);
-
-      ijk=100;
-      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
-      i = pcie_send(hDev3, 1, 1, px);
-      usleep(10);
-
       
-      
-      
-      //no compression
-      
-      //imod=imod_fem;
-      //ichip=3;
-      //if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
-      //else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x1<<16);  // set b channel no compression
-      //i=1;
-      //k=1;
-      //i = pcie_send(hDev3, i, k, px);
-
-      
-       timesize = 4;
-       imod=imod_fem;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_timesize+(timesize<<16);  // set drift time size
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-       
-
-       a_id =0x20;
-       imod=imod_fem;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_id+(a_id<<16);  // set a_id                                                       
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-
-       
-       ichip=4;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_id+(a_id<<16);  // set a_id                                                          
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-
-       
-       
-       imod=imod_fem;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_test+(0x1<<16);    // enable a test on                                            
-       i=1;
-       k=1;
-       if(islow_read == 1) i = pcie_send(hDev3, i, k, px);
-       
-       
-       //vic commented
-       
-       /* a_id =0xf; */
-       /* imod=imod_fem; */
-       /* ichip=3; */
-       /* buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_id+(a_id<<16);  // set a_id */
-       /* i=1; */
-       /* k=1; */
-       /* i = pcie_send(hDev3, i, k, px); */
-
-       /* imod=imod_fem; */
-       /* ichip=4; */
-       /* buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_id+(a_id<<16);  // set a_id */
-       /* i=1; */
-       /* k=1; */
-       /* i = pcie_send(hDev3, i, k, px); */
+      //this was in SN
+//     now reset all the link port receiver
 //
-//     set max word in the pre-buffer memory
-//
-       
-       
-       //vic stopped here
-       
-       ik=8000;
+     for (imod_fem = (imod_st-1); imod_fem > imod_xmit; imod_fem--) {
        imod=imod_fem;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_max+(ik<<16);  // set pre-buffer max word
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-//
-//     enable hold
-//
-       imod=imod_fem;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_hold_enable+(0x1<<16);  // enable the hold
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-
-//       imod=11;
-//       ichip=3;
-//       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_test+(0x1<<16);    // enable a test on
-//       i=1;
-//       k=1;
-//       if(islow_read == 1) i = pcie_send(hDev, i, k, px);
-
-
-       imod=imod_fem;
-       ichip=4;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_on+(0x0<<16);    // set last module on
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-
-       imod=imod_fem;
+       if (iprint==1) printf(" reset the link for module %d \n", imod);
        ichip=4;
        buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_rxreset+(0x0<<16);    // reset LINKIN DPA
        i=1;
        k=1;
        i = pcie_send(hDev3, i, k, px);
-
 //
-//     set up xmit module  -- module count
 //
-       imod=imod_xmit;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_modcount+(0x0<<16);  // set number of module to 1 to enable output
+       ichip=4;
+       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_align+(0x0<<16);    // send alignment command
        i=1;
        k=1;
        i = pcie_send(hDev3, i, k, px);
-//
-//     rest optical
-//
-       imod=imod_xmit;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_opt_dig_reset+(0x1<<16);  // set optical reset on
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-//
-//     enable superNova Token Passing
-//
-       /* imod=imod_xmit; */
-       /* ichip=3; */
-       /* buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_2+(0x1<<16);  // enable token 1 pass */
-       /* i=1; */
-       /* k=1; */
-       /* i = pcie_send(hDev3, i, k, px); */
+      }
 
-       imod=imod_xmit;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_1+(0x1<<16);  // enable token 1 pass
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
+      printf("\n...FEB setup complete.\n\n");
 
-//
 
-//
-       printf(" enter 1 to reset the DPA \n");
-       /* scanf("%d",&ik); */
+      //******************************************************
+      //XMIT setup
 
-//
-//     reset XMIT LINK IN DPA
-//
-       imod=imod_xmit;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_link_reset+(0x1<<16);  //  reset XMIT LINK IN DPA
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-//
-//     wait for 10ms just in case
-//
-       usleep(10000);
-       printf(" XMIT FIFO reset \n");
-//
-//     reset XMIT FIFO reset
-//
-       imod=imod_xmit;
-       ichip=3;
-       buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_dpa_fifo_reset+(0x1<<16);  //  reset XMIT LINK IN DPA
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
+      printf("Setting up XMIT module\n");
 
-//
-//
-//
-      imod=imod_fem;
-      printf(" reset the link PLL for module %x \n", imod);
-      ichip=4;
-      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_pll_reset+(0x0<<16);    // reset LINKIN PLL
-      i=1;
-      k=1;
-      i = pcie_send(hDev3, i, k, px);
-      usleep(1000);   // give PLL time to reset
-
-//
-//
-//
-
-      i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
-      imod=imod_fem;
+      //     set up xmit module  -- module count
+      imod=imod_xmit; 
       ichip=3;
-      buf_send[0]=(imod<<11)+(ichip<<8)+20+(0x0<<16);  // read out status
+      //                  -- number of FEM module -1, counting start at 0
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_modcount+((imod_st-imod_xmit-1)<<16);
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-      py = &read_array;
-      i = pcie_rec(hDev3,0,2,nword,iprint,py);     // read out 2 32 bits words
-      if(iprint == 1) printf("FEM module %d status word after PLL reset = %x, %x \n", imod, read_array[0], read_array[1]);
+      printf("\t==> imod_st - imod_xmit - 1 = %d\n",imod_st-imod_xmit-1);
+      
+      //     reset optical
+      imod=imod_xmit;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_opt_dig_reset+(0x1<<16);  // set optical reset on
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
 
-//
-//
-//       reset XMIT LINK IN DPA
-//
+      //     enable Neutrino Token Passing
+      imod=imod_xmit;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_1+(0x1<<16);  // enable token 1 pass
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
+
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_2+(0x0<<16);  // disable token 2 pass
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
+
+      //       reset XMIT LINK IN DPA
       imod=imod_xmit;
       ichip=3;
       buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_link_pll_reset+(0x1<<16);  //  reset XMIT LINK IN DPA
@@ -1786,23 +1790,19 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       k=1;
       i = pcie_send(hDev3, i, k, px);
       usleep(1000);
-//
-//     reset XMIT LINK IN DPA
-//
+
+      //     reset XMIT LINK IN DPA
       imod=imod_xmit;
       ichip=3;
       buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_link_reset+(0x1<<16);  //  reset XMIT LINK IN DPA
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-//
-//     wait for 10ms just in case
-//
+
+      //     wait for 10ms just in case
       usleep(10000);
-      printf(" XMIT FIFO reset \n");
-//
-//     reset XMIT FIFO reset
-//
+
+      //     reset XMIT FIFO reset
       imod=imod_xmit;
       ichip=3;
       buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_dpa_fifo_reset+(0x1<<16);  //  reset XMIT LINK IN DPA
@@ -1810,598 +1810,911 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       k=1;
       i = pcie_send(hDev3, i, k, px);
 
-//
-//    set up last module to the module next to XMIT
-//
-      imod=imod_fem;
-      printf(" set last module on, module address %d\n", imod);
-      ichip=4;
-      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_on+(0x0<<16);    // set last module on
-      i=1;
-      k=1;
-      i = pcie_send(hDev3, i, k, px);
+      /*       //    set up last module to the module next to XMIT */
+      /*       imod=imod_xmit+1; */
+      /*       //      printf(" set last module on, module address %d\n", imod); */
+      /*       ichip=4; */
+      /*       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_on+(0x0<<16);    // set last module on */
+      /*       i=1; */
+      /*       k=1; */
+      /*       i = pcie_send(hDev3, i, k, px); */
+      
+      for (is=0; is<1; is++) {
 
+	//      test re-align circuit
+        imod=imod_xmit;
+        ichip=3;
+        buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_dpa_word_align+(0x1<<16);  //  send alignment pulse
+        i=1;
+        k=1;
+        i = pcie_send(hDev3, i, k, px);
 
-//
-//      test re-align circuit
-//
-      imod=imod_xmit;
-      ichip=3;
-      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_dpa_word_align+(0x1<<16);  //  send alignment pulse
-      i=1;
-      k=1;
-      i = pcie_send(hDev3, i, k, px);
-
-//        printf(" enter 1 to set continue on re-align circuit \n");
-//        scanf("%d",&ik);
-
+      }
       usleep(5000); //wait for 5 ms
-//      printf(" XMIT re-align done \n");
-//      scanf("%d",&ik);
 
       nword =1;
-
       i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
       imod=imod_xmit;
       ichip=3;
-      buf_send[0]=(imod_xmit<<11)+(ichip<<8)+mb_xmit_rdstatus+(0x0<<16);  // read out status
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_rdstatus+(0x0<<16);  // read out status
 
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
       py = &read_array;
       i = pcie_rec(hDev3,0,2,nword,iprint,py);     // read out 2 32 bits words
-      printf("xmit status word = %x, %x \n", read_array[0], read_array[1]);
+      printf("XMIT status word = %x, %x \n", read_array[0], read_array[1]);
+      check_status(NULL,hDev3,99,99,99,3,3,99,2);
 
+      /*      //\****************************************************** */
+      /*       //    set up last module to the module next to XMIT */
+      /*       imod=imod_xmit+1; */
+      /*       //      printf(" set last module off, module address %d\n", imod); */
+      /*       ichip=4; */
+      /*       buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_off+(0x0<<16);    // set last module off */
+      /*       i=1; */
+      /*       k=1; */
+      /*       i = pcie_send(hDev3, i, k, px); */
+      
+      usleep(10000);
+      
 
-
-      printf(" finish XMIT alignment \n");
-      /* scanf("%d",&ik); */
-//
-//
-//
-//
-
-//
-//
-
-
-       usleep(5000); //wait for 5 ms
-       printf(" XMIT re-align done \n");
-
-
-//       dwDMABufSize = 200000;
-       dwDMABufSize = 200000;
-
-//      ndma_loop =(dma_buffer_size*4)/dwDMABufSize;  // set DMA loop for 100 M 32bits words
-       ndma_loop =1;
-       printf(" DMA will run %d loop\n", ndma_loop);
-       ntot_rec=0;
-       for (iv=0; iv<ndma_loop; iv++) {
-        if(ifr ==0) {
-//         ifr=1;
-         printf(" buffer allocation 1\n");
-         dwStatus = WDC_DMAContigBufLock(hDev5, &pbuf_rec1, dwOptions_rec, dwDMABufSize, &pDma_rec1);
-         if (WD_STATUS_SUCCESS != dwStatus) {
-          printf("Failed locking a rec 1 Contiguous DMA buffer. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
-          printf("enter 1 to continue \n");
-          scanf("%d",&is);
-         }
-         else {
-           u32Data = pDma_rec1->Page->pPhysicalAddr & 0xffffffff;
-           printf(" buffer allocation lower address = %x\n", u32Data);
-           u32Data = (pDma_rec1->Page->pPhysicalAddr >> 32) & 0xffffffff;
-           printf(" buffer allocation higher address = %x\n", u32Data);
-         }
-//         ifr=1;
-         printf(" buffer allocation 2\n");
-         dwStatus = WDC_DMAContigBufLock(hDev5, &pbuf_rec2, dwOptions_rec, dwDMABufSize, &pDma_rec2);
-         if (WD_STATUS_SUCCESS != dwStatus) {
-          printf("Failed locking a rec 2 Contiguous DMA buffer. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
-          printf("enter 1 to continue \n");
-          /* scanf("%d",&is); */
-         }
-         else {
-           u32Data = pDma_rec2->Page->pPhysicalAddr & 0xffffffff;
-           printf(" buffer allocation 2 lower address = %x\n", u32Data);
-           u32Data = (pDma_rec2->Page->pPhysicalAddr >> 32) & 0xffffffff;
-           printf(" buffer allocation 2 higher address = %x\n", u32Data);
-         }
-
-/* set tx mode register */
-
-         u32Data = 0x00001000;
-         dwOffset = tx_md_reg;
-         dwAddrSpace =cs_bar;
-         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-
-/* write this will abort previous DMA */
-         dwAddrSpace =2;
-         dwOffset = cs_dma_msi_abort;
-         u32Data = dma_abort;
-         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-/* clear DMA register after the abort */
-         dwAddrSpace =2;
-         dwOffset = cs_dma_msi_abort;
-         u32Data = 0;
-         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-         printf(" initial abort finished \n");
-        }
-
-        if((iv%2) == 0) buffp_rec32 = pbuf_rec1;
-        else buffp_rec32 = pbuf_rec2;
-
-/* synch cache */
-        if((iv%2) ==0) WDC_DMASyncCpu(pDma_rec1);
-        else WDC_DMASyncCpu(pDma_rec2);
-
-        printf(".");
-        if(idebug ==1) printf(" synch CPU \n");
-///
-///    set up the DMA size  (half buffer size limit??)
-///
-        nwrite =(dwDMABufSize/8);  //remove factor 2
-//       nwrite = 4000;
-
-        for (is=1; is<3; is++) {
-         tr_bar = t1_tr_bar;
-         r_cs_reg = r1_cs_reg;
-         dma_tr = dma_tr1;
-         if(is == 2) {
-          tr_bar = t2_tr_bar;
-          r_cs_reg = r2_cs_reg;
-          dma_tr = dma_tr2;
-         }
-         if(idebug ==1) printf(" is = %d\n",is);
-/** initialize the receiver ***/
-         u32Data = cs_init;
-         dwOffset = r_cs_reg;
-         dwAddrSpace =cs_bar;
-//
-// rreceiver only get initialize for the 1st time
-//
-         if(ifr ==0) WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-/** start the receiver **/
-         dwAddrSpace = cs_bar;
-         u32Data = cs_start+(nwrite*2)*4;   /* 32 bits mode == 4 bytes per word *2 fibers **/
-         dwOffset = r_cs_reg;
-         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-        }
-        if((ifr ==0) &&(idebug ==1)) printf(" initial receiver \n");
-//       scanf("%d",&ik);
-/** set up DMA for both transceiver together **/
-
-        dwAddrSpace =cs_bar;
-        dwOffset = cs_dma_add_low_reg;
-        if((iv%2) == 0) u32Data = pDma_rec1->Page->pPhysicalAddr & 0xffffffff;
-        else u32Data = pDma_rec2->Page->pPhysicalAddr & 0xffffffff;
-        WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-
-        dwAddrSpace =cs_bar;
-        dwOffset = cs_dma_add_high_reg;
-        if((iv%2) == 0) u32Data = (pDma_rec1->Page->pPhysicalAddr >> 32) & 0xffffffff;
-        else u32Data = (pDma_rec2->Page->pPhysicalAddr >> 32) & 0xffffffff;
-        WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-
-/* byte count */
-        dwAddrSpace =cs_bar;
-        dwOffset = cs_dma_by_cnt;
-        u32Data = (nwrite)*4*2;      /** twice more data - from fiber 1& 2**/
-        WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-
-
-/* write this will start DMA */
-        dwAddrSpace =2;
-        dwOffset = cs_dma_cntrl;
-        if((iv%2) == 0) is = (pDma_rec1->Page->pPhysicalAddr >> 32) & 0xffffffff;
-        else is = (pDma_rec2->Page->pPhysicalAddr >> 32) & 0xffffffff;
-        if(is == 0) {
-          printf(" use 3dw \n");
-          u32Data = dma_tr12+dma_3dw_rec;
-        }
-        else {
-          u32Data = dma_tr12+dma_4dw_rec;
-          printf(" use 4dw \n");
-        }
-        WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-        if(idebug ==1) printf(" DMA set up done \n");
-
-        if(ifr ==0) {
-         ifr=1;
-//
-//      turn the run on to start data flow
-//
-         printf(" enter 1 to set the RUN on \n");
-         /* scanf("%d",&ik); */
-
-         imod=0;
-         ichip=1;
-         buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
-         i=1;
-         k=1;
-         i = pcie_send(hDev3, i, k, px);
-        }
-
-/***    check to see if DMA is done or not **/
-        idone =0;
-        //for (is=0; is<60000000; is++) {;
-	for (is=0; is<300000; is++) {;
-          dwAddrSpace =cs_bar;
- 	  u64Data =0;
-	  dwOffset = cs_dma_cntrl;
-          WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	  if(idebug ==1) printf(" receive DMA status word %d %X \n", is, u32Data);
-	  if((u32Data & dma_in_progress) == 0) {
-            idone =1;
-//            if(idebug ==1) printf(" receive DMA complete %d \n", i);
-            printf(" receive DMA complete %d \n", is);
-          }
-	  if((u32Data & dma_in_progress) == 0) break;
-        }
+      //******************************************************
+      //     now reset all the link port receiver
+      
+      imod_fem = imod_xmit+1;
+      
+      while (imod_fem < imod_st){
+    	imod= imod_fem+1;
+    	ichip=4;
+    	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_on+(0x0<<16);    // set last module on
+    	i=1;
+    	k=1;
+    	i = pcie_send(hDev3, i, k, px);
+    	printf(" set last modulen, module address %d\n", imod);
+    	imod =imod_fem;
+    	printf(" reset the link for module %d \n", imod);
+    	ichip=4;
+    	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_rxreset+(0x0<<16);    // reset LINKIN DPA
+    	i=1;
+    	k=1;
+    	i = pcie_send(hDev3, i, k, px);
 	
-	//vic
-	//DMA is complete !!!!
-	
-	
-         dwAddrSpace =cs_bar;
-         u64Data =0;
-         dwOffset = t1_cs_reg;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         printf (" status word for channel 1 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
-         dwAddrSpace =cs_bar;
-         u64Data =0;
-         dwOffset = t2_cs_reg;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         printf (" status word for channel 2 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
+    	ichip=4;
+    	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_align+(0x0<<16);    // send alignment command
+    	i=1;
+    	k=1;
+    	i = pcie_send(hDev3, i, k, px);
+    	usleep(1000);
 
-        if(idone == 0) {
-//
-         dwAddrSpace =cs_bar;
-         u64Data =0;
-         dwOffset = t1_cs_reg;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         printf (" status word for channel 1 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
-         dwAddrSpace =cs_bar;
-         u64Data =0;
-         dwOffset = t2_cs_reg;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         printf (" status word for channel 2 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
-//
-         printf(" loop %d, DMA is not finished \n", iv);
-         dwAddrSpace =cs_bar;
-         dwOffset = cs_dma_by_cnt;
-         WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-         printf (" DMA word count = %x\n",u32Data);
-
-//
-         /* scanf("%d",&is); */
-//         if((iv%2) == 0) WDC_DMASyncIo(pDma_rec1);
-//         else WDC_DMASyncIo(pDma_rec2);
-         nred = (((nwrite)*4*2)-(u32Data))/4;
-         printf(" number of words received %d %d %d %d\n",nred, ntot_rec, iv, nwrite);
-         //scanf("%d",&is);
-         for (is=0; is<nred; is++) {
-          read_array[is+(iv*(nwrite*2))]= *buffp_rec32++;
-         }
-         ntot_rec = ntot_rec+nred;
-//
-//
-//
-         u64Data =0;
-         dwOffset = t1_cs_reg;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         u32Data=u64Data>>32;
-         nremain_tran1 = u32Data;
-         printf(" enter 1 to contrinue %d %d %d\n", nremain_tran1, nwrite, nread_dma);
-         /* scanf("%d",&is); */
-
-         if(iv%2 ==0) {
-          WDC_DMASyncCpu(pDma_rec1);
-          WDC_DMASyncIo(pDma_rec1);
-         }
-         else {
-          WDC_DMASyncCpu(pDma_rec2);
-          WDC_DMASyncIo(pDma_rec2);
-         }
-
-         ik= (nwrite-nread_dma)/4;
-
-         nremain = ((nwrite*8)-(nred*4))-nremain_tran1;
-         printf(" nremain = %d, nremain/4 = %d \n", nremain, nremain/4);
-
-         printf(" enter 1 to contrinue %d %d %d\n", (nremain_tran1)&0xffffff, nwrite, nread_dma);
-         /* scanf("%d",&is); */
-
-	 fprintf(pFilee, "%d,%d,%d\n",min__,(max__ - min__),0);
-	 fclose(pFilee);
-	 return;
-	 
-
-        for (ig=0; ig< ((nremain/8)+4); ig++) {
-         dwAddrSpace = t1_tr_bar;
-         u64Data =0;
-         dwOffset =0;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         u32Data =   (u64Data>> 32) & 0xffffffff;
-         read_array[ntot_rec+ig*2+1] = u32Data;
-         u32Data =   u64Data& 0xffffffff;
-         read_array[ntot_rec+ig*2] = u32Data;
-        }
-        ntot_rec = ntot_rec+ ((nremain/4)+8);
-
-/* write this will abort previous DMA */
-         dwAddrSpace =2;
-         dwOffset = cs_dma_msi_abort;
-         u32Data = dma_abort;
-         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-/* clear DMA register after the abort */
-         dwAddrSpace =2;
-         dwOffset = cs_dma_msi_abort;
-         u32Data = 0;
-         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-         printf(" before abort, type 1 to continue\n");
-         scanf("%d",&is);
-        }
-        if(idone == 0) break;
-	/* synch DMA i/O cache **/
-	
-	if((iv%2) == 0) WDC_DMASyncIo(pDma_rec1);
-	else WDC_DMASyncIo(pDma_rec2);
-	
-	
-	
-
-	//
-        if(idebug == 1) {
-         dwAddrSpace =cs_bar;
-         u64Data =0;
-         dwOffset = t1_cs_reg;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         printf (" status word for channel 1 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
-         dwAddrSpace =cs_bar;
-         u64Data =0;
-         dwOffset = t2_cs_reg;
-         WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
-         printf (" status word for channel 2 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
-        }
-//
-//     copy of the data array
-//
-	
-	for (is=0; is<nwrite*2; is++) {
-         read_array[is+(iv*(nwrite*2))]= *buffp_rec32++;
-        }
-        ntot_rec = ntot_rec+(nwrite*2);
-       }
-
-        //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
-       sprintf(title,"joses_data_01212015_min_%d_max_%d.dat",min__,max__);
-       fd_sn = creat(title,0755);
-       printf("fd_sn = %d\n", fd_sn);
-       nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
-       printf("\n\n\n\n\t==> Done writing the file: n_write2: %d !!!!!\n\n\n\n",nwrite_2);
-
-       
-       	fprintf(pFilee,"%d,%d,%d\n",min__,(max__ - min__),1);
-	fclose(pFilee);
-	
-	return;
-	
-	
-//
-//
-//
-//       if(irawprint ==1) {
-	if(1) { // Jose: run this
-
-	 // hhhh: use this to decode file output
-
-        for (is=0; is< ntot_rec; is++) {
-         if((is%8) ==0) printf("%4d",is);
-         if(((is%250000) ==0) && (is !=0)) {
-          printf(" type 1 to continue\n");
-          scanf("%d", &dummy1);
-         }
-         printf(" %8x",read_array[is]);
-         if(((is+1)%8) ==0 ) printf("\n");
-        }
-        if(((is+1)*8) != 0)printf("\n");
-       }
-       printf(" type 1 to continue\n");
-       scanf("%d", &dummy1);
-//
-//     
-       ik=0;
-       for (is=0; is< ntot_rec; is++) {
-        if(read_array[is] == 0xffffffff) {
-         event_head[ik] =is;
-         ik= ik+1;
-         printf(" event %d header at %d\n", ik-1,is);
-        }
-        read_array_s[is*2] = (read_array[is] & 0xffff);
-        read_array_s[is*2+1] = (read_array[is] >> 16) & 0xffff;
-       }
-       printf(" type 1 to continue\n");
-       scanf("%d", &dummy1);
-
-//
-//
-       for (is=0; is< ik-1; is++) {
-        i= event_head[is];
-        printf(" header word = %x, %x, %x, %x, %x, %x, %x \n", read_array[i], read_array[i+1],
-        read_array[i+2], read_array[i+3], read_array[i+4], read_array[i+5],read_array[i+6]);
-        for (ij= (i+7)*2; ij< (event_head[is+1]-1)*2; ij++) {
-         ijk = read_array_s[ij];
-//         printf(" data = %x \n", ijk);
-//         scanf("%d", &dummy1);
-         if((ijk & 0xf000) == 0x4000) {
-          printf(" \n ** channel word, frame = %x, channel = %x \n", ((ijk>>6) & 0x3f), (ijk & 0x3f));
-         }
-         else if ((ijk & 0xf000) == 0x1000) {
-          printf("    packet time = %x \n", (ijk & 0xfff));
-          il=0;
-         }
-         else if ((ijk & 0xf000) == 0x3000) {
-          printf(" %x ****\n", (ijk & 0xfff));
-         }
-         else if ((ijk & 0x8000) == 0x8000) {
-          i = ijk & 0x7fff;
-          icount =0;
-          ib=0;
-          for (il=0; il< 15; il++) {
-           ia = (i>> il) & 0x1;
-           ic = (i>>(il+1)) & 0x1;
-           if((ib==1) & (ia== 0)) icount = icount+1;
-//           printf(" il = %d, ia = %d, ib= %d, ic= %d, icount = %d \n", il, ia, ib, ic, icount);
-//           scanf("%d", &dummy1);
-           if(((ic==1) & ((ia==1) | (ib==1))) | (il ==14)) {
-            if(icount ==0) idiff =0;
-            else if(icount ==1) idiff = -1;
-            else if(icount ==2) idiff = 1;
-            else if(icount ==3) idiff = -2;
-            else if(icount ==4) idiff = 2;
-            else printf(" huffman error \n");
-            adc_v = adc_v + idiff;
-            icount=0;
-            ib=0;
-            printf(" %x", adc_v);
-           }
-           if(il == 14) break;
-           if(ia == 1) ib=1;
-//           printf(" %x", ijk);
-          }
-         }
-         else {
-           adc_v = ijk & 0xfff;
-           printf(" %x", (ijk & 0xfff));
-         }
-//         printf(" type 1 to continue\n");
-//         scanf("%d", &dummy1);
-
-        }
-        printf(" packet end %x \n", read_array[event_head[is+1]-1]);
-        printf(" type 1 to continue\n");
-        scanf("%d", &dummy1);
-       }
-
-//
-//
+    	imod=imod_fem+1;
+    	if(imod != imod_st) {
+    	  ichip=4;
+    	  buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_lst_off+(0x0<<16);    // set last module off
+    	  i=1;
+    	  k=1;
+    	  i = pcie_send(hDev3, i, k, px);
+    	  	  printf(" set last module off, module address %d\n", imod);
+    	}
+    	imod_fem=imod_fem+1;
+      }
+      
+      printf("\n...XMIT setup complete\n");
+      //check_status(NULL,hDev3,99,99,99,3,3,99,2);
 
 
+      //******************************************************
+      //      turn the run on to start data flow
 
-//       for(is=0; is< 6*nwrite; is++) {
-//         read_array_s[is*2] = (read_array[is] & 0xffff);
-//         read_array_s[is*2+1] = ((read_array[is] >>16) & 0xffff);
-//       }
-//       nread = ((read_array_s[4] & 0xfff) << 12)+ (read_array_s[5] & 0xfff);
+      printf("\n*****************************************************\n");
+      printf("*****************************************************\n");
+      
+      printf("\n=========> RUN ON!\n");
 
-       nread = (((read_array[2] & 0xfff)<<12) + ((read_array[2] & 0xfff0000)>>16));
-       nread =nread+1;
-       nread = nread/2;
-       printf(" no. of word within the frame is %d\n", nread);
-       printf(" %x, %x, %x, %x \n", read_array[0], read_array[1], read_array[2], read_array[3]);
-       printf(" %x, %x, %x, %x \n", read_array[4], read_array[5], read_array[6], read_array[7]);
-       scanf("%d",&is);
-       for (is=0; is< nread+7; is++) {       // 6 header + 1 trailer.
-        read_comp[is] = read_array[is];
-       }
-//
-//
-//
-       printf(" 1st event \n");
-       for (is=0; is< nread+7; is++) {
-         if((is%8) ==0) printf("%4d",is);
-         printf(" %8x",read_array[is]);
-         if(((is+1)%8) ==0 ) printf("\n");
-       }
-//       if(((is+1)%8) !=0 ) printf("\n");
-       printf("\n");
-//
-//
-//
-       icomp_l = (ntot_rec)/(nread+7); // only compare complete event  // have to add header
-       if(comp_s ==1) printf(" compare %d of event in the loop, nread = %d \n",icomp_l, nread);
-       if(comp_s == 1) {
-        for(is=0; is<icomp_l; is++) {
-         for (ik=6; ik< nread+6; ik++) {   //for the moment skip header
-          k=ik+is*(nread+7);
-          if(read_comp[ik] != read_array[k]) {
-            printf(" data error seq within event = %d, total seq = %d, event = %d, first event data word = %8x, data = %8x \n", ik,k,is,read_comp[ik], read_array[k]);
-            scanf("%d",&k);
-            for (il=0; il< 2*(nread+7); il++) {
-             if((il%8) ==0) printf("%4d",il);
-             k= il + is*(nread+7);
-             printf(" %8x",read_array[k]);
-             if(((il+1)%8) ==0 ) printf("\n");
-            }
-//            if(((il+1)%8) !=0 ) printf("\n");
-            printf("\n");
-          }
-         }
-        }
-       }
-       printf(" compare finished \n");
-       scanf("%d",&is);
-       is=0;
-       while (is < nwrite*2) {
-         if(((nwrite*2)-is) <= 12) printf(" not enough word header \n");
-         if(((nwrite*2)-is) <= 12) break;
-         if((read_array_s[is] == 0xffff) && (read_array_s[is+1] == 0xffff)) {
-          printf(" event header %8x \n", read_array_s[is]+(read_array_s[is+1] << 16));
-          is=is+2;
-          printf(" module header = %4x\n", read_array_s[is]);
-          is=is+1;
-          printf(" address word = %4x, aid = %2x, module numebr %3d\n", read_array_s[is], ((read_array_s[is]>>5) &0x7f), (read_array_s[is] &0x1f));
-          is=is+1;
-          ik= (read_array_s[is]<<16)+ (read_array_s[is+1]);
-          nread=  ((read_array_s[is] & 0xfff) << 12)+ (read_array_s[is+1] & 0xfff);
-          nread = nread+1;
-          printf(" word count word = %8x, word count = %8d \n", ik,nread);
-          is = is+2;
-          ik= (read_array_s[is]<<16)+ (read_array_s[is+1]);
-          k=  ((read_array_s[is] & 0xfff) << 12)+ (read_array_s[is+1] & 0xfff);
-          printf(" event number word = %8x, event number = %8d \n", ik,k);
-          is = is+2;
-          ik= (read_array_s[is]<<16)+ (read_array_s[is+1]);
-          k=  ((read_array_s[is] & 0xfff) << 12)+ (read_array_s[is+1] & 0xfff);
-          printf(" frame number word = %8x, frame number = %8d \n", ik,k);
-          is =is+2;
-          ik= (read_array_s[is]<<16)+ (read_array_s[is+1]);
-          k=  ((read_array_s[is] & 0xfff) << 12)+ (read_array_s[is+1] & 0xfff);
-          printf(" checksum word = %8x, checksum = %8x \n", ik,k);
-          is=is+2;
-         if(((nwrite*2)-is) <= (nread+2)) printf(" not enough word for the event \n");
-         if(((nwrite*2)-is) <= (nread+2)) break;
-          is=is+nread;
-          printf("end of packet word, %8x \n", read_array_s[is]+ (read_array_s[is+1]<<16));
-          is = is+2;
-          scanf("%d", &ik);
-         }
-       }
-
-       imod=0;
-       ichip=1;
-       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_off)+(0x0<<16); //enable offline run off
-       i=1;
-       k=1;
-       i = pcie_send(hDev3, i, k, px);
-       scanf("%d",&ik);
+      imod=0;
+      ichip=1;
+      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
+      
+      usleep(10000);
+      
+      if (ihuff==0){
+	nword = (((64*timesize*3)/2+5)*(imod_st-imod_xmit))+2;  //total number of 32 bits word
+      }
+      else {
+	printf("I DON'T KNOW THE COMPRESSION FACTOR! :( ...\n");
+	printf("I'm going to assume uncompressed data. You may get DMA timeouts. Enter 1 to acknowledge this.\n");
+	scanf("%d",&ik);
+	nword = (((64*timesize*3)/2+5)*(imod_st-imod_xmit))+2; 
       }
 
-     break;
+      printf(" Event length is %d words\n", nword); 
+      last_dma_loop_size = (nword*4) % dwDMABufSize;          // last dma loop size
+      //      ndma_loop = (nword*4)/dwDMABufSize;
+
+      ndma_loop = nmod-1;
+      //vic
+
+      ifr=0;
+
+      printf(" DMA will run %d loop(s) per event\n", (ndma_loop+1));
+      printf("\t%d loops with %d words and %d loop with %d words\n\n",ndma_loop,dwDMABufSize/4,1,(nword)%(dwDMABufSize/4));
+
+      //variables for data checking
+      nc=0;
+      iset=0;
+      ncount=0;
+      nwords=0;
+      ibin=1;
+      ic=0;      
+      ih=0;
+      set=0;
+      
+      //******************************************************	    
+      for (ijk=0; ijk< nevent; ijk++) {
+	
+	if (ijk%100==0) printf("\n===================> EVENT No. %i\n\n",ijk+1);
 
 
+	// load trig 1 position relative to the frame..
+	/**
+	   imod=0;
+	   itrig_delay = ijk*256*8+16;
+	   ichip=1;
+	   buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_trig_pos)+((itrig_delay & 0xffff)<<16); //enable test mode
+	   i=1;
+	   k=1;
+	   i = pcie_send(hDev3, i, k, px);
+	**/
+
+	ntot_rec=0;//keeps track of number of words received in event
+
+	//god
+	dwAddrSpace =2;
+	u32Data =0;
+	dwOffset = 0x1c;
+	WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	printf ("\n\t==> status T1 word before first DMA = %x ~ ",u32Data);
+	dwAddrSpace =2;
+	u32Data =0;
+	dwOffset = 0x24;
+	WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	printf ("status T2 word before first DMA = %x\n\n",u32Data);
+	//god
+
+	for (iv=0; iv<(ndma_loop+1); iv++) {
+
+	  if(ifr ==0) {//first dma
+
+	    if (idebug==1) printf(" buffer allocation 1\n");
+	    dwStatus = WDC_DMAContigBufLock(hDev5, &pbuf_rec1, dwOptions_rec, dwDMABufSize, &pDma_rec1);
+	    if (WD_STATUS_SUCCESS != dwStatus) {
+	      printf("Failed locking a rec 1 Contiguous DMA buffer. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
+	      printf("enter 1 to continue \n");
+	      scanf("%d",&is);
+	    }
+	    else {
+	      u32Data = pDma_rec1->Page->pPhysicalAddr & 0xffffffff;
+	      if (idebug==1) printf(" buffer allocation lower address = %x\n", u32Data);
+	      u32Data = (pDma_rec1->Page->pPhysicalAddr >> 32) & 0xffffffff;
+	      if (idebug==1) printf(" buffer allocation higher address = %x\n", u32Data);
+	    }
+
+	    if (idebug==1) printf(" buffer allocation 2\n");
+	    dwStatus = WDC_DMAContigBufLock(hDev5, &pbuf_rec2, dwOptions_rec, dwDMABufSize, &pDma_rec2);
+	    if (WD_STATUS_SUCCESS != dwStatus) {
+	      printf("Failed locking a rec 2 Contiguous DMA buffer. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
+	      printf("enter 1 to continue \n");
+	      scanf("%d",&is);
+	    }
+	    else {
+	      u32Data = pDma_rec2->Page->pPhysicalAddr & 0xffffffff;
+	      if (idebug==1) printf(" buffer allocation 2 lower address = %x\n", u32Data);
+	      u32Data = (pDma_rec2->Page->pPhysicalAddr >> 32) & 0xffffffff;
+	      if (idebug==1) printf(" buffer allocation 2 higher address = %x\n", u32Data);
+	    }
+	    
+	    /* set tx mode register */
+	    u32Data = 0x00002000;
+	    dwOffset = tx_md_reg;
+	    dwAddrSpace =cs_bar;
+	    WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	    
+	    /* write this will abort previous DMA */
+	    dwAddrSpace =2;
+	    dwOffset = cs_dma_msi_abort;
+	    u32Data = dma_abort;
+	    WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	    
+	    /* clear DMA register after the abort */
+	    dwAddrSpace =2;
+	    dwOffset = cs_dma_msi_abort;
+	    u32Data = 0;
+	    WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	    if (idebug==1) printf(" initial abort finished \n");
+	    
+	    
+	    //god
+	    dwAddrSpace =2;
+	    u32Data = 0;
+	    dwOffset = 0x1c;
+	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	    printf ("\n\t==> status T1 word after end first DMA = %x ~ ",u32Data);
+	    dwAddrSpace = 2;
+	    u32Data =0;
+	    dwOffset = 0x24;
+	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	    printf ("status T2 word after end first DMA = %x\n\n",u32Data);
+	    //god
+      
+	    
+	  }//end if first dma
+	  
+	  if((iv%2) == 0) buffp_rec32 = pbuf_rec1;
+	  else buffp_rec32 = pbuf_rec2;
+	  
+	  /* synch cache */
+	  //not needed in SL6?
+	  if((iv%2) ==0) WDC_DMASyncCpu(pDma_rec1);
+	  else WDC_DMASyncCpu(pDma_rec2);	  
+	  if(idebug ==1) printf(" synch CPU \n");
+
+	  if(iv != ndma_loop) nwrite_byte = dwDMABufSize;
+	  else nwrite_byte = last_dma_loop_size;
+	  nwrite_byte = 307109*4;
+	  if (iv==0 || iv==ndma_loop) nwrite_byte = 307110*4;
+
+	  for (is=1; is<3; is++) {
+	    tr_bar = t1_tr_bar;
+	    r_cs_reg = r1_cs_reg;
+	    dma_tr = dma_tr1;
+	    if(is == 2) {
+	      tr_bar = t2_tr_bar;
+	      r_cs_reg = r2_cs_reg;
+	      dma_tr = dma_tr2;
+	    }
+	    if(idebug ==1) printf(" is = %d\n",is);
+	    /** initialize the receiver ***/
+	    u32Data = cs_init;
+	    dwOffset = r_cs_reg;
+	    dwAddrSpace =cs_bar;
+
+	    // receiver only gets initialize for the 1st time
+	    if(ifr ==0) {
+	      if (idebug==1) printf(" initialize the input fifo\n");
+	      WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	    }
+	    
+	    /** start the receiver **/
+	    dwAddrSpace = cs_bar;
+	    u32Data = cs_start+nwrite_byte;   /* 32 bits mode == 4 bytes per word *2 fibers **/
+	    if (idebug==1) printf(" DMA loop %d with DMA data length %d \n", iv, nwrite_byte);
+	    dwOffset = r_cs_reg;
+	    WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	    
+	  }
+
+	  ifr=1;
+
+	  /** set up DMA for both transceiver together **/		
+	  dwAddrSpace =cs_bar;
+	  dwOffset = cs_dma_add_low_reg;
+	  if((iv%2) == 0) u32Data = pDma_rec1->Page->pPhysicalAddr & 0xffffffff;
+	  else u32Data = pDma_rec2->Page->pPhysicalAddr & 0xffffffff;
+	  WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	  
+	  dwAddrSpace =cs_bar;
+	  dwOffset = cs_dma_add_high_reg;
+	  if((iv%2) == 0) u32Data = (pDma_rec1->Page->pPhysicalAddr >> 32) & 0xffffffff;
+	  else u32Data = (pDma_rec2->Page->pPhysicalAddr >> 32) & 0xffffffff;
+	  WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	  
+	  /* byte count */
+	  dwAddrSpace =cs_bar;
+	  dwOffset = cs_dma_by_cnt;
+	  u32Data = nwrite_byte;
+	  WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	  
+
+	  /* write this will start DMA */
+	  dwAddrSpace =2;
+	  dwOffset = cs_dma_cntrl;
+	  if((iv%2) == 0) is = (pDma_rec1->Page->pPhysicalAddr >> 32) & 0xffffffff;
+	  else is = (pDma_rec2->Page->pPhysicalAddr >> 32) & 0xffffffff;
+	  if(is == 0) {
+	    if(idebug==1 ) printf(" use 3dw \n");
+	    u32Data = dma_tr12+dma_3dw_rec;
+	  }
+	  else {
+	    u32Data = dma_tr12+dma_4dw_rec;
+	    //	    if(idebug==1 ) printf(" use 4dw \n");
+	  }
+	  WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	  printf(" DMA set up done, byte count = %d\n", nwrite_byte);
+
+	  //send trigger on first dma loop
+	  if(iv == 0) {
 
 
+	    incomp=0; 
+
+	    if (femfakedata==1 && ( (icompare==1 && ijk==0) || (icompare==0) ) ){//load fake data only for first event
+	      
+	      //for (im=0; im<nmod; im++){//loop over modules
+	      
+	      //******************************************************
+	      //Load fake FEM data
+	      imod = imod_fem;
+	      printf("Loading fake data for module in slot number %d\n",imod);
+		
+	      ichip=3;
+	      
+	      for (il=0; il<64; il++) {
+		
+		ik = 0x4000+il;                        // load channel address
+		buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); // load channe address
+		i = pcie_send(hDev3, 1, 1, px);
+		ibase = il+1;    // set the base value of the ADC data
+		
+		for (ik=0; ik< 256; ik++) {
+		  if(iround == 3) idir =-1;
+		  if(iround == 0) idir = 1;
+		  iround = iround + idir;
+		  in= ibase + iround;
+		  if( (ik > 240) & (ik <247)) in=300+ibase;
+		  
+		  /* if(il%4 == 0) { */
+		    //if(ik == 0) printf(" channel %d fake data \n",il);
+		    /* printf(" %4d", in); */
+		    //if(((ik+1)%16)==0) printf("\n");
+		  /* } */
+
+		  k = 0x8000+ in;        // make sure bit 15-12 il clear for the data
+		  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
+		  i = pcie_send(hDev3, 1, 1, px);
+		  send_array[il*256+ik][im]=in;           //load up data map
+			 
+		}
+	      }
+	      
+	      
+	      //god
+	      dwAddrSpace =2;
+	      u32Data =0;
+	      dwOffset = 0x1c;
+	      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	      printf ("\n\t==> status T1 word before read = %x ~ ",u32Data);
+	      dwAddrSpace =2;
+	      u32Data =0;
+	      dwOffset = 0x24;
+	      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	      printf ("status T2 word before read = %x\n\n",u32Data);
+	      //god
+
+	      /* 	ik = 0x4000+il; */
+	      /* 	if (iprint==1) printf("\nch begin %x\nch data\n",ik); */
+	      /* 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); // load channe address */
+	      /* 	i = pcie_send(hDev3, 1, 1, px); */
+	      /* 	for (ik=0; ik<256; ik++) {                 // loop over all possible address */
+	      /* 	  if (irand==1) in = (rand()) & 0xfff ;    // use random number */
+	      /* 	  else in=(ik*1) & 0xfff; */
+	      /* 	  //in = 0xaaa;  */
+	      /* 	  //in = 0x555; */
+	      /* 	  k = 0x8000+ in;        // make sure bit 15-12 is clear for the data */
+	      /* 	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data */
+	      /* 	  i = pcie_send(hDev3, 1, 1, px); */
+	      /* 	  send_array[il*256+ik][im]=in;           //load up data map */
+	      /* 	  if (iprint==1) printf("%x\t",in); */
+	      /* 	} */
+	      /* } */
+
+	      //}
+		
+		//	      }//data map loaded
+	  
+	      usleep(5000);
+	    }
 
 
-    } //&&&&&&&&&&&&&&&&&&&
+	    imod=0;
+	    ichip=1;
+	    buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
+	    i=1;
+	    k=1;
+	    i = pcie_send(hDev3, i, k, px);
+	    if (idebug==1) printf(" trigger send  \n");
+	    
+	    usleep(10000);
+	  
+	  }
 
 
+	  /***    check to see if DMA is done or not **/
+	  idone =0;
+	  for (is=0; is<6000000; is++) {;
+	    
+	    if (is == 0 || is%100000 == 0 ) {
+	    //god
+	    dwAddrSpace =2;
+	    u32Data =0;
+	    dwOffset = 0x1c;
+	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	    printf ("\n\t==> status T1 word before read = %x ~ ",u32Data);
+	    dwAddrSpace =2;
+	    u32Data =0;
+	    dwOffset = 0x24;
+	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	    printf ("status T2 word before read = %x\n\n",u32Data);
+	    //god
+	    
+	    }
+	    
+	    dwAddrSpace =cs_bar;
+	    u32Data =0;
+	    u64Data =0;
+	    dwOffset = cs_dma_cntrl;
+	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+
+	    
+	    
+	    
+	    /* if(idebug ==1) printf(" receive DMA status word %d %X \n", is, u32Data); */
+	    if((u32Data & dma_in_progress) == 0) {
+	      idone =1;
+	      if(idebug ==1) printf(" receive DMA complete %d \n", is);
+	    }
+	    if((u32Data & dma_in_progress) == 0) break;
+	  }
+	  if(idone == 0) {
+	    printf("\n %%%%%%%%%%%% Event %d, loop %d, DMA is not finished \n", ijk+1,iv);
+	    incomp=1;
+	    dwAddrSpace =cs_bar;
+	    dwOffset = cs_dma_by_cnt;
+	    WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
+	    printf (" DMA word count = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
+	    
+
+	    if((iv%2) == 0) WDC_DMASyncIo(pDma_rec1);
+	    else WDC_DMASyncIo(pDma_rec2);
+
+	    nred = (nwrite_byte-(u64Data &0xffff))/4;
+	    printf(" number of 32-bit words received: %d (this DMA) + %d (total before this DMA)\n",nred, ntot_rec);
+	    if (iwrite==1 || irawprint==1){
+	      for (is=0; is<nred; is++) {
+		read_array[is]= *buffp_rec32++;
+		if (irawprint==1) read_array_compare[ntot_rec+is] = read_array[is];
+		if (irawprint==1 && ijk==0) read_array_1st[ntot_rec+is] = read_array[is];
+		if (iwrited==1){
+		  fprintf(outf," %8x",read_array[is]);
+		  if((((ntot_rec+is+1)%8) ==0)) fprintf(outf,"\n");
+		}
+	      }
+	      scanf("%d",&ik);
+	    }
+	    ntot_rec=ntot_rec+nred;
+
+	    if (iwritem==1){
+	      sprintf(name,"output/fem_testing_xmitnu_%i_%i_%i.dat",tnum,ijk+1,iv);
+	      fd = creat(name,0755);
+	      n_write = write(fd,read_array,nred*4);
+	      close(fd);
+	    }
+	    else if (iwrite==1 && dmasizewrite==1) {
+	      n_write = write(fd,read_array,nred*4);
+	    }
+
+	    dwAddrSpace =cs_bar;
+	    u64Data =0;
+	    dwOffset = t1_cs_reg;
+	    WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
+	    printf (" status word for channel 1 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
+	    dwAddrSpace =cs_bar;
+	    u64Data =0;
+	    dwOffset = t2_cs_reg;
+	    WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
+	    printf (" status word for channel 2 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
+
+	    	    
+	    /* write this will abort previous DMA */
+	    dwAddrSpace =2;
+	    dwOffset = cs_dma_msi_abort;
+	    u32Data = dma_abort;
+	    WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+
+	    /* clear DMA register after the abort */
+	    dwAddrSpace =2;
+	    dwOffset = cs_dma_msi_abort;
+	    u32Data = 0;
+	    WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
+	    if (idebug==1) printf(" before abort, type 1 to continue\n");
+	    if (idebug==1) scanf("%d",&is);
+
+	  }
+
+	  if(idone == 0) break;
+	  printf("\t==> Are we done? \n");
+	  //god
+	  dwAddrSpace =2;
+	  u32Data =0;
+	  dwOffset = 0x1c;
+	  WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	  printf ("\n\t==> status T1 word before read = %x ~ ",u32Data);
+	  dwAddrSpace =2;
+	  u32Data =0;
+	  dwOffset = 0x24;
+	  WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
+	  printf ("status T2 word before read = %x\n\n",u32Data);
+	  //god
+	  
+
+	  /* synch DMA i/O cache **/
+	  //SL6
+	  if((iv%2) == 0) WDC_DMASyncIo(pDma_rec1);
+	  else WDC_DMASyncIo(pDma_rec2);
+
+	  if(idebug == 1) {
+	    dwAddrSpace =cs_bar;
+	    u64Data =0;
+	    dwOffset = t1_cs_reg;
+	    WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
+	    printf (" status word for channel 1 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
+	    dwAddrSpace =cs_bar;
+	    u64Data =0;
+	    dwOffset = t2_cs_reg;
+	    WDC_ReadAddr64(hDev5, dwAddrSpace, dwOffset, &u64Data);
+	    printf (" status word for channel 2 after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
+	  }
+	  
+	  nwrite = nwrite_byte/4;
+	  if (iwrite==1 || irawprint==1){
+	    for (is=0; is<nwrite; is++) {
+	      read_array[is]= *buffp_rec32++;
+	      if (irawprint==1) read_array_compare[ntot_rec+is] = read_array[is];
+	      if (irawprint==1 && ijk==0) read_array_1st[ntot_rec+is] = read_array[is];
+	      if (iwrited==1){
+		fprintf(outf," %8x",read_array[is]);
+		if((((ntot_rec+is+1)%8) ==0)) fprintf(outf,"\n");
+	      }
+	    }
+	  }
+	  if (iwritem==1){
+	    sprintf(name,"output/fem_testing_xmitnu_%i_%i_%i.dat",tnum,ijk+1,iv);
+	    fd = creat(name,0755);
+	    n_write = write(fd,read_array,nwrite*4);
+	    close(fd);
+	  }
+	  else if (iwrite==1 && dmasizewrite==1) {
+	    n_write = write(fd,read_array,nwrite*4);
+	  }
+
+	  ntot_rec = ntot_rec+nwrite;
+	   
+	}//end dma loop
+	
+	printf("\t==> DMA loop is over\n");
+	//write to file: full event
+	if (iwrite==1 && dmasizewrite==0){
+	  n_write = write(fd,read_array_compare,ntot_rec*4);
+	}
+
+	//*******************************************************
+	//DATA INTEGRITY CHECKS
+
+	//or check data integrity, and compare to first event, if selected
+	if (irawprint==1){
+	  
+	  //*********
+	  //check all events, or first event if comparing; no compression
+	  if ( ihuff==0 && ((icompare==1 && ijk==0) || (icompare==0))){//first event. no compression!!
+	    
+	    //initialize auxiliary counters
+	    nc=0; //channel counter
+	    iset=0; //flag for adc values within a channel
+	    ncount=0; //keeps track of words read for each fem
+	    nwords=0; //number of words for each fem, from header
+	    ic=0; //total words
+	    
+	    firstokay=1; //is set to 0 if errors found
+	    
+	    for (ic=0; ic<ntot_rec; ic++){
+	      
+	      if ((read_array_compare[ic] & 0xf0000000)==0xe0000000){
+		if (ch!=64){
+		  printf("\n%%%%%%%%ERROR: Missing channels\n");
+		  firstokay=0;
+		}		//event end last word
+		printf("\n\nEvent end %x\n",read_array_compare[ic]);
+		if (ic!=(ntot_rec-1)){
+		  printf("\n%%%%%%%%ERROR: Missing words\n");
+		  firstokay=0;
+		}
+	      }
+	      
+	      else if ((read_array_compare[ic] & 0xffffffff)==0xffffffff){
+		//beginning of new event
+		printf("\n================================================================");
+		printf("\nEvent start: %x\n",read_array_compare[ic]);
+		set=0;//keeps track of number of fems
+		if (ic!=0){
+		  printf("\n%%%%%%%%ERROR: ic not 0\n");
+		  firstokay=0;
+		}
+	      }
+	      
+	      else {
+		
+		if ((read_array_compare[ic]&0xffff)==0xffff){
+		  if (ch!=64 && set!=0){
+		    printf("\n%%%%%%%%ERROR: Missing channels\n");
+		    firstokay=0;
+		  }
+		  ch=0;
+		  //first FEM header word
+		  printf("\n\nFEM first header word\n");
+		  printf(" module address (%d)   %d <====\n",imod_xmit+set+1,((read_array_compare[ic]>>16) & 0xfff) & 0x1f);
+		  imod=((read_array_compare[ic]>>16) & 0xfff) & 0x1f;
+		  printf(" module ID            %d\n", (((read_array_compare[ic]>>16) & 0xfff) >>5) & 0x7f);
+		  ih=0;
+		  set++;
+		}//end if first header word
+		else if ((read_array_compare[ic]&0xf000)==0xf000){
+		  ih++;
+		  if (ih==1){
+		    printf("\nHeader words\n");
+		    printf(" nwords to read     %d\n", ((read_array_compare[ic] >>16) & 0xfff)+((read_array_compare[ic] & 0xfff)<<12));
+		    ncount=0;
+		    nwords = ((read_array_compare[ic] >>16) & 0xfff)+((read_array_compare[ic] & 0xfff)<<12);
+		  }
+		  else if (ih==2){
+		    printf(" event number (%d)   %d <====\n",ijk+1,((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12));
+		    if (ijk==1) fevnob4[set] = ((read_array_1st[ic] >>16) & 0xfff) + ((read_array_1st[ic] & 0xfff) <<12);
+		    else fevnob4[set] = fevno[set];
+		    fevno[set] = ((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12);
+		    if (fevno[set]-fevnob4[set]!=1 && ijk!=0){
+		      printf("%%%%%%%%ERROR: EVENT NOT INCREMENTED!\n");
+		      firstokay=0;
+		      printf("Enter 1 to continue\t");
+		      scanf("%d",&ik);
+		    }
+		  }
+		  else if (ih==3){
+		    printf(" frame number       %d\n",((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12));
+		    if (ijk==1) ffrnob4[set] = ((read_array_1st[ic] >>16) & 0xfff) + ((read_array_1st[ic] & 0xfff) <<12);
+		    else ffrnob4[set] = ffrno[set];
+		    ffrno[set] = ((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12);
+		    if (ffrno[set]<=ffrnob4[set]  && ijk!=0){
+		      printf("%%%%%%%%ERROR: FRAME NOT INCREMENTED!\n");
+		      firstokay=0;
+		      printf("Enter 1 to continue\t");
+		      scanf("%d",&ik);
+		    }
+		  }
+		  else if (ih==4){
+		    printf(" checksum           %x\n",    ((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12));
+		  }
+		  else {
+		    printf("%%%%%%%%ERROR: Bad header info!\n");
+		    firstokay=0;
+		  }
+		}//end if header word
+		
+		else{//adc word
+		  
+		  if ( ncount<=nwords ){ //while reading lines for this event
+		    
+		    adc1 = read_array_compare[ic] & 0xffff;
+		    adc2 = (read_array_compare[ic] >> 16) & 0xffff;
+		      
+		    //		    printf("%x\t\%x\n",adc1,adc2);
+		    
+		    if((adc1 & 0xf000) == 0x4000) { //first word       
+		      iset=1;
+		      nc=0;
+		      ncount=ncount+1;
+		      if ((adc1&0xfff)%8==0) printf("\n");
+		      printf("\t//%d",(adc1 & 0xfff)); 
+		      il = (adc1 & 0xfff);
+		      if (il!=ch){
+			printf("%%%%%%%%ERROR: bad channel number %d. Should be %d.\n",il,ch);
+			firstokay=0;
+		      }
+		    }
+		    
+		    else if ((adc1 & 0xf000) == 0x5000) { //last word
+		      iset=0;
+		      //printf(" %d",(adc1 & 0xfff));
+		      ch++;
+		      ncount = ncount+1;
+		    }
+		      
+		    else if (iset ==1) { //neither first nor last word; intermediate adc values
+		      if ( ihuff==0 && ((adc1&0xf000) != 0x0000)) {
+			printf("%%%%%%%%ERROR: adc value is 16-bit\n");
+			  firstokay=0;
+		      }
+		      if (ihuff==0 && femfakedata==1){
+			//compare against loaded data map
+			if (iprint==1) printf("%x|%x\t",send_array[ch*256+(nc%3200)%256][set-1],read_array_compare[ic] & 0xffff);
+			if (send_array[ch*256+(nc%3200)%256][set-1]!=(read_array_compare[ic] & 0xffff)){
+			  printf("%%%%%%%%ERROR: DATA mismatch found! Event %i, ch %i, data word %d, counter %d: %x|%x\n",ijk+1,ch,nc,ch*256+(nc%3200)%256,send_array[ch*256+(nc%3200)%256][set-1],(read_array_compare[ic] & 0xffff));
+			  if (nc%9600==0) scanf("%d",&ik);
+			  //			  printf("mismatch");
+			  firstokay=0;
+			}
+			//			else printf("%%%%%%%%ERROR: DATA match found! Event %i, ch %i, data word %d: %x|%x\n",ijk+1,ch,nc,send_array[ch*256+nc%256][set-1],(read_array_compare[ic] & 0xffff));
+			//			else if (nc==0 || nc==1)  printf("%%%%%%%%CHECK: Event %i, ch %i, data word %d: %x|%x\n",ijk+1,ch,nc,send_array[ch*256+(nc%3200)%256][set-1],(read_array_compare[ic] & 0xffff));
+		      }
+		      ncount = ncount+1;
+		      nc=nc+1;//increment adc value counter
+		    }
+		    
+		    else {
+		      printf("%%%%%%%%ERROR: I don't know what to do with this word!\n");              
+		      printf("%d\t %x\n",ncount,adc1);
+		      firstokay=0;
+		    }
+		    
+		    
+		    if((adc2 & 0xf000) == 0x4000) { //first word       
+		      nc=0;
+		      iset=1;
+		      ncount=ncount+1;
+		      if ((adc2&0xfff)%8==0) printf("\n");
+		      printf("\t//%d",(adc2 & 0xfff));
+		      il = (adc2 & 0xfff);
+		      if (il!=ch){
+			printf("%%%%%%%%ERROR: bad channel number %d. Should be %d.\n",il,ch);
+			firstokay=0;
+		      }
+		    }
+		    
+		    else if ((adc2 & 0xf000) == 0x5000) { //last word
+		      iset=0;
+		      //printf(" %d",(adc2 & 0xfff));
+		      ch++;
+		      ncount = ncount+1;
+		    }
+		    
+		    else if (iset ==1) { //neither first nor last word; intermediate adc values
+		      if ( ihuff==0 && ((adc2 & 0xf000) != 0x0000)) {
+			printf("%%%%%%%%ERROR: adc value is 16-bit\n");
+			firstokay=0;
+		      }
+		      if (ihuff==0 && femfakedata==1){
+			//compare against loaded data map
+			if (iprint==1) printf("%x|%x\t",send_array[ch*256+(nc%3200)%256][set-1],((read_array_compare[ic]>>16) & 0xffff));
+			if (send_array[ch*256+(nc%3200)%256][set-1]!=((read_array_compare[ic]>>16) & 0xffff)){
+			  printf("%%%%%%%%ERROR: DATA mismatch found! Event %i, ch %i, data word %d, counter %d: %x|%x\n",ijk+1,ch,nc,ch*256+(nc%3200)%256,send_array[ch*256+(nc%3200)%256][set-1],((read_array_compare[ic]>>16) & 0xffff));
+			  if (nc%9600==0) scanf("%d",&ik);
+			  //			  printf("mismatch ");
+			  firstokay=0;
+			}
+			//			else printf("%%%%%%%%ERROR: DATA match found! Event %i, ch %i, data word %d: %x|%x\n",ijk+1,ch,nc,send_array[ch*256+nc%256][set-1],((read_array_compare[ic]>>16) & 0xffff));
+			//			else if (nc==0 || nc==1)  printf("%%%%%%%%CHECK: Event %i, ch %i, data word %d: %x|%x\n",ijk+1,ch,nc,send_array[ch*256+(nc%3200)%256][set-1],((read_array_compare[ic]>>16) & 0xffff));
+		      }
+		      ncount = ncount+1;
+		      nc=nc+1;//increment adc value counter
+		    }
+		    
+		    else {
+		      printf("%%%%%%%%ERROR: I don't know what to do with this word!\n");              
+		      printf("%d\t %x\n",ncount,adc2);
+		      firstokay=0;
+		    }
+		    
+		  }//end if word is within limit from fem
+		  
+		}//else if not header word
+		
+	      }//else if not first or last word
+	      
+	    }//end loop over words in array
+	    
+	    
+	    if (set!=nmod){
+	      printf("\n%%%%%%%%ERROR: Missing FEMs\n");
+	      firstokay=0;
+	    }
+	    
+	    if (firstokay!=1){ 
+	      printf("\n%%%%%%%%ERROR: Event is not okay!\n");
+	      printf("Enter 1 to continue\t");
+	      scanf("%d",&ik);
+	    }
+	    else {
+	      printf("\nEVENT %d IS OK!\n\n",ijk+1);
+	    }
+	    
+	    if (ipause==1){
+	      printf("Enter 1 to continue\t");
+	      scanf("%d",&ik);
+	    }
+	    
+	  }//end if compare and first event, or if just checking all events
+	  
+	  //*******************************************
+	  //if this isn't the first event, and first event is okay check that subsequent events agree with first event
+	  if (icompare==1 && ijk!=0){
+	    
+	    if ((ijk%100)==0) printf("Checked %d events.\n",ijk);
+	    
+	    for (ic=0; ic<ntot_rec; ic++){
+
+	      if (read_array_compare[ic]!= read_array_1st[ic]){
+		
+		if (ic==3){//event number
+		  if (ijk==1) evnob4 = ((read_array_1st[ic] >>16) & 0xfff) + ((read_array_1st[ic] & 0xfff) <<12);
+		  else evnob4 = evno;
+		  evno = ((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12);
+		  if (evno-evnob4!=1){
+		    printf("%%%%%%%%ERROR: EVENT NOT INCREMENTED!\n");
+		  }
+		}
+		else if (ic==4){//frame number
+		  if (ijk==1) frnob4 = ((read_array_1st[ic] >>16) & 0xfff) + ((read_array_1st[ic] & 0xfff) <<12);
+		  else frnob4 = frno;
+		  frno = ((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12);
+		  if (frno<=frnob4){
+		    printf("%%%%%%%%ERROR: FRAME NOT INCREMENTED!\n");
+		  }
+		}
+		else {
+		  
+		  if ( (((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12)) ==evno ||
+		       (((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12)) ==frno ){
+		    //		    printf("event number and frame number\n");
+		    //		    printf("word %d\t %x\t current: %x\n",ic,(((read_array_1st[ic] >>16) & 0xfff) + ((read_array_1st[ic] & 0xfff) <<12)),(((read_array_compare[ic] >>16) & 0xfff) + ((read_array_compare[ic] & 0xfff) <<12)));
+		  }
+		  else if (ic<100){
+		    printf("UNEXPECTED DIFFERENCE!!\n");
+		    printf("Event %d\n",ijk+1);
+		    printf("word %d\t %x\t current: %x\n",ic,read_array_1st[ic],read_array_compare[ic]);
+		    if (ic%20==0){
+		      printf("Enter 1 to continue\t");
+		      scanf("%d",&is);
+		    }
+		  }
+		}
+	      }
+	    }
+	    
+	  }//if comparing, and this is not the first event, and first event was okay
+	  
+	}//if checking data (irawprint==1)
+		
+      }//end loop over events
+
+      if (irawprint==1) printf("\nData checking complete.\n");
+      if (icompare==1) printf("Compared %d events to first event.\n\n",ijk-1);
+
+      imod=0;
+      ichip=1;
+      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_off)+(0x0<<16); //enable offline run off
+      i=1;
+      k=1;
+      i = pcie_send(hDev, i, k, px);
+
+
+      if (iwrite==1 && iwritem==0) close(fd);
+      if (iwrited==1) fclose(outf);
+
+
+      
+      break;
+
+    }
 
 
 
 }
+     //&&&&&&&&&&&&&&&&&&&
+
+
+
+
+
 
 void trig_module_read(WDC_DEVICE_HANDLE hDev)
 {
@@ -4333,7 +4646,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
     i=1;
     k=1;
     i = pcie_send(hDev, i, k, px);
-//        imod=11;
+//        imod=3;
     ichip=3;
     buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_dram_reset+(0x0<<16);  // turm the DRAM reset off
     i=1;
@@ -4342,7 +4655,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
 
     usleep(5000);    // wait for 5 ms for DRAM to be initialized
 
-//         imod=11;
+//         imod=3;
     ichip=3;
     buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_mod_number+(imod<<16);  // set module number
     i=1;
@@ -4354,7 +4667,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
 
     i = pcie_rec(hDev,0,1,nword,iprint,py);     // init the receiver
 
-//         imod=11;
+//         imod=3;
     ichip=3;
     buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_rd_status+(0x0<<16);  // read out status
     i=1;
@@ -4403,7 +4716,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
 //                         the last 16 bits.upper byte = 8 bits data and lower 8 bits ignored.
 //
      for (is=0; is<8; is++) {
-//      imod=11;
+//      imod=3;
       ichip=5;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_pmt_spi_add)+((is & 0xf)<<16); //set spi address
       i=1;
@@ -4413,7 +4726,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
       printf(" spi port %d \n",is);
 //       scanf("%d",&ik);
 
-//      imod=11;
+//      imod=3;
       ichip=5;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_pmt_adc_data_load)+(0x0300<<16); //1st next word will be overwrite by the next next word
       buf_send[1]=(((0x0)<<13)+(0xd))+((0xc)<<24)+((0x0)<<16);
@@ -4429,7 +4742,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
       printf(" spi port 2nd command %d \n",is);
 //       scanf("%d",&ik);
 
-//      imod=11;
+//      imod=3;
       ichip=5;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_pmt_adc_data_load)+(0x0300<<16); //1st next word will be overwrite by the next next word
       buf_send[1]=(((0x0)<<13)+(0xff))+((0x1)<<24)+((0x0)<<16);
@@ -4450,7 +4763,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
 //
 //    send FPGA ADC receiver reset
 //
-//      imod=11;
+//      imod=3;
      ichip=3;
      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_adc_reset+(0x1<<16);  // FPGA ADC receiver reset on
      i=1;
@@ -4463,7 +4776,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
 //
 //    send FPGA ADC align
 //
-//      imod=11;
+//      imod=3;
      ichip=3;
      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_adc_align+(0x0<<16);  // FPGA ADC receiver reset off
      i=1;
@@ -4517,7 +4830,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
 //                         the last 16 bits.upper byte = 8 bits data and lower 8 bits ignored.
 //
      for (is=0; is<8; is++) {
-//        imod=11;
+//        imod=3;
       ichip=5;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_pmt_spi_add)+((is & 0xf)<<16); //set spi address
       i=1;
@@ -4527,7 +4840,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
       printf(" spi port %d \n",is);
 //       scanf("%d",&ik);
 
-//        imod=11;
+//        imod=3;
       ichip=5;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_pmt_adc_data_load)+(0x0300<<16); //1st next word will be overwrite by the next next word
 //        buf_send[1]=(((0x0)<<13)+(0xd))+((0x9)<<24)+((0x0)<<16);
@@ -4543,7 +4856,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
       printf(" spi port 2nd command %d \n",is);
 //       scanf("%d",&ik);
 
-//       imod=11;
+//       imod=3;
       ichip=5;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_pmt_adc_data_load)+(0x0300<<16); //1st next word will be overwrite by the next next word
       buf_send[1]=(((0x0)<<13)+(0xff))+((0x1)<<24)+((0x0)<<16);
@@ -4564,7 +4877,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
 //
 // set to use test generator 2, set test =2
 //
-//       imod=11;
+//       imod=3;
      ichip=mb_feb_pass_add;
      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_test_source+(0x2<<16);  // set test source to 2
      i=1;
@@ -4629,7 +4942,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
     i = pcie_send(hDev, i, k, px);
     
 //         timesize =4;
-//         imod=11;
+//         imod=3;
     ichip=3;
     buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_timesize+(timesize<<16);  // set drift time size
     i=1;
@@ -4637,7 +4950,7 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
     i = pcie_send(hDev, i, k, px);
 
     a_id =0xf;
-//         imod=11;
+//         imod=3;
     ichip=3;
     buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_id+(a_id<<16);  // set a_id
     i=1;
@@ -8376,6 +8689,7 @@ static int xmit_boot(WDC_DEVICE_HANDLE hDev, int imod_xmit)
   px = &buf_send;
   printf(" boot xmit module \n");
   inpf = fopen("/home/ub/xmit_fpga","r");
+  /* inpf = fopen("/home/ub/xmit_fpga_link_header","r"); */
   imod=imod_xmit;
   ichip=mb_xmit_conf_add;
   buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -8476,6 +8790,7 @@ static int fem_boot(WDC_DEVICE_HANDLE hDev, int imod_fem)
   //    Boot stratix after XMIT module
   //
   inpf = fopen("/home/ub/feb_fpga_test","r");
+  /* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
   imod=imod_fem;
   ichip=mb_feb_conf_add;
   buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -9037,5 +9352,466 @@ static void DiagEventHandler(WDC_DEVICE_HANDLE hDev, DWORD dwAction)
       printf("0x%lx\n", dwAction);
       break;
     }
+}
+
+
+static int check_status(WDC_DEVICE_HANDLE hDevPMT,
+			WDC_DEVICE_HANDLE hDevTPC,
+			int imod_trig,
+			int imod_fem_pmt_start,
+			int imod_fem_pmt_end,
+			int imod_fem_tpc_start,
+			int imod_fem_tpc_end,
+			int imod_xmit_pmt,
+			int imod_xmit_tpc) {
+
+#define mb_feb_rd_status 20
+#define mb_feb_pmt_rd_counters 86
+#define mb_a_buf_status 34
+#define mb_b_buf_status 35
+#define mb_xmit_rdstatus 20
+#define mb_xmit_rdcounters 21
+#define mb_trig_rd_status 32
+  //
+  // STATUS CHECK BEFORE RUNNING
+  //
+  static UINT32 read_array[40000];
+  static UINT32 buf_send[40000];
+  static UINT32 iprint = 1;
+  static UINT32 nword = 0;
+  int i=0;
+  int k=0;
+  long imod, ichip;
+  UINT32 *px, *py;
+  px = &buf_send;
+  py = &read_array;
+  int imod_fem_pmt, imod_fem_tpc;
+
+  int sum_status_pmt_fem=0;
+  int sum_status_pmt_xmit=0;
+  int sum_status_tpc_fem=0;
+  int sum_status_tpc_xmit=0;
+
+  int num_pmt_fem_buf_nonempty=0;
+  int num_tpc_fem_buf_nonempty=0;
+
+  int num_pmt_fem_header_nonempty=0;
+  int num_tpc_fem_header_nonempty=0;
+
+  int num_pmt_fem_data_nonempty=0;
+  int num_tpc_fem_data_nonempty=0;
+
+  int frame_ctr_pmt_xmit=0;
+  int frame_ctr_tpc_xmit=0;
+  int frame_ctr_trigger=0;
+
+  int event_ctr_pmt_xmit=0;
+  int event_ctr_tpc_xmit=0;
+  int event_ctr_trigger=0;
+
+  int read_ctr_pmt_xmit=0;
+  int read_ctr_tpc_xmit=0;
+
+  static int pmt_nublock[20];
+  static int tpc_nublock[20];
+  for(i=0; i<20; ++i) {
+    pmt_nublock[i]=0;
+    tpc_nublock[i]=0;
+  }
+
+  
+  if(hDevTPC){
+    // TPC FEM STATUS
+    printf(" *****\033[95m Slow Ctrl Monitoring: \033[93mTPC-FEM Status Info \033[00m*****\n");
+    printf(" module: b-err1: b-err2: pll   : snmem : bmmem : header: data  : r-pll : l-pll : r-dpa : l-dpa : r-cmd : l-cmd : r-done: l-done\n");
+    for(imod_fem_tpc = imod_fem_tpc_start; imod_fem_tpc <= imod_fem_tpc_end; imod_fem_tpc++) {
+      
+      nword = 2;
+      i = pcie_rec(hDevTPC,0,1,nword,iprint,py);     // init the receiver
+      //
+      imod=imod_fem_tpc;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+20+(0x0<<16);  // read out status
+      i=1;
+      k=1;
+      i = pcie_send(hDevTPC, i, k, px);
+      //     scanf("%d", &i);
+      usleep(10);
+      py = &read_array;
+      read_array[0] =0;
+      i = pcie_rec(hDevTPC,0,2,nword,iprint,py);     // read out 2 32 bits words
+      usleep(10);
+      printf(" %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d : %-5d",
+	     ((read_array[0]>>11) & 0x1f),
+	     ((read_array[0]>>20) & 0x1),
+	     ((read_array[0]>>19) & 0x1),
+	     ((read_array[0]>>21) & 0x1),	   
+	     ((read_array[0]>>22) & 0x1),
+	     ((read_array[0]>>23) & 0x1),
+	     ((read_array[0]>>31) & 0x1),
+	     ((read_array[0]>>30) & 0x1),
+	     ((read_array[0]>>24) & 0x1),
+	     ((read_array[0]>>25) & 0x1),
+	     ((read_array[0]>>17) & 0x1),
+	     ((read_array[0]>>18) & 0x1),
+	     ((read_array[0]>>26) & 0x1),
+	     ((read_array[0]>>27) & 0x1),
+	     ((read_array[0]>>28) & 0x1),
+	     ((read_array[0]>>29) & 0x1));
+      if( //((read_array[0]>>20) & 0x1) != 0 ||
+	  ((read_array[0]>>19) & 0x1) != 0 ||
+	  ((read_array[0]>>21) & 0x1) != 1 ||
+	  ((read_array[0]>>22) & 0x1) != 1 ||
+	  ((read_array[0]>>23) & 0x1) != 1 ||
+	  //((read_array[0]>>31) & 0x1) != 1 ||
+	  //((read_array[0]>>30) & 0x1) != 1 ||
+	  ((read_array[0]>>24) & 0x1) != 1 ||
+	  ((read_array[0]>>25) & 0x1) != 1 ||
+	  ((read_array[0]>>17) & 0x1) != 1 ||
+	  ((read_array[0]>>18) & 0x1) != 1 ||
+	  ((read_array[0]>>26) & 0x1) != 1 ||
+	  ((read_array[0]>>28) & 0x1) != 1 ||
+	  ((read_array[0]>>27) & 0x1) != 1 || 
+	  ((read_array[0]>>29) & 0x1) != 1 ) {
+	  //((read_array[0]>>26) & 0x1) != ((read_array[0]>>28) & 0x1) ||
+	  //((read_array[0]>>27) & 0x1) != ((read_array[0]>>29) & 0x1) ) {
+	printf(" ... \033[93m CHECK!!!\033[00m\n");
+	sum_status_tpc_fem++;
+      }
+      else printf("\n");
+
+      if( ((read_array[0]>>31) & 0x1) != 1 )
+	num_tpc_fem_header_nonempty++;
+      if( ((read_array[0]>>30) & 0x1) != 1 )
+	num_tpc_fem_data_nonempty++;
+      //
+      
+      printf(" ***** Slow Ctrl Monitoring: TPC-FEM Status Info *****\n");
+      printf(" module = %d, command = %d \n", ((read_array[0]>>11) & 0x1f), (read_array[0] &0xff));
+      printf(" ADC right dpa lock     %d \n", ((read_array[0]>>17) & 0x1));
+      printf(" ADC left  dpa lock     %d \n", ((read_array[0]>>18) & 0x1));
+      printf(" block error 2          %d \n", ((read_array[0]>>19) & 0x1));
+      printf(" block error 1          %d \n", ((read_array[0]>>20) & 0x1));
+      printf(" pll lcoked             %d \n", ((read_array[0]>>21) & 0x1));
+      printf(" superNova mem ready    %d \n", ((read_array[0]>>22) & 0x1));
+      printf(" beam      mem ready    %d \n", ((read_array[0]>>23) & 0x1));
+      printf(" ADC right PLL locked   %d \n", ((read_array[0]>>24) & 0x1));
+      printf(" ADC left PLL locked    %d \n", ((read_array[0]>>25) & 0x1));
+      printf(" ADC align cmd right    %d \n", ((read_array[0]>>26) & 0x1));
+      printf(" ADC align cmd left     %d \n", ((read_array[0]>>27) & 0x1));
+      printf(" ADC align done right   %d \n", ((read_array[0]>>28) & 0x1));
+      printf(" ADC align done left    %d \n", ((read_array[0]>>29) & 0x1));
+      printf(" Neutrino data empty    %d \n", ((read_array[0]>>30) & 0x1));
+      printf(" Neutrino Header empty  %d \n", ((read_array[0]>>31) & 0x1));
+    }
+    printf("\n");
+    
+    // TPC FEM NU/SN BUFFER
+    printf(" *****\033[95m Slow Ctrl Monitoring: \033[93mTPC-FEM NU/SN-Buffer Info \033[00m*****\n");
+    printf(" nu-mod   : nu-word  : nu-block : sn-mod   : sn-word  : sn-block\n");
+    for(imod_fem_tpc = imod_fem_tpc_start; imod_fem_tpc <= imod_fem_tpc_end; imod_fem_tpc++) {
+      nword =2 ;
+      i = pcie_rec(hDevTPC,0,1,nword,iprint,py);     // init the receiver
+      imod=imod_fem_tpc;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_a_buf_status+(0x0<<16);  // read out status
+      i=1;
+      k=1;
+      i = pcie_send(hDevTPC, i, k, px);
+      py = &read_array;
+      usleep(10);
+      i = pcie_rec(hDevTPC,0,2,nword,iprint,py);     // read out 2 32 bits words
+      printf(" %-8d :",((read_array[0]>>11) & 0x1f));
+      if((((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16))){
+	printf("\033[93m %-8d : %-8d\033[00m :",
+	       (((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16)),
+	       ((read_array[1]>>8) &0xff));
+	num_tpc_fem_buf_nonempty++;
+      }
+      else
+	printf(" %-8d : %-8d :",
+	       (((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16)),
+	       ((read_array[1]>>8) &0xff));
+      tpc_nublock[(int)((read_array[0]>>11) & 0x1f)] = ((read_array[1]>>8) &0xff);
+      
+	printf(" ***** Slow Ctrl Monitoring: TPC-FEM NU-Buffer Status Info *****\n");
+	printf("    Neutrino buffer status word = %x, %x \n", read_array[0], read_array[1]);
+	printf("    module addres %d, command %d \n",((read_array[0]>>11) & 0x1f) ,(read_array[0] & 0xff));
+	i = (((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16));
+	printf("    Neutrino uword = %x, Neutrino ublock = %x \n", i, ((read_array[1]>>8) &0xff));
+	printf("\n");  
+      
+      nword = 2;
+      i = pcie_rec(hDevTPC,0,1,nword,iprint,py);     // init the receiver
+      
+      imod=imod_fem_tpc;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_b_buf_status+(0x0<<16);  // read out status
+      i=1;
+      k=1;
+      i = pcie_send(hDevTPC, i, k, px);
+      usleep(10);
+      py = &read_array;
+      printf(" %-8d :",((read_array[0]>>11) & 0x1f));
+      if((((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16)))
+	printf("\033[93m %-8d : %-8d\033[00m \n",
+	       (((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16)),
+	       ((read_array[1]>>8) &0xff));
+      else
+	printf(" %-8d : %-8d \n",
+	       (((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16)),
+	       ((read_array[1]>>8) &0xff));
+      
+	printf(" ***** Slow Ctrl Monitoring: TPC-FEM SN-Buffer Status Info *****\n");
+	printf("    SuperNova buffer status word = %x, %x \n", read_array[0], read_array[1]);
+	printf("    module addres %d, command %d \n",((read_array[0]>>11) & 0x1f) ,(read_array[0] & 0xff));
+	i = (((read_array[1] >> 16) & 0xffff)+ ((read_array[1] & 0xff)<< 16));
+	printf("    SuperNova uword = %x, SuperNova ublock = %x \n", i, ((read_array[1]>>8) &0xff));
+	printf("\n");
+    }
+    printf("\n");
+    
+    // TPC XMIT STATUS
+    nword =1 ;
+    i = pcie_rec(hDevTPC,0,1,nword,iprint,py);     // init the receiver
+    imod=imod_xmit_tpc;
+    ichip=3;
+    buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_rdstatus+(0x0<<16);  // read out status
+    i=1;
+    k=1;
+    i = pcie_send(hDevTPC, i, k, px);
+    usleep(10);
+    py = &read_array;
+    i = pcie_rec(hDevTPC,0,2,nword,iprint,py);     // read out 2 32 bits words
+    i = (read_array[0] >> 16);
+    printf(" *****\033[95m Slow Ctrl Monitoring: \033[93mTPC-XMIT Status Info \033[00m*****\n");  
+    printf(" a-err1 : a-err2 : t-err1 : t-err2 : nu-op1 : nu-op2 : sn-op1 : sn-op2 : nu-busy: sn-busy: nu-lock: sn-lock: dpa : rec : pll\n");
+    printf(" %-6d : %-6d : %-6d : %-6d : %-6d : %-6d : %-6d : %-6d : %-6d : %-6d : %-6d : %-6d : %-3d : %-3d : %-3d",
+	   ((i >> 14) &0x1),
+	   ((i >> 15) &0x1),
+	   ((i >> 12) &0x1),
+	   ((i >> 13) &0x1),
+	   ((i >> 11) &0x1),
+	   ((i >> 10) &0x1),
+	   ((i >> 9) &0x1),
+	   ((i >> 8) &0x1),
+	   ((i >> 7) &0x1),
+	   ((i >> 6) &0x1),
+	   ((i >> 3) &0x1),
+	   ((i >> 4) &0x1),
+	   ((i >> 2) &0x1),
+	   ((i >> 1) &0x1),
+	   (i &0x1));
+    if( ((i >> 14) &0x1) != 0 ||
+	((i >> 15) &0x1) != 0 ||
+	((i >> 12) &0x1) != 0 ||
+	((i >> 13) &0x1) != 0 ||
+	((i >> 11) &0x1) != 1 ||
+	((i >> 10) &0x1) != 1 ||
+	//((i >> 9) &0x1)  != 1 ||
+	//((i >> 8) &0x1)  != 1 ||
+	((i >> 7) &0x1)  != 0 ||
+	((i >> 6) &0x1)  != 0 ||
+	((i >> 3) &0x1)  != 1 ||
+	((i >> 4) &0x1)  != 1 ||
+	((i >> 2) &0x1)  != 1 ||
+	((i >> 1) &0x1)  != 1 ||
+	(i &0x1) != 1) {
+      printf(" ... \033[93m CHECK!!!\033[00m\n");
+      sum_status_tpc_xmit++;
+    }
+    else
+      printf("\n");
+    
+      printf(" ***** Slow Ctrl Monitoring: TPC-XMIT Readout Status Info *****\n");
+      printf("    buffer status word = %x\n", read_array[0]);
+      printf("    crate %d, header %x \n",(read_array[0] & 0x1f) ,((read_array[0] >> 8) & 0xff));
+      i = (read_array[0] >> 16);
+      printf("    alignment 2 error  %d \n", ((i >> 15) &0x1));
+      printf("    alignment 1 error  %d \n", ((i >> 14) &0x1));
+      printf("    time 2 error       %d \n", ((i >> 13) &0x1));
+      printf("    time 1 error       %d \n", ((i >> 12) &0x1));
+      printf("    opt 1 status Neu   %d \n", ((i >> 11) &0x1));
+      printf("    opt 2 status Neu   %d \n", ((i >> 10) &0x1));
+      printf("    opt 1 status Super %d \n", ((i >> 9) &0x1));
+      printf("    opt 2 status Super %d \n", ((i >> 8) &0x1));
+      printf("    busy neutrino      %d \n", ((i >> 7) &0x1));
+      printf("    busy SuperNova     %d \n", ((i >> 6) &0x1));
+      printf("    xmit Super locked  %d \n", ((i >> 4) &0x1));
+      printf("    xmit Neu locked    %d \n", ((i >> 3) &0x1));
+      printf("    DPA locked         %d \n", ((i >> 2) &0x1));
+      printf("    receiver locked    %d \n", ((i >> 1) &0x1));
+      printf("    PLL locked         %d \n", (i &0x1));
+    printf("\n");
+    
+    // TPC XMIT COUNTER
+    i = pcie_rec(hDevTPC,0,1,nword,iprint,py);     // init the receiver
+    imod=imod_xmit_tpc;
+    ichip=3;
+    buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_rdcounters+(0x0<<16);  // read out status
+    i=1;
+    k=1;
+    i = pcie_send(hDevTPC, i, k, px);
+    py = &read_array;
+    usleep(100);
+    i = pcie_rec(hDevTPC,0,2,nword,iprint,py);     // read out 2 32 bits words
+    
+    printf(" ***** \033[95mSlow Ctrl Monitoring: \033[93mTPC-XMIT Counter Info \033[00m*****\n");
+    //printf("    buffer status word = %x, %x, %x, %x, %x\n", read_array[0], read_array[1],
+    //read_array[2], read_array[3], read_array[4]);
+    //printf("    crate %d, header %x \n",(read_array[0] & 0x1f) ,((read_array[0] >> 8) & 0xff));
+    printf("  frame count %d \n", read_array[1]);
+    printf("  event count %d \n", read_array[2]);
+    printf("  neutrino read count %d \n", read_array[3]);
+    printf("  supernova read count %d \n", read_array[4]);
+    printf("\n");
+
+    frame_ctr_tpc_xmit = read_array[1];
+    event_ctr_tpc_xmit = read_array[2];
+    read_ctr_tpc_xmit = read_array[3];
+  }
+
+
+  // Check consistency
+  int frame_diff_pmt_tpc = 0;
+  int frame_diff_pmt_trg = 0;
+  int frame_diff_tpc_trg = 0;
+  int read_lag_pmt_xmit  = 0;
+  int read_lag_tpc_xmit  = 0;
+  int event_diff_pmt_tpc = 0;
+  int event_diff_pmt_trg = 0;
+  int event_diff_tpc_trg = 0;
+  if(frame_ctr_pmt_xmit && frame_ctr_tpc_xmit){
+    frame_diff_pmt_tpc = frame_ctr_pmt_xmit - frame_ctr_tpc_xmit;
+    event_diff_pmt_tpc = event_ctr_pmt_xmit - event_ctr_tpc_xmit;
+  }
+  if(frame_ctr_pmt_xmit && frame_ctr_trigger){
+    frame_diff_pmt_trg = frame_ctr_pmt_xmit - frame_ctr_trigger;
+    event_diff_pmt_trg = event_ctr_pmt_xmit - event_ctr_trigger;
+  }
+  if(frame_ctr_tpc_xmit && frame_ctr_trigger) {
+    frame_diff_tpc_trg = frame_ctr_tpc_xmit - frame_ctr_trigger;
+    event_diff_tpc_trg = event_ctr_tpc_xmit - event_ctr_trigger;
+  }
+
+  if(frame_ctr_pmt_xmit)
+    read_lag_pmt_xmit = event_ctr_pmt_xmit - read_ctr_pmt_xmit;
+  if(frame_ctr_tpc_xmit)
+    read_lag_tpc_xmit = event_ctr_tpc_xmit - read_ctr_tpc_xmit;
+
+  // give out INFO
+  printf("\033[1;35;40m[ Status Check Ends...   ]\033[00m\n");
+  if(num_pmt_fem_buf_nonempty)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m %d PMT FEM with non-empty buffer...\n",num_pmt_fem_buf_nonempty);
+  if(num_pmt_fem_header_nonempty)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m %d PMT FEM with non-empty header...\n",num_pmt_fem_header_nonempty);
+  if(num_pmt_fem_data_nonempty)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m %d PMT FEM with non-empty data...\n",num_pmt_fem_data_nonempty);
+
+  if(num_tpc_fem_buf_nonempty)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m %d TPC FEM with non-empty buffer...\n",num_tpc_fem_buf_nonempty);
+  if(num_tpc_fem_header_nonempty)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m %d TPC FEM with non-empty header...\n",num_tpc_fem_header_nonempty);
+  if(num_tpc_fem_data_nonempty)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m %d TPC FEM with non-empty data...\n",num_tpc_fem_data_nonempty);
+
+  if(frame_diff_pmt_tpc && frame_diff_pmt_tpc<10 && frame_diff_pmt_tpc>-10)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m Frame count mismatch (PMT-TPC XMIT) %d \n",frame_diff_pmt_tpc);
+  if(frame_diff_pmt_tpc && frame_diff_pmt_trg<10 && frame_diff_pmt_trg>-10)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m Frame count mismatch (PMT XMIT - Trigger) %d \n",frame_diff_pmt_trg);
+  if(frame_diff_tpc_trg && frame_diff_tpc_trg<10 && frame_diff_tpc_trg>-10)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m Frame count mismatch (TPC XMIT - Trigger) %d \n",frame_diff_tpc_trg);
+
+  if(read_lag_pmt_xmit && read_lag_pmt_xmit<5)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m PMT XMIT read lag (behind by %d events) \n",read_lag_pmt_xmit);  
+  if(read_lag_tpc_xmit && read_lag_tpc_xmit<5)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m TPC XMIT read lag (behind by %d events) \n",read_lag_tpc_xmit);
+
+  if(event_diff_pmt_tpc && event_diff_pmt_tpc < 5 && event_diff_pmt_tpc > -5)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m PMT-TPC XMIT event count diff: %d \n",event_diff_pmt_tpc);
+  if(event_diff_pmt_trg && event_diff_pmt_trg < 5 && event_diff_pmt_trg > -5)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m PMT XMIT - Trigger event count diff: %d \n",event_diff_pmt_trg);
+  if(event_diff_tpc_trg && event_diff_tpc_trg < 5 && event_diff_tpc_trg > -5)
+    printf("\033[5;1;35;40m[ INFO ]\033[00m TPC XMIT - Trigger event count diff: %d \n",event_diff_tpc_trg);
+
+  // give out EXCEPTION
+  int status_return_code = 0;
+
+  // nublock
+  for(i=0; i<20; ++i) {
+    if(pmt_nublock[i]>=20) {
+      printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m PMT module %d nu-block %d \n",i,pmt_nublock[i]);
+      status_return_code+=1;
+    }
+    if(tpc_nublock[i]>=20) {
+      printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m TPC module %d nu-block %d \n",i,tpc_nublock[i]);
+      status_return_code+=1;
+    }
+  }
+
+  // Frame diff
+  if(frame_diff_pmt_tpc && frame_diff_pmt_tpc>=10 && frame_diff_pmt_tpc<=-10) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m Large frame count mismatch (PMT-TPC XMIT) %d \n",frame_diff_pmt_tpc);
+    //status_return_code++;
+  }
+  if(frame_diff_pmt_trg && frame_diff_pmt_trg>=10 && frame_diff_pmt_trg<=-10) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m Large frame count mismatch (PMT XMIT - Trigger) %d \n",frame_diff_pmt_trg);
+    status_return_code++;
+  }
+  if(frame_diff_tpc_trg && frame_diff_tpc_trg>=10 && frame_diff_tpc_trg<=-10) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m Large frame count mismatch (TPC XMIT - Trigger) %d \n",frame_diff_tpc_trg);
+    //status_return_code++;
+  }
+
+  // Read lag
+  if(read_lag_pmt_xmit && read_lag_pmt_xmit>=5) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m PMT XMIT read lag too large (behind by %d events) \n",read_lag_pmt_xmit);
+    status_return_code++;
+  }
+  if(read_lag_tpc_xmit && read_lag_tpc_xmit>=5) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m TPC XMIT read lag too large (behind by %d events) \n",read_lag_tpc_xmit);
+    status_return_code++;
+  }
+
+  // Event diff
+  if(event_diff_pmt_tpc && event_diff_pmt_tpc >= 5 && event_diff_pmt_tpc <= -5) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m PMT-TPC XMIT event count diff too large:%d \n",event_diff_pmt_tpc);
+    status_return_code++;
+  }
+  if(event_diff_pmt_trg && event_diff_pmt_trg >= 5 && event_diff_pmt_trg <= -5) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m PMT TPC XMIT - Trigger event count diff too large:%d \n",event_diff_pmt_trg);
+    status_return_code++;
+  }
+  if(event_diff_tpc_trg && event_diff_tpc_trg >= 5 && event_diff_tpc_trg <= -5) {
+    printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m TPC TPC XMIT - Trigger event count diff too large:%d \n",event_diff_tpc_trg);
+    status_return_code++;
+  }
+
+  // Status
+  if(sum_status_pmt_fem || sum_status_tpc_fem || sum_status_pmt_xmit || sum_status_tpc_xmit) {
+    if(sum_status_pmt_fem)
+      printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m %d PMT-FEM have bad status...\n",sum_status_pmt_fem);
+    if(sum_status_tpc_fem)
+      printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m %d TPC-FEM have bad status...\n",sum_status_tpc_fem);
+    if(sum_status_pmt_xmit)
+      printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m %d PMT-XMIT bad status...\n",sum_status_pmt_xmit);
+    if(sum_status_tpc_xmit)
+      printf("\033[5;1;33;41m[ EXCEPTION ]\033[00m %d TPC-XMIT bad status...\n",sum_status_tpc_xmit);
+    status_return_code += 1;
+  }
+
+  if(!status_return_code)
+    printf("\033[1;32;40m[ GOOD STATUS  ] \033[00m\n");
+  else
+    printf("\033[1;31;43m[ *BAD* STATUS ] \033[00m\n");
+
+          
+
+
+  //
+  // CHECK ENDS
+  //
+  return 0;
+  //return status_return_code;
 }
 

@@ -1,5 +1,5 @@
 
-Start time of program: 1453414430 sec 527744 usec
+Start time of program: 1453476103 sec 817845 usec
 
 PCIE diagnostic utility.
 Application accesses hardware using WinDriver.
@@ -114,10 +114,10 @@ xmit status word = 31fff00, ffffffff
  XMIT re-align done 
  DMA will run 1 loop
  buffer allocation 1
- buffer allocation lower address = 300c0000
+ buffer allocation lower address = 2c000000
  buffer allocation higher address = 3
  buffer allocation 2
- buffer allocation 2 lower address = 30580000
+ buffer allocation 2 lower address = 2c040000
  buffer allocation 2 higher address = 3
  initial abort finished 
 . use 4dw 
