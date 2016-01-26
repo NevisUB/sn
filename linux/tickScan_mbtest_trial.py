@@ -9,18 +9,16 @@ import time
 
 # continue from here
 
-for width in xrange(28,64):
+#for deltat in xrange(3, 64):
+for deltat in xrange(13, 26):
 
-  for tstart in xrange(192,256-width): #max tstart is 254
+    for tstart in xrange(192, 256 - deltat):
+#  for tstart in xrange(0, 192, 10):
+        if deltat <= 13 and tstart <= 218:
+            continue
 
-# for width in xrange(39,64):
-#    tstart = 255 - width
-   
-    if width == 28 and tstart <= 207:
-      continue
-
-    cmd = "./mbtest_trial_case1_prod %i %i > tickScan.out 2>tickScan.err"%(tstart, tstart+width)
-   
-    print "** Processing ", cmd
-    call(cmd,shell=True)
-    time.sleep(1)
+        cmd = "./mbtest_trial_case1_prod %i %i > tickScan.out 2>tickScan.err"%(tstart, tstart+deltat)
+        
+        print "** Processing ", cmd
+        call(cmd,shell=True)
+        time.sleep(2)

@@ -1097,19 +1097,24 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       printf("CRATE CONFIGURATION:\n");
 
       printf("\n\tHow many FEB modules?\t\t");
-      scanf("%d",&nmod);
+      //scanf("%d",&nmod);
       //      nmod=17;//15 new FEMs at a time
+      printf("\t==> 1 FEB module\n");
+      nmod = 1;
 
       printf("\n\tXMIT slot number (count from right, starting at 1)?\t");
-      scanf("%d",&imod_xmit);
+      //scanf("%d",&imod_xmit);
       //      imod_xmit=1;
-
+      imod_xmit = 2;
+      printf("\t==>XMIT in slot 2\n");
+      
       imod_st=imod_xmit+nmod;
       
       printf("\n\tProceeding with module numbers:\n\t");
       for (i=0; i<nmod; i++){
 	printf("%d\t",imod_xmit+1+i);
       }
+
       printf("\n\tLast FEM module: %d",imod_st);
       printf("\n");
       
@@ -1119,29 +1124,36 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
       femfakedata=1;
       printf("\n\tUse random FEM data?\t");
-      scanf("%d",&irand);
+      //scanf("%d",&irand);
+      printf("\t==> No i put it in\n");
       //	irand=1;
 
       //      printf("\n\tUse huffman compression?\t");
       //      scanf("%d",&ihuff);
       //      ihuff =1; //xxxxx need to predict event size 
+      printf("\t==>No huffman compression\n");
       ihuff=0;
 
       //      printf("\n\tDMA buffer size?\t");
       //      scanf("%d",&dwDMABufSize);
       dwDMABufSize = 4000000;
+      printf("\t==>dwDMABufSize: %d\n",dwDMABufSize);
 
       printf("\n-----------------------------\n");
       printf("OUTPUT OPTIONS:\n");
       
       printf("\n\tWrite data to binary file?\t");
       scanf("%d",&iwrite);
+      printf("\t==>Yes!\n");
+      iwrite = 1;
       if(iwrite == 1) {
 	printf("\n\tTest number (for output file name)?\t");
 	scanf("%d",&tnum);
 	//      tnum=0;	
 	printf("\n\tWrite multiple binaries?\t");
-	scanf("%d",&iwritem);
+	printf("\t==> Yes...\n");
+	//scanf("%d",&iwritem);
+	iwritem=1;
 	//	iwritem=0;
 	if (iwritem==0){
 	  printf("\n\tWrite on every DMA?\t");
@@ -1153,9 +1165,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       }
 
       printf("\n\tWrite data to text formated file?\t");
-      scanf("%d",&iwrited);
+      //      scanf("%d",&iwrited);
       //      iwrited=0;
-
+      printf("\t==>No...\n");
+      iwrited=0;
+      
       if (iwrited==1){
 	printf("\n\tTest number (for output file name)?\t");
 	scanf("%d",&tnum);
@@ -1174,7 +1188,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //idebug=1;
 
       printf("\n\tType 1 to check data integrity during running:\t");
-      scanf("%d",&irawprint);
+      //scanf("%d",&irawprint);
+      irawprint=0;
+      printf("\t==>No raw printing...\n");
       //      irawprint=1;
       
       if (irawprint==1){
@@ -1203,7 +1219,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //iframe_length = 8191; //25599 corresponds to nominal 1.6ms
       itrig_delay = 16;//4112;//12,2064;//1610;//wraparound skipped
       timesize = 3199;//199; //3199 cprresponds to nominal 1.6ms
-
+      
       printf("\nUsing:\n\t frame size = %d\n\t drift time = %d\n", iframe_length, timesize);
 
       icheck =0;
@@ -1222,12 +1238,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       u32Data = 0;
       dwOffset = 0x1c;
       WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-      printf ("\n\t==> status T1 word before config = %x ~ ",u32Data);
+      printf ("\n\t==> status R1 word before config = %x ~ ",u32Data);
       dwAddrSpace = 2;
       u32Data =0;
       dwOffset = 0x24;
       WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-      printf ("status T2 word after before = %x\n\n",u32Data);
+      printf ("status R2 word after before = %x\n\n",u32Data);
       //god
 
       
@@ -1256,12 +1272,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       u32Data = 0;
       dwOffset = 0x1c;
       WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-      printf ("\n\t==> status T1 word after config = %x ~ ",u32Data);
+      printf ("\n\t==> status R1 word after config = %x ~ ",u32Data);
       dwAddrSpace = 2;
       u32Data =0;
       dwOffset = 0x24;
       WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-      printf ("status T2 word after config = %x\n\n",u32Data);
+      printf ("status R2 word after config = %x\n\n",u32Data);
       //god
 
       
@@ -1312,7 +1328,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
       printf("\nBooting XMIT module...\n\n");
       /* inpf = fopen("/home/ub/config_files_041712/xmit_fpga_080612","r"); */
-      inpf = fopen("/home/ub/config_files_040213/xmit_fpga_040213","r");
+      /* inpf = fopen("/home/ub/config_files_040213/xmit_fpga_040213","r"); */
+      inpf = fopen("/home/ub/xmit_fpga_link_header","r");
       imod=imod_xmit;
       ichip=mb_xmit_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1976,12 +1993,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	u32Data =0;
 	dwOffset = 0x1c;
 	WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	printf ("\n\t==> status T1 word before first DMA = %x ~ ",u32Data);
+	printf ("\n\t==> status R1 word before first DMA = %x ~ ",u32Data);
 	dwAddrSpace =2;
 	u32Data =0;
 	dwOffset = 0x24;
 	WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	printf ("status T2 word before first DMA = %x\n\n",u32Data);
+	printf ("status R2 word before first DMA = %x\n\n",u32Data);
 	//god
 
 	for (iv=0; iv<(ndma_loop+1); iv++) {
@@ -2041,12 +2058,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    u32Data = 0;
 	    dwOffset = 0x1c;
 	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	    printf ("\n\t==> status T1 word after end first DMA = %x ~ ",u32Data);
+	    printf ("\n\t==> status R1 word after end first DMA = %x ~ ",u32Data);
 	    dwAddrSpace = 2;
 	    u32Data =0;
 	    dwOffset = 0x24;
 	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	    printf ("status T2 word after end first DMA = %x\n\n",u32Data);
+	    printf ("status R2 word after end first DMA = %x\n\n",u32Data);
 	    //god
       
 	    
@@ -2185,12 +2202,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	      u32Data =0;
 	      dwOffset = 0x1c;
 	      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	      printf ("\n\t==> status T1 word before read = %x ~ ",u32Data);
+	      printf ("\n\t==> status R1 word before read = %x ~ ",u32Data);
 	      dwAddrSpace =2;
 	      u32Data =0;
 	      dwOffset = 0x24;
 	      WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	      printf ("status T2 word before read = %x\n\n",u32Data);
+	      printf ("status R2 word before read = %x\n\n",u32Data);
 	      //god
 
 	      /* 	ik = 0x4000+il; */
@@ -2241,12 +2258,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    u32Data =0;
 	    dwOffset = 0x1c;
 	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	    printf ("\n\t==> status T1 word before read = %x ~ ",u32Data);
+	    printf ("\n\t==> status R1 word before read = %x ~ ",u32Data);
 	    dwAddrSpace =2;
 	    u32Data =0;
 	    dwOffset = 0x24;
 	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	    printf ("status T2 word before read = %x\n\n",u32Data);
+	    printf ("status R2 word before read = %x\n\n",u32Data);
 	    //god
 	    
 	    }
@@ -2340,12 +2357,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  u32Data =0;
 	  dwOffset = 0x1c;
 	  WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	  printf ("\n\t==> status T1 word before read = %x ~ ",u32Data);
+	  printf ("\n\t==> status R1 word before read = %x ~ ",u32Data);
 	  dwAddrSpace =2;
 	  u32Data =0;
 	  dwOffset = 0x24;
 	  WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
-	  printf ("status T2 word before read = %x\n\n",u32Data);
+	  printf ("status R2 word before read = %x\n\n",u32Data);
 	  //god
 	  
 
