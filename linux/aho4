@@ -1,0 +1,701 @@
+../mbtest_trial_case1_speed_prod.c:4888:1: warning: "dma_buffer_size" redefined
+../mbtest_trial_case1_speed_prod.c:885:1: warning: this is the location of the previous definition
+../mbtest_trial_case1_speed_prod.c: In function ‘main’:
+../mbtest_trial_case1_speed_prod.c:261: warning: implicit declaration of function ‘gettimeofday’
+../mbtest_trial_case1_speed_prod.c: In function ‘MenuMBtest’:
+../mbtest_trial_case1_speed_prod.c:1136: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:1137: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:1407: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:1709: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:1728: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:1730: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:1771: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:1806: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:2193: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘DWORD’
+../mbtest_trial_case1_speed_prod.c:2273: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:2274: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:2404: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:2588: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:2693: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:2701: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:2714: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:2733: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:2735: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:2743: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:2872: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:2885: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:2887: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:3072: warning: cast to pointer from integer of different size
+../mbtest_trial_case1_speed_prod.c:3097: warning: large integer implicitly truncated to unsigned type
+../mbtest_trial_case1_speed_prod.c:2902: warning: unused variable ‘mytime1’
+../mbtest_trial_case1_speed_prod.c:2900: warning: unused variable ‘endtest1’
+../mbtest_trial_case1_speed_prod.c:1023: warning: unused variable ‘thread_data_n_m’
+../mbtest_trial_case1_speed_prod.c:1021: warning: unused variable ‘thread_data_sn_tpc’
+../mbtest_trial_case1_speed_prod.c:1020: warning: unused variable ‘thread_data_n_tpc’
+../mbtest_trial_case1_speed_prod.c:1017: warning: unused variable ‘thread_data_n’
+../mbtest_trial_case1_speed_prod.c:1008: warning: unused variable ‘pFilee’
+../mbtest_trial_case1_speed_prod.c:1008: warning: unused variable ‘outfile’
+../mbtest_trial_case1_speed_prod.c:1008: warning: unused variable ‘outf’
+../mbtest_trial_case1_speed_prod.c:1006: warning: unused variable ‘py1’
+../mbtest_trial_case1_speed_prod.c:1005: warning: unused variable ‘buffp_send’
+../mbtest_trial_case1_speed_prod.c:1004: warning: unused variable ‘buffp_rec32_n’
+../mbtest_trial_case1_speed_prod.c:1003: warning: unused variable ‘buffp_rec64’
+../mbtest_trial_case1_speed_prod.c:999: warning: unused variable ‘dwOptions_send’
+../mbtest_trial_case1_speed_prod.c:990: warning: unused variable ‘pDma_rec’
+../mbtest_trial_case1_speed_prod.c:989: warning: unused variable ‘pbuf_rec’
+../mbtest_trial_case1_speed_prod.c:979: warning: unused variable ‘attr_pt_fake’
+../mbtest_trial_case1_speed_prod.c:978: warning: unused variable ‘attr_pt_trig_dma_m’
+../mbtest_trial_case1_speed_prod.c:978: warning: unused variable ‘attr_pt_tr_m’
+../mbtest_trial_case1_speed_prod.c:976: warning: unused variable ‘attr_pt_sn_tpc’
+../mbtest_trial_case1_speed_prod.c:976: warning: unused variable ‘attr_pt_tr_tpc’
+../mbtest_trial_case1_speed_prod.c:975: warning: unused variable ‘attr_pt_sn_dma_tpc’
+../mbtest_trial_case1_speed_prod.c:975: warning: unused variable ‘attr_pt_trig_dma_tpc’
+../mbtest_trial_case1_speed_prod.c:966: warning: unused variable ‘status_pt’
+../mbtest_trial_case1_speed_prod.c:961: warning: unused variable ‘start’
+../mbtest_trial_case1_speed_prod.c:959: warning: unused variable ‘frame_trig_div’
+../mbtest_trial_case1_speed_prod.c:959: warning: unused variable ‘frame_trig_sample’
+../mbtest_trial_case1_speed_prod.c:958: warning: unused variable ‘ifake_kazu’
+../mbtest_trial_case1_speed_prod.c:957: warning: unused variable ‘adc_v’
+../mbtest_trial_case1_speed_prod.c:957: warning: unused variable ‘idiff’
+../mbtest_trial_case1_speed_prod.c:957: warning: unused variable ‘icount’
+../mbtest_trial_case1_speed_prod.c:955: warning: unused variable ‘istart_old’
+../mbtest_trial_case1_speed_prod.c:955: warning: unused variable ‘istart’
+../mbtest_trial_case1_speed_prod.c:955: warning: unused variable ‘izero_sup’
+../mbtest_trial_case1_speed_prod.c:955: warning: unused variable ‘ibeg’
+../mbtest_trial_case1_speed_prod.c:955: warning: unused variable ‘iwidth’
+../mbtest_trial_case1_speed_prod.c:955: warning: unused variable ‘islope’
+../mbtest_trial_case1_speed_prod.c:954: warning: unused variable ‘imod_last_tpc’
+../mbtest_trial_case1_speed_prod.c:954: warning: unused variable ‘imod_st_tpc’
+../mbtest_trial_case1_speed_prod.c:954: warning: unused variable ‘imod_xmit_tpc’
+../mbtest_trial_case1_speed_prod.c:954: warning: unused variable ‘itpc_adc’
+../mbtest_trial_case1_speed_prod.c:954: warning: unused variable ‘itpc_read’
+../mbtest_trial_case1_speed_prod.c:954: warning: unused variable ‘ipmt_read’
+../mbtest_trial_case1_speed_prod.c:953: warning: unused variable ‘imonitor’
+../mbtest_trial_case1_speed_prod.c:953: warning: unused variable ‘ipr_trig’
+../mbtest_trial_case1_speed_prod.c:953: warning: unused variable ‘isuper’
+../mbtest_trial_case1_speed_prod.c:953: warning: unused variable ‘imulti’
+../mbtest_trial_case1_speed_prod.c:953: warning: unused variable ‘n_trig’
+../mbtest_trial_case1_speed_prod.c:953: warning: unused variable ‘ibytec’
+../mbtest_trial_case1_speed_prod.c:953: warning: unused variable ‘icont’
+../mbtest_trial_case1_speed_prod.c:952: warning: unused variable ‘pulse_trig_delay’
+../mbtest_trial_case1_speed_prod.c:952: warning: unused variable ‘p2_width’
+../mbtest_trial_case1_speed_prod.c:952: warning: unused variable ‘p2_delay’
+../mbtest_trial_case1_speed_prod.c:952: warning: unused variable ‘p1_width’
+../mbtest_trial_case1_speed_prod.c:952: warning: unused variable ‘p1_delay’
+../mbtest_trial_case1_speed_prod.c:952: warning: unused variable ‘itrig_pulse’
+../mbtest_trial_case1_speed_prod.c:951: warning: unused variable ‘idac_shaper’
+../mbtest_trial_case1_speed_prod.c:951: warning: unused variable ‘pmt_dac_scan’
+../mbtest_trial_case1_speed_prod.c:949: warning: unused variable ‘iwait_loop’
+../mbtest_trial_case1_speed_prod.c:949: warning: unused variable ‘iwait_usec’
+../mbtest_trial_case1_speed_prod.c:948: warning: unused variable ‘wait_max’
+../mbtest_trial_case1_speed_prod.c:948: warning: unused variable ‘wait_min’
+../mbtest_trial_case1_speed_prod.c:947: warning: unused variable ‘event_head’
+../mbtest_trial_case1_speed_prod.c:947: warning: unused variable ‘is1’
+../mbtest_trial_case1_speed_prod.c:947: warning: unused variable ‘nwrite_byte_n’
+../mbtest_trial_case1_speed_prod.c:946: warning: unused variable ‘nremain_dma’
+../mbtest_trial_case1_speed_prod.c:946: warning: unused variable ‘ig’
+../mbtest_trial_case1_speed_prod.c:946: warning: unused variable ‘nremain_tran2’
+../mbtest_trial_case1_speed_prod.c:946: warning: unused variable ‘nremain_tran1’
+../mbtest_trial_case1_speed_prod.c:946: warning: unused variable ‘nread_dma’
+../mbtest_trial_case1_speed_prod.c:946: warning: unused variable ‘nremain’
+../mbtest_trial_case1_speed_prod.c:944: warning: unused variable ‘n_write’
+../mbtest_trial_case1_speed_prod.c:944: warning: unused variable ‘n_read’
+../mbtest_trial_case1_speed_prod.c:944: warning: unused variable ‘fd’
+../mbtest_trial_case1_speed_prod.c:942: warning: unused variable ‘event_ev’
+../mbtest_trial_case1_speed_prod.c:942: warning: unused variable ‘frame_ev’
+../mbtest_trial_case1_speed_prod.c:942: warning: unused variable ‘frame_save’
+../mbtest_trial_case1_speed_prod.c:942: warning: unused variable ‘event_save’
+../mbtest_trial_case1_speed_prod.c:942: warning: unused variable ‘ic_fr’
+../mbtest_trial_case1_speed_prod.c:942: warning: unused variable ‘ic_ev’
+../mbtest_trial_case1_speed_prod.c:941: warning: unused variable ‘ilast_check’
+../mbtest_trial_case1_speed_prod.c:941: warning: unused variable ‘nk’
+../mbtest_trial_case1_speed_prod.c:941: warning: unused variable ‘nword_comp’
+../mbtest_trial_case1_speed_prod.c:941: warning: unused variable ‘icomp_index’
+../mbtest_trial_case1_speed_prod.c:940: warning: unused variable ‘idis_c1’
+../mbtest_trial_case1_speed_prod.c:940: warning: unused variable ‘idis_c’
+../mbtest_trial_case1_speed_prod.c:940: warning: unused variable ‘nwrite_byte’
+../mbtest_trial_case1_speed_prod.c:939: warning: unused variable ‘ihold_word’
+../mbtest_trial_case1_speed_prod.c:939: warning: unused variable ‘ibusy_test’
+../mbtest_trial_case1_speed_prod.c:939: warning: unused variable ‘ibusy_send’
+../mbtest_trial_case1_speed_prod.c:938: warning: unused variable ‘nred’
+../mbtest_trial_case1_speed_prod.c:938: warning: unused variable ‘ich_frm’
+../mbtest_trial_case1_speed_prod.c:938: warning: unused variable ‘ich_sample’
+../mbtest_trial_case1_speed_prod.c:938: warning: unused variable ‘ich_head’
+../mbtest_trial_case1_speed_prod.c:937: warning: unused variable ‘pmt_testpulse’
+../mbtest_trial_case1_speed_prod.c:937: warning: unused variable ‘use_pmt’
+../mbtest_trial_case1_speed_prod.c:937: warning: unused variable ‘istart_time’
+../mbtest_trial_case1_speed_prod.c:937: warning: unused variable ‘ifall’
+../mbtest_trial_case1_speed_prod.c:937: warning: unused variable ‘irise’
+../mbtest_trial_case1_speed_prod.c:936: warning: unused variable ‘en_lower’
+../mbtest_trial_case1_speed_prod.c:936: warning: unused variable ‘en_upper’
+../mbtest_trial_case1_speed_prod.c:936: warning: unused variable ‘en_top’
+../mbtest_trial_case1_speed_prod.c:936: warning: unused variable ‘cos_thres’
+../mbtest_trial_case1_speed_prod.c:936: warning: unused variable ‘cos_mult’
+../mbtest_trial_case1_speed_prod.c:935: warning: unused variable ‘pmt_words’
+../mbtest_trial_case1_speed_prod.c:935: warning: unused variable ‘threshold1’
+../mbtest_trial_case1_speed_prod.c:935: warning: unused variable ‘threshold0’
+../mbtest_trial_case1_speed_prod.c:935: warning: unused variable ‘idelay1’
+../mbtest_trial_case1_speed_prod.c:935: warning: unused variable ‘idelay0’
+../mbtest_trial_case1_speed_prod.c:934: warning: unused variable ‘ijtrig’
+../mbtest_trial_case1_speed_prod.c:934: warning: unused variable ‘idrift_time’
+../mbtest_trial_case1_speed_prod.c:934: warning: unused variable ‘itrig’
+../mbtest_trial_case1_speed_prod.c:933: warning: unused variable ‘isample’
+../mbtest_trial_case1_speed_prod.c:933: warning: unused variable ‘idiv’
+../mbtest_trial_case1_speed_prod.c:932: warning: unused variable ‘itrig_ext’
+../mbtest_trial_case1_speed_prod.c:932: warning: unused variable ‘nsend_f’
+../mbtest_trial_case1_speed_prod.c:932: warning: unused variable ‘ncount’
+../mbtest_trial_case1_speed_prod.c:932: warning: unused variable ‘iset’
+../mbtest_trial_case1_speed_prod.c:931: warning: unused variable ‘ipulse’
+../mbtest_trial_case1_speed_prod.c:930: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c:929: warning: unused variable ‘istatus_read’
+../mbtest_trial_case1_speed_prod.c:929: warning: unused variable ‘ihold_set’
+../mbtest_trial_case1_speed_prod.c:929: warning: unused variable ‘idouble’
+../mbtest_trial_case1_speed_prod.c:929: warning: unused variable ‘ihold’
+../mbtest_trial_case1_speed_prod.c:929: warning: unused variable ‘idup’
+../mbtest_trial_case1_speed_prod.c:928: warning: unused variable ‘itrig_c’
+../mbtest_trial_case1_speed_prod.c:928: warning: unused variable ‘irun’
+../mbtest_trial_case1_speed_prod.c:928: warning: unused variable ‘itest’
+../mbtest_trial_case1_speed_prod.c:927: warning: unused variable ‘jevent’
+../mbtest_trial_case1_speed_prod.c:927: warning: unused variable ‘iadd’
+../mbtest_trial_case1_speed_prod.c:927: warning: unused variable ‘idma_readback’
+../mbtest_trial_case1_speed_prod.c:927: warning: unused variable ‘inew’
+../mbtest_trial_case1_speed_prod.c:927: warning: unused variable ‘iloop’
+../mbtest_trial_case1_speed_prod.c:926: warning: unused variable ‘ierror’
+../mbtest_trial_case1_speed_prod.c:926: warning: unused variable ‘ireadback’
+../mbtest_trial_case1_speed_prod.c:926: warning: unused variable ‘num’
+../mbtest_trial_case1_speed_prod.c:924: warning: unused variable ‘izero’
+../mbtest_trial_case1_speed_prod.c:924: warning: unused variable ‘iread’
+../mbtest_trial_case1_speed_prod.c:923: warning: unused variable ‘dwOptions’
+../mbtest_trial_case1_speed_prod.c:921: warning: unused variable ‘pDma’
+../mbtest_trial_case1_speed_prod.c:920: warning: unused variable ‘pbuf’
+../mbtest_trial_case1_speed_prod.c:918: warning: unused variable ‘pbuffp_rec’
+../mbtest_trial_case1_speed_prod.c:918: warning: unused variable ‘idcm_verify_p’
+../mbtest_trial_case1_speed_prod.c:918: warning: unused variable ‘idcm_send_p’
+../mbtest_trial_case1_speed_prod.c:917: warning: unused variable ‘dis’
+../mbtest_trial_case1_speed_prod.c:917: warning: unused variable ‘sample_b’
+../mbtest_trial_case1_speed_prod.c:917: warning: unused variable ‘ic’
+../mbtest_trial_case1_speed_prod.c:917: warning: unused variable ‘ia’
+../mbtest_trial_case1_speed_prod.c:917: warning: unused variable ‘comp_s’
+../mbtest_trial_case1_speed_prod.c:917: warning: unused variable ‘icomp_l’
+../mbtest_trial_case1_speed_prod.c:916: warning: unused variable ‘idcm_verify_array’
+../mbtest_trial_case1_speed_prod.c:915: warning: unused variable ‘idcm_send_array’
+../mbtest_trial_case1_speed_prod.c:914: warning: unused variable ‘idcm_read_array32’
+../mbtest_trial_case1_speed_prod.c:913: warning: unused variable ‘read_array_s’
+../mbtest_trial_case1_speed_prod.c:913: warning: unused variable ‘idcm_read_array’
+../mbtest_trial_case1_speed_prod.c:912: warning: unused variable ‘imod_shaper’
+../mbtest_trial_case1_speed_prod.c:912: warning: unused variable ‘imod_trig’
+../mbtest_trial_case1_speed_prod.c:912: warning: unused variable ‘imod_p’
+../mbtest_trial_case1_speed_prod.c:911: warning: unused variable ‘nword_tot’
+../mbtest_trial_case1_speed_prod.c:911: warning: unused variable ‘itmp’
+../mbtest_trial_case1_speed_prod.c:911: warning: unused variable ‘index’
+../mbtest_trial_case1_speed_prod.c:911: warning: unused variable ‘nmask’
+../mbtest_trial_case1_speed_prod.c:910: warning: unused variable ‘read_comp’
+../mbtest_trial_case1_speed_prod.c:909: warning: unused variable ‘read_array_c’
+../mbtest_trial_case1_speed_prod.c:908: warning: unused variable ‘read_array1’
+../mbtest_trial_case1_speed_prod.c:907: warning: unused variable ‘ib’
+../mbtest_trial_case1_speed_prod.c:907: warning: unused variable ‘lastchnl’
+../mbtest_trial_case1_speed_prod.c:907: warning: unused variable ‘kword’
+../mbtest_trial_case1_speed_prod.c:907: warning: unused variable ‘ioffset’
+../mbtest_trial_case1_speed_prod.c:906: warning: unused variable ‘checksum’
+../mbtest_trial_case1_speed_prod.c:898: warning: unused variable ‘title1’
+../mbtest_trial_case1_speed_prod.c:894: warning: unused variable ‘buffp’
+../mbtest_trial_case1_speed_prod.c:891: warning: unused variable ‘u64Data1’
+../mbtest_trial_case1_speed_prod.c:890: warning: unused variable ‘u16Data’
+../mbtest_trial_case1_speed_prod.c: In function ‘trig_module_read’:
+../mbtest_trial_case1_speed_prod.c:3174: warning: unused variable ‘j’
+../mbtest_trial_case1_speed_prod.c:3171: warning: unused variable ‘buffp_rec32_n’
+../mbtest_trial_case1_speed_prod.c:3170: warning: unused variable ‘dis’
+../mbtest_trial_case1_speed_prod.c:3170: warning: unused variable ‘neu_buf_filled’
+../mbtest_trial_case1_speed_prod.c:3169: warning: unused variable ‘dma_tr’
+../mbtest_trial_case1_speed_prod.c:3169: warning: unused variable ‘r_cs_reg’
+../mbtest_trial_case1_speed_prod.c:3169: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c:3169: warning: unused variable ‘tr_bar’
+../mbtest_trial_case1_speed_prod.c:3169: warning: unused variable ‘idone’
+../mbtest_trial_case1_speed_prod.c:3168: warning: unused variable ‘read_point_n_tmp’
+../mbtest_trial_case1_speed_prod.c:3168: warning: unused variable ‘idebug’
+../mbtest_trial_case1_speed_prod.c:3168: warning: unused variable ‘icopy’
+../mbtest_trial_case1_speed_prod.c:3167: warning: unused variable ‘taskid’
+../mbtest_trial_case1_speed_prod.c:3167: warning: unused variable ‘nwrite_byte_n’
+../mbtest_trial_case1_speed_prod.c:3167: warning: unused variable ‘nwrite’
+../mbtest_trial_case1_speed_prod.c:3167: warning: unused variable ‘iused’
+../mbtest_trial_case1_speed_prod.c:3167: warning: unused variable ‘is’
+../mbtest_trial_case1_speed_prod.c:3162: warning: unused variable ‘u32Data’
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_trig_read’:
+../mbtest_trial_case1_speed_prod.c:3307: warning: unused variable ‘j’
+../mbtest_trial_case1_speed_prod.c:3304: warning: unused variable ‘buffp_rec32_n’
+../mbtest_trial_case1_speed_prod.c:3303: warning: unused variable ‘dis’
+../mbtest_trial_case1_speed_prod.c:3303: warning: unused variable ‘neu_buf_filled’
+../mbtest_trial_case1_speed_prod.c:3302: warning: unused variable ‘dma_tr’
+../mbtest_trial_case1_speed_prod.c:3302: warning: unused variable ‘r_cs_reg’
+../mbtest_trial_case1_speed_prod.c:3302: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c:3302: warning: unused variable ‘tr_bar’
+../mbtest_trial_case1_speed_prod.c:3302: warning: unused variable ‘idone’
+../mbtest_trial_case1_speed_prod.c:3301: warning: unused variable ‘read_point_n_tmp’
+../mbtest_trial_case1_speed_prod.c:3301: warning: unused variable ‘idebug’
+../mbtest_trial_case1_speed_prod.c:3301: warning: unused variable ‘icopy’
+../mbtest_trial_case1_speed_prod.c:3300: warning: unused variable ‘nwrite_byte_n’
+../mbtest_trial_case1_speed_prod.c:3300: warning: unused variable ‘nwrite’
+../mbtest_trial_case1_speed_prod.c:3300: warning: unused variable ‘iused’
+../mbtest_trial_case1_speed_prod.c:3300: warning: unused variable ‘is’
+../mbtest_trial_case1_speed_prod.c:3295: warning: unused variable ‘u32Data’
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_sn_dma’:
+../mbtest_trial_case1_speed_prod.c:3481: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:3457: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_trig_dma’:
+../mbtest_trial_case1_speed_prod.c:3709: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_trig_filewrite’:
+../mbtest_trial_case1_speed_prod.c:3951: warning: no return statement in function returning non-void
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_sn_filewrite’:
+../mbtest_trial_case1_speed_prod.c:4001: warning: no return statement in function returning non-void
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_sn_dma_tpc’:
+../mbtest_trial_case1_speed_prod.c:4080: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:4056: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_trig_dma_tpc’:
+../mbtest_trial_case1_speed_prod.c:4308: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_trig_filewrite_tpc’:
+../mbtest_trial_case1_speed_prod.c:4560: warning: no return statement in function returning non-void
+../mbtest_trial_case1_speed_prod.c: In function ‘pt_sn_filewrite_tpc’:
+../mbtest_trial_case1_speed_prod.c:4610: warning: no return statement in function returning non-void
+../mbtest_trial_case1_speed_prod.c: In function ‘tpc_adc_setup’:
+../mbtest_trial_case1_speed_prod.c:4949: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:4950: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:4964: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:5076: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:5092: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:5203: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:4945: warning: unused variable ‘outf’
+../mbtest_trial_case1_speed_prod.c:4943: warning: unused variable ‘py1’
+../mbtest_trial_case1_speed_prod.c:4940: warning: unused variable ‘dwOptions_rec’
+../mbtest_trial_case1_speed_prod.c:4938: warning: unused variable ‘dwOptions_send’
+../mbtest_trial_case1_speed_prod.c:4937: warning: unused variable ‘pDma_rec’
+../mbtest_trial_case1_speed_prod.c:4936: warning: unused variable ‘pbuf_rec’
+../mbtest_trial_case1_speed_prod.c:4928: warning: unused variable ‘pmt_precount’
+../mbtest_trial_case1_speed_prod.c:4928: warning: unused variable ‘pmt_dac_scan’
+../mbtest_trial_case1_speed_prod.c:4928: warning: unused variable ‘idac_shaper’
+../mbtest_trial_case1_speed_prod.c:4927: warning: unused variable ‘cdiv’
+../mbtest_trial_case1_speed_prod.c:4927: warning: unused variable ‘csample’
+../mbtest_trial_case1_speed_prod.c:4927: warning: unused variable ‘cframe’
+../mbtest_trial_case1_speed_prod.c:4927: warning: unused variable ‘odiv’
+../mbtest_trial_case1_speed_prod.c:4927: warning: unused variable ‘osample’
+../mbtest_trial_case1_speed_prod.c:4927: warning: unused variable ‘oframe’
+../mbtest_trial_case1_speed_prod.c:4926: warning: unused variable ‘pmt_mich_window’
+../mbtest_trial_case1_speed_prod.c:4926: warning: unused variable ‘pmt_deadtime’
+../mbtest_trial_case1_speed_prod.c:4925: warning: unused variable ‘ifem_loop’
+../mbtest_trial_case1_speed_prod.c:4925: warning: unused variable ‘ifem_lst’
+../mbtest_trial_case1_speed_prod.c:4925: warning: unused variable ‘ifem_fst’
+../mbtest_trial_case1_speed_prod.c:4925: warning: unused variable ‘irawprint’
+../mbtest_trial_case1_speed_prod.c:4924: warning: unused variable ‘ndma_loop’
+../mbtest_trial_case1_speed_prod.c:4924: warning: unused variable ‘ihold_word’
+../mbtest_trial_case1_speed_prod.c:4924: warning: unused variable ‘ibusy_test’
+../mbtest_trial_case1_speed_prod.c:4924: warning: unused variable ‘ibusy_send’
+../mbtest_trial_case1_speed_prod.c:4924: warning: unused variable ‘ineu’
+../mbtest_trial_case1_speed_prod.c:4923: warning: unused variable ‘nred’
+../mbtest_trial_case1_speed_prod.c:4923: warning: unused variable ‘ntot_rec’
+../mbtest_trial_case1_speed_prod.c:4923: warning: unused variable ‘idebug’
+../mbtest_trial_case1_speed_prod.c:4923: warning: unused variable ‘ich_frm’
+../mbtest_trial_case1_speed_prod.c:4923: warning: unused variable ‘ich_sample’
+../mbtest_trial_case1_speed_prod.c:4923: warning: unused variable ‘ich_head’
+../mbtest_trial_case1_speed_prod.c:4922: warning: unused variable ‘pmt_testpulse’
+../mbtest_trial_case1_speed_prod.c:4922: warning: unused variable ‘use_pmt’
+../mbtest_trial_case1_speed_prod.c:4922: warning: unused variable ‘istart_time’
+../mbtest_trial_case1_speed_prod.c:4922: warning: unused variable ‘ifall’
+../mbtest_trial_case1_speed_prod.c:4922: warning: unused variable ‘irise’
+../mbtest_trial_case1_speed_prod.c:4921: warning: unused variable ‘en_lower’
+../mbtest_trial_case1_speed_prod.c:4921: warning: unused variable ‘en_upper’
+../mbtest_trial_case1_speed_prod.c:4921: warning: unused variable ‘en_top’
+../mbtest_trial_case1_speed_prod.c:4921: warning: unused variable ‘cos_thres’
+../mbtest_trial_case1_speed_prod.c:4921: warning: unused variable ‘cos_mult’
+../mbtest_trial_case1_speed_prod.c:4920: warning: unused variable ‘pmt_words’
+../mbtest_trial_case1_speed_prod.c:4920: warning: unused variable ‘threshold1’
+../mbtest_trial_case1_speed_prod.c:4920: warning: unused variable ‘threshold0’
+../mbtest_trial_case1_speed_prod.c:4920: warning: unused variable ‘idelay1’
+../mbtest_trial_case1_speed_prod.c:4920: warning: unused variable ‘idelay0’
+../mbtest_trial_case1_speed_prod.c:4919: warning: unused variable ‘ijtrig’
+../mbtest_trial_case1_speed_prod.c:4919: warning: unused variable ‘idrift_time’
+../mbtest_trial_case1_speed_prod.c:4919: warning: unused variable ‘itrig’
+../mbtest_trial_case1_speed_prod.c:4919: warning: unused variable ‘iframe_length’
+../mbtest_trial_case1_speed_prod.c:4918: warning: unused variable ‘isample’
+../mbtest_trial_case1_speed_prod.c:4918: warning: unused variable ‘idiv’
+../mbtest_trial_case1_speed_prod.c:4918: warning: unused variable ‘imod_xmit’
+../mbtest_trial_case1_speed_prod.c:4917: warning: unused variable ‘itrig_ext’
+../mbtest_trial_case1_speed_prod.c:4917: warning: unused variable ‘nwrite’
+../mbtest_trial_case1_speed_prod.c:4917: warning: unused variable ‘nsend_f’
+../mbtest_trial_case1_speed_prod.c:4917: warning: unused variable ‘ncount’
+../mbtest_trial_case1_speed_prod.c:4917: warning: unused variable ‘iset’
+../mbtest_trial_case1_speed_prod.c:4916: warning: unused variable ‘itrig_delay’
+../mbtest_trial_case1_speed_prod.c:4916: warning: unused variable ‘ipulse’
+../mbtest_trial_case1_speed_prod.c:4915: warning: unused variable ‘dma_tr’
+../mbtest_trial_case1_speed_prod.c:4915: warning: unused variable ‘r_cs_reg’
+../mbtest_trial_case1_speed_prod.c:4915: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c:4915: warning: unused variable ‘tr_bar’
+../mbtest_trial_case1_speed_prod.c:4915: warning: unused variable ‘idone’
+../mbtest_trial_case1_speed_prod.c:4914: warning: unused variable ‘istatus_read’
+../mbtest_trial_case1_speed_prod.c:4914: warning: unused variable ‘ihold_set’
+../mbtest_trial_case1_speed_prod.c:4914: warning: unused variable ‘idouble’
+../mbtest_trial_case1_speed_prod.c:4914: warning: unused variable ‘ihold’
+../mbtest_trial_case1_speed_prod.c:4914: warning: unused variable ‘idup’
+../mbtest_trial_case1_speed_prod.c:4913: warning: unused variable ‘itrig_c’
+../mbtest_trial_case1_speed_prod.c:4913: warning: unused variable ‘irun’
+../mbtest_trial_case1_speed_prod.c:4913: warning: unused variable ‘itest’
+../mbtest_trial_case1_speed_prod.c:4912: warning: unused variable ‘jevent’
+../mbtest_trial_case1_speed_prod.c:4912: warning: unused variable ‘iadd’
+../mbtest_trial_case1_speed_prod.c:4912: warning: unused variable ‘idma_readback’
+../mbtest_trial_case1_speed_prod.c:4912: warning: unused variable ‘inew’
+../mbtest_trial_case1_speed_prod.c:4912: warning: unused variable ‘iloop’
+../mbtest_trial_case1_speed_prod.c:4911: warning: unused variable ‘ierror’
+../mbtest_trial_case1_speed_prod.c:4911: warning: unused variable ‘nloop’
+../mbtest_trial_case1_speed_prod.c:4911: warning: unused variable ‘ireadback’
+../mbtest_trial_case1_speed_prod.c:4911: warning: unused variable ‘num’
+../mbtest_trial_case1_speed_prod.c:4909: warning: unused variable ‘izero’
+../mbtest_trial_case1_speed_prod.c:4909: warning: unused variable ‘icheck’
+../mbtest_trial_case1_speed_prod.c:4909: warning: unused variable ‘iread’
+../mbtest_trial_case1_speed_prod.c:4908: warning: unused variable ‘dwOptions’
+../mbtest_trial_case1_speed_prod.c:4907: warning: unused variable ‘dwStatus’
+../mbtest_trial_case1_speed_prod.c:4905: warning: unused variable ‘ia’
+../mbtest_trial_case1_speed_prod.c:4905: warning: unused variable ‘comp_s’
+../mbtest_trial_case1_speed_prod.c:4905: warning: unused variable ‘icomp_l’
+../mbtest_trial_case1_speed_prod.c:4903: warning: unused variable ‘imod_shaper’
+../mbtest_trial_case1_speed_prod.c:4903: warning: unused variable ‘imod_trig’
+../mbtest_trial_case1_speed_prod.c:4903: warning: unused variable ‘imod_p’
+../mbtest_trial_case1_speed_prod.c:4902: warning: unused variable ‘islow_read’
+../mbtest_trial_case1_speed_prod.c:4902: warning: unused variable ‘iv’
+../mbtest_trial_case1_speed_prod.c:4902: warning: unused variable ‘nevent’
+../mbtest_trial_case1_speed_prod.c:4902: warning: unused variable ‘nword_tot’
+../mbtest_trial_case1_speed_prod.c:4902: warning: unused variable ‘itmp’
+../mbtest_trial_case1_speed_prod.c:4902: warning: unused variable ‘index’
+../mbtest_trial_case1_speed_prod.c:4902: warning: unused variable ‘nmask’
+../mbtest_trial_case1_speed_prod.c:4898: warning: unused variable ‘checksum’
+../mbtest_trial_case1_speed_prod.c:4898: warning: unused variable ‘iwrite’
+../mbtest_trial_case1_speed_prod.c:4898: warning: unused variable ‘nread’
+../mbtest_trial_case1_speed_prod.c:4898: warning: unused variable ‘ifr’
+../mbtest_trial_case1_speed_prod.c:4898: warning: unused variable ‘j’
+../mbtest_trial_case1_speed_prod.c:4895: warning: unused variable ‘buffp’
+../mbtest_trial_case1_speed_prod.c:4892: warning: unused variable ‘u16Data’
+../mbtest_trial_case1_speed_prod.c:4891: warning: unused variable ‘u32Data’
+../mbtest_trial_case1_speed_prod.c: In function ‘pmt_adc_setup’:
+../mbtest_trial_case1_speed_prod.c:5756: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:5757: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:5848: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:5887: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:6183: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:6230: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:5735: warning: unused variable ‘outf’
+../mbtest_trial_case1_speed_prod.c:5733: warning: unused variable ‘py1’
+../mbtest_trial_case1_speed_prod.c:5730: warning: unused variable ‘dwOptions_rec’
+../mbtest_trial_case1_speed_prod.c:5728: warning: unused variable ‘dwOptions_send’
+../mbtest_trial_case1_speed_prod.c:5727: warning: unused variable ‘pDma_rec’
+../mbtest_trial_case1_speed_prod.c:5726: warning: unused variable ‘pbuf_rec’
+../mbtest_trial_case1_speed_prod.c:5718: warning: unused variable ‘pmt_dac_scan’
+../mbtest_trial_case1_speed_prod.c:5718: warning: unused variable ‘idac_shaper’
+../mbtest_trial_case1_speed_prod.c:5717: warning: unused variable ‘cdiv’
+../mbtest_trial_case1_speed_prod.c:5717: warning: unused variable ‘csample’
+../mbtest_trial_case1_speed_prod.c:5717: warning: unused variable ‘cframe’
+../mbtest_trial_case1_speed_prod.c:5717: warning: unused variable ‘odiv’
+../mbtest_trial_case1_speed_prod.c:5717: warning: unused variable ‘osample’
+../mbtest_trial_case1_speed_prod.c:5717: warning: unused variable ‘oframe’
+../mbtest_trial_case1_speed_prod.c:5715: warning: unused variable ‘ifem_loop’
+../mbtest_trial_case1_speed_prod.c:5715: warning: unused variable ‘ifem_lst’
+../mbtest_trial_case1_speed_prod.c:5715: warning: unused variable ‘ifem_fst’
+../mbtest_trial_case1_speed_prod.c:5715: warning: unused variable ‘irawprint’
+../mbtest_trial_case1_speed_prod.c:5714: warning: unused variable ‘ndma_loop’
+../mbtest_trial_case1_speed_prod.c:5714: warning: unused variable ‘ihold_word’
+../mbtest_trial_case1_speed_prod.c:5714: warning: unused variable ‘ibusy_test’
+../mbtest_trial_case1_speed_prod.c:5714: warning: unused variable ‘ibusy_send’
+../mbtest_trial_case1_speed_prod.c:5714: warning: unused variable ‘ineu’
+../mbtest_trial_case1_speed_prod.c:5713: warning: unused variable ‘nred’
+../mbtest_trial_case1_speed_prod.c:5713: warning: unused variable ‘ntot_rec’
+../mbtest_trial_case1_speed_prod.c:5713: warning: unused variable ‘idebug’
+../mbtest_trial_case1_speed_prod.c:5713: warning: unused variable ‘ich_frm’
+../mbtest_trial_case1_speed_prod.c:5713: warning: unused variable ‘ich_sample’
+../mbtest_trial_case1_speed_prod.c:5713: warning: unused variable ‘ich_head’
+../mbtest_trial_case1_speed_prod.c:5712: warning: unused variable ‘pmt_testpulse’
+../mbtest_trial_case1_speed_prod.c:5712: warning: unused variable ‘use_pmt’
+../mbtest_trial_case1_speed_prod.c:5712: warning: unused variable ‘istart_time’
+../mbtest_trial_case1_speed_prod.c:5712: warning: unused variable ‘ifall’
+../mbtest_trial_case1_speed_prod.c:5712: warning: unused variable ‘irise’
+../mbtest_trial_case1_speed_prod.c:5709: warning: unused variable ‘ijtrig’
+../mbtest_trial_case1_speed_prod.c:5709: warning: unused variable ‘idrift_time’
+../mbtest_trial_case1_speed_prod.c:5709: warning: unused variable ‘itrig’
+../mbtest_trial_case1_speed_prod.c:5709: warning: unused variable ‘iframe_length’
+../mbtest_trial_case1_speed_prod.c:5708: warning: unused variable ‘isample’
+../mbtest_trial_case1_speed_prod.c:5708: warning: unused variable ‘idiv’
+../mbtest_trial_case1_speed_prod.c:5708: warning: unused variable ‘imod_xmit’
+../mbtest_trial_case1_speed_prod.c:5707: warning: unused variable ‘itrig_ext’
+../mbtest_trial_case1_speed_prod.c:5707: warning: unused variable ‘nwrite’
+../mbtest_trial_case1_speed_prod.c:5707: warning: unused variable ‘nsend_f’
+../mbtest_trial_case1_speed_prod.c:5707: warning: unused variable ‘ncount’
+../mbtest_trial_case1_speed_prod.c:5707: warning: unused variable ‘iset’
+../mbtest_trial_case1_speed_prod.c:5706: warning: unused variable ‘itrig_delay’
+../mbtest_trial_case1_speed_prod.c:5706: warning: unused variable ‘ibase’
+../mbtest_trial_case1_speed_prod.c:5706: warning: unused variable ‘ipulse’
+../mbtest_trial_case1_speed_prod.c:5706: warning: unused variable ‘timesize’
+../mbtest_trial_case1_speed_prod.c:5705: warning: unused variable ‘dma_tr’
+../mbtest_trial_case1_speed_prod.c:5705: warning: unused variable ‘r_cs_reg’
+../mbtest_trial_case1_speed_prod.c:5705: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c:5705: warning: unused variable ‘tr_bar’
+../mbtest_trial_case1_speed_prod.c:5705: warning: unused variable ‘idone’
+../mbtest_trial_case1_speed_prod.c:5704: warning: unused variable ‘istatus_read’
+../mbtest_trial_case1_speed_prod.c:5704: warning: unused variable ‘ihold_set’
+../mbtest_trial_case1_speed_prod.c:5704: warning: unused variable ‘idouble’
+../mbtest_trial_case1_speed_prod.c:5704: warning: unused variable ‘ihold’
+../mbtest_trial_case1_speed_prod.c:5704: warning: unused variable ‘idup’
+../mbtest_trial_case1_speed_prod.c:5703: warning: unused variable ‘itrig_c’
+../mbtest_trial_case1_speed_prod.c:5703: warning: unused variable ‘irun’
+../mbtest_trial_case1_speed_prod.c:5703: warning: unused variable ‘itest’
+../mbtest_trial_case1_speed_prod.c:5702: warning: unused variable ‘jevent’
+../mbtest_trial_case1_speed_prod.c:5702: warning: unused variable ‘iadd’
+../mbtest_trial_case1_speed_prod.c:5702: warning: unused variable ‘idma_readback’
+../mbtest_trial_case1_speed_prod.c:5702: warning: unused variable ‘inew’
+../mbtest_trial_case1_speed_prod.c:5702: warning: unused variable ‘iloop’
+../mbtest_trial_case1_speed_prod.c:5701: warning: unused variable ‘ierror’
+../mbtest_trial_case1_speed_prod.c:5701: warning: unused variable ‘nloop’
+../mbtest_trial_case1_speed_prod.c:5701: warning: unused variable ‘ireadback’
+../mbtest_trial_case1_speed_prod.c:5701: warning: unused variable ‘num’
+../mbtest_trial_case1_speed_prod.c:5699: warning: unused variable ‘izero’
+../mbtest_trial_case1_speed_prod.c:5699: warning: unused variable ‘icheck’
+../mbtest_trial_case1_speed_prod.c:5699: warning: unused variable ‘iread’
+../mbtest_trial_case1_speed_prod.c:5698: warning: unused variable ‘dwOptions’
+../mbtest_trial_case1_speed_prod.c:5697: warning: unused variable ‘dwStatus’
+../mbtest_trial_case1_speed_prod.c:5692: warning: unused variable ‘ihuff’
+../mbtest_trial_case1_speed_prod.c:5692: warning: unused variable ‘ic’
+../mbtest_trial_case1_speed_prod.c:5692: warning: unused variable ‘ia’
+../mbtest_trial_case1_speed_prod.c:5692: warning: unused variable ‘comp_s’
+../mbtest_trial_case1_speed_prod.c:5692: warning: unused variable ‘icomp_l’
+../mbtest_trial_case1_speed_prod.c:5687: warning: unused variable ‘imod_shaper’
+../mbtest_trial_case1_speed_prod.c:5687: warning: unused variable ‘imod_trig’
+../mbtest_trial_case1_speed_prod.c:5687: warning: unused variable ‘imod_p’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘islow_read’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘ijk’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘iv’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘nevent’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘nword_tot’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘itmp’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘index’
+../mbtest_trial_case1_speed_prod.c:5686: warning: unused variable ‘nmask’
+../mbtest_trial_case1_speed_prod.c:5680: warning: unused variable ‘checksum’
+../mbtest_trial_case1_speed_prod.c:5680: warning: unused variable ‘il’
+../mbtest_trial_case1_speed_prod.c:5680: warning: unused variable ‘iwrite’
+../mbtest_trial_case1_speed_prod.c:5680: warning: unused variable ‘nread’
+../mbtest_trial_case1_speed_prod.c:5680: warning: unused variable ‘ifr’
+../mbtest_trial_case1_speed_prod.c:5680: warning: unused variable ‘j’
+../mbtest_trial_case1_speed_prod.c:5674: warning: unused variable ‘buffp’
+../mbtest_trial_case1_speed_prod.c:5670: warning: unused variable ‘u16Data’
+../mbtest_trial_case1_speed_prod.c:5669: warning: unused variable ‘u32Data’
+../mbtest_trial_case1_speed_prod.c: At top level:
+../mbtest_trial_case1_speed_prod.c:6282: warning: return type defaults to ‘int’
+../mbtest_trial_case1_speed_prod.c: In function ‘pmt_link_setup’:
+../mbtest_trial_case1_speed_prod.c:6623: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:6624: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:6625: warning: statement with no effect
+../mbtest_trial_case1_speed_prod.c:6632: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6652: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:6654: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6761: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6796: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:6805: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6832: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6834: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6859: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6879: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c:6882: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+../mbtest_trial_case1_speed_prod.c:6620: warning: unused variable ‘py1’
+../mbtest_trial_case1_speed_prod.c:6617: warning: unused variable ‘dwOptions_rec’
+../mbtest_trial_case1_speed_prod.c:6615: warning: unused variable ‘dwOptions_send’
+../mbtest_trial_case1_speed_prod.c:6614: warning: unused variable ‘pDma_rec’
+../mbtest_trial_case1_speed_prod.c:6613: warning: unused variable ‘pbuf_rec’
+../mbtest_trial_case1_speed_prod.c:6608: warning: unused variable ‘tim2’
+../mbtest_trial_case1_speed_prod.c:6607: warning: unused variable ‘carray’
+../mbtest_trial_case1_speed_prod.c:6606: warning: unused variable ‘charchannel’
+../mbtest_trial_case1_speed_prod.c:6605: warning: unused variable ‘pmt_dac_scan’
+../mbtest_trial_case1_speed_prod.c:6605: warning: unused variable ‘idac_shaper’
+../mbtest_trial_case1_speed_prod.c:6604: warning: unused variable ‘cdiv’
+../mbtest_trial_case1_speed_prod.c:6604: warning: unused variable ‘csample’
+../mbtest_trial_case1_speed_prod.c:6604: warning: unused variable ‘cframe’
+../mbtest_trial_case1_speed_prod.c:6604: warning: unused variable ‘odiv’
+../mbtest_trial_case1_speed_prod.c:6604: warning: unused variable ‘osample’
+../mbtest_trial_case1_speed_prod.c:6604: warning: unused variable ‘oframe’
+../mbtest_trial_case1_speed_prod.c:6603: warning: unused variable ‘pmt_mich_window’
+../mbtest_trial_case1_speed_prod.c:6603: warning: unused variable ‘pmt_deadtime’
+../mbtest_trial_case1_speed_prod.c:6602: warning: unused variable ‘ifem_loop’
+../mbtest_trial_case1_speed_prod.c:6602: warning: unused variable ‘ifem_lst’
+../mbtest_trial_case1_speed_prod.c:6602: warning: unused variable ‘ifem_fst’
+../mbtest_trial_case1_speed_prod.c:6602: warning: unused variable ‘irawprint’
+../mbtest_trial_case1_speed_prod.c:6601: warning: unused variable ‘ndma_loop’
+../mbtest_trial_case1_speed_prod.c:6601: warning: unused variable ‘ihold_word’
+../mbtest_trial_case1_speed_prod.c:6601: warning: unused variable ‘ibusy_test’
+../mbtest_trial_case1_speed_prod.c:6601: warning: unused variable ‘ibusy_send’
+../mbtest_trial_case1_speed_prod.c:6601: warning: unused variable ‘ineu’
+../mbtest_trial_case1_speed_prod.c:6600: warning: unused variable ‘nred’
+../mbtest_trial_case1_speed_prod.c:6600: warning: unused variable ‘ntot_rec’
+../mbtest_trial_case1_speed_prod.c:6600: warning: unused variable ‘idebug’
+../mbtest_trial_case1_speed_prod.c:6600: warning: unused variable ‘ich_frm’
+../mbtest_trial_case1_speed_prod.c:6600: warning: unused variable ‘ich_sample’
+../mbtest_trial_case1_speed_prod.c:6600: warning: unused variable ‘ich_head’
+../mbtest_trial_case1_speed_prod.c:6599: warning: unused variable ‘pmt_testpulse’
+../mbtest_trial_case1_speed_prod.c:6599: warning: unused variable ‘use_pmt’
+../mbtest_trial_case1_speed_prod.c:6599: warning: unused variable ‘istart_time’
+../mbtest_trial_case1_speed_prod.c:6599: warning: unused variable ‘ifall’
+../mbtest_trial_case1_speed_prod.c:6599: warning: unused variable ‘irise’
+../mbtest_trial_case1_speed_prod.c:6598: warning: unused variable ‘en_lower’
+../mbtest_trial_case1_speed_prod.c:6598: warning: unused variable ‘en_upper’
+../mbtest_trial_case1_speed_prod.c:6598: warning: unused variable ‘en_top’
+../mbtest_trial_case1_speed_prod.c:6598: warning: unused variable ‘cos_thres’
+../mbtest_trial_case1_speed_prod.c:6598: warning: unused variable ‘cos_mult’
+../mbtest_trial_case1_speed_prod.c:6597: warning: unused variable ‘pmt_words’
+../mbtest_trial_case1_speed_prod.c:6597: warning: unused variable ‘threshold1’
+../mbtest_trial_case1_speed_prod.c:6597: warning: unused variable ‘threshold0’
+../mbtest_trial_case1_speed_prod.c:6597: warning: unused variable ‘idelay1’
+../mbtest_trial_case1_speed_prod.c:6597: warning: unused variable ‘idelay0’
+../mbtest_trial_case1_speed_prod.c:6596: warning: unused variable ‘ijtrig’
+../mbtest_trial_case1_speed_prod.c:6596: warning: unused variable ‘idrift_time’
+../mbtest_trial_case1_speed_prod.c:6596: warning: unused variable ‘itrig’
+../mbtest_trial_case1_speed_prod.c:6596: warning: unused variable ‘iframe_length’
+../mbtest_trial_case1_speed_prod.c:6595: warning: unused variable ‘isample’
+../mbtest_trial_case1_speed_prod.c:6595: warning: unused variable ‘idiv’
+../mbtest_trial_case1_speed_prod.c:6594: warning: unused variable ‘itrig_ext’
+../mbtest_trial_case1_speed_prod.c:6594: warning: unused variable ‘nwrite’
+../mbtest_trial_case1_speed_prod.c:6594: warning: unused variable ‘nsend_f’
+../mbtest_trial_case1_speed_prod.c:6594: warning: unused variable ‘ncount’
+../mbtest_trial_case1_speed_prod.c:6594: warning: unused variable ‘iset’
+../mbtest_trial_case1_speed_prod.c:6593: warning: unused variable ‘itrig_delay’
+../mbtest_trial_case1_speed_prod.c:6593: warning: unused variable ‘a_id’
+../mbtest_trial_case1_speed_prod.c:6593: warning: unused variable ‘ibase’
+../mbtest_trial_case1_speed_prod.c:6593: warning: unused variable ‘ipulse’
+../mbtest_trial_case1_speed_prod.c:6593: warning: unused variable ‘timesize’
+../mbtest_trial_case1_speed_prod.c:6592: warning: unused variable ‘dma_tr’
+../mbtest_trial_case1_speed_prod.c:6592: warning: unused variable ‘r_cs_reg’
+../mbtest_trial_case1_speed_prod.c:6592: warning: unused variable ‘t_cs_reg’
+../mbtest_trial_case1_speed_prod.c:6592: warning: unused variable ‘tr_bar’
+../mbtest_trial_case1_speed_prod.c:6592: warning: unused variable ‘idone’
+../mbtest_trial_case1_speed_prod.c:6591: warning: unused variable ‘istatus_read’
+../mbtest_trial_case1_speed_prod.c:6591: warning: unused variable ‘ihold_set’
+../mbtest_trial_case1_speed_prod.c:6591: warning: unused variable ‘idouble’
+../mbtest_trial_case1_speed_prod.c:6591: warning: unused variable ‘ihold’
+../mbtest_trial_case1_speed_prod.c:6591: warning: unused variable ‘idup’
+../mbtest_trial_case1_speed_prod.c:6590: warning: unused variable ‘itrig_c’
+../mbtest_trial_case1_speed_prod.c:6590: warning: unused variable ‘dummy1’
+../mbtest_trial_case1_speed_prod.c:6590: warning: unused variable ‘ichip_c’
+../mbtest_trial_case1_speed_prod.c:6590: warning: unused variable ‘irun’
+../mbtest_trial_case1_speed_prod.c:6590: warning: unused variable ‘itest’
+../mbtest_trial_case1_speed_prod.c:6589: warning: unused variable ‘jevent’
+../mbtest_trial_case1_speed_prod.c:6589: warning: unused variable ‘iadd’
+../mbtest_trial_case1_speed_prod.c:6589: warning: unused variable ‘idma_readback’
+../mbtest_trial_case1_speed_prod.c:6589: warning: unused variable ‘inew’
+../mbtest_trial_case1_speed_prod.c:6589: warning: unused variable ‘iloop’
+../mbtest_trial_case1_speed_prod.c:6589: warning: unused variable ‘nsend’
+../mbtest_trial_case1_speed_prod.c:6589: warning: unused variable ‘ij’
+../mbtest_trial_case1_speed_prod.c:6588: warning: unused variable ‘ierror’
+../mbtest_trial_case1_speed_prod.c:6588: warning: unused variable ‘nloop’
+../mbtest_trial_case1_speed_prod.c:6588: warning: unused variable ‘ireadback’
+../mbtest_trial_case1_speed_prod.c:6588: warning: unused variable ‘counta’
+../mbtest_trial_case1_speed_prod.c:6588: warning: unused variable ‘num’
+../mbtest_trial_case1_speed_prod.c:6588: warning: unused variable ‘count’
+../mbtest_trial_case1_speed_prod.c:6586: warning: unused variable ‘izero’
+../mbtest_trial_case1_speed_prod.c:6586: warning: unused variable ‘icheck’
+../mbtest_trial_case1_speed_prod.c:6586: warning: unused variable ‘iread’
+../mbtest_trial_case1_speed_prod.c:6585: warning: unused variable ‘dwOptions’
+../mbtest_trial_case1_speed_prod.c:6584: warning: unused variable ‘dwStatus’
+../mbtest_trial_case1_speed_prod.c:6579: warning: unused variable ‘ihuff’
+../mbtest_trial_case1_speed_prod.c:6579: warning: unused variable ‘ic’
+../mbtest_trial_case1_speed_prod.c:6579: warning: unused variable ‘ia’
+../mbtest_trial_case1_speed_prod.c:6579: warning: unused variable ‘comp_s’
+../mbtest_trial_case1_speed_prod.c:6579: warning: unused variable ‘icomp_l’
+../mbtest_trial_case1_speed_prod.c:6574: warning: unused variable ‘imod_shaper’
+../mbtest_trial_case1_speed_prod.c:6574: warning: unused variable ‘imod_trig’
+../mbtest_trial_case1_speed_prod.c:6574: warning: unused variable ‘imod_p’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘islow_read’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘ijk’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘iv’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘nevent’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘nword_tot’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘itmp’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘index’
+../mbtest_trial_case1_speed_prod.c:6573: warning: unused variable ‘nmask’
+../mbtest_trial_case1_speed_prod.c:6569: warning: unused variable ‘send_array’
+../mbtest_trial_case1_speed_prod.c:6567: warning: unused variable ‘checksum’
+../mbtest_trial_case1_speed_prod.c:6567: warning: unused variable ‘il’
+../mbtest_trial_case1_speed_prod.c:6567: warning: unused variable ‘iwrite’
+../mbtest_trial_case1_speed_prod.c:6567: warning: unused variable ‘nread’
+../mbtest_trial_case1_speed_prod.c:6567: warning: unused variable ‘ifr’
+../mbtest_trial_case1_speed_prod.c:6567: warning: unused variable ‘j’
+../mbtest_trial_case1_speed_prod.c:6561: warning: unused variable ‘buffp’
+../mbtest_trial_case1_speed_prod.c:6557: warning: unused variable ‘u16Data’
+../mbtest_trial_case1_speed_prod.c:6556: warning: unused variable ‘u32Data’
+../mbtest_trial_case1_speed_prod.c: In function ‘Menujsebii_test’:
+../mbtest_trial_case1_speed_prod.c:7258: warning: format ‘%llX’ expects type ‘long long unsigned int’, but argument 2 has type ‘UINT32’
+../mbtest_trial_case1_speed_prod.c:7266: warning: format ‘%llX’ expects type ‘long long unsigned int’, but argument 2 has type ‘UINT32’
+../mbtest_trial_case1_speed_prod.c:6961: warning: unused variable ‘n_written’
+../mbtest_trial_case1_speed_prod.c:6960: warning: unused variable ‘read_array’
+../mbtest_trial_case1_speed_prod.c:6960: warning: unused variable ‘write_array’
+../mbtest_trial_case1_speed_prod.c:6958: warning: unused variable ‘nsize_sw’
+../mbtest_trial_case1_speed_prod.c:6958: warning: unused variable ‘isweep’
+../mbtest_trial_case1_speed_prod.c:6956: warning: unused variable ‘nread’
+../mbtest_trial_case1_speed_prod.c:6956: warning: unused variable ‘jk’
+../mbtest_trial_case1_speed_prod.c:6951: warning: unused variable ‘buffp_rec64’
+../mbtest_trial_case1_speed_prod.c:6947: warning: unused variable ‘buff’
+../mbtest_trial_case1_speed_prod.c:6944: warning: unused variable ‘u32Data_send’
+../mbtest_trial_case1_speed_prod.c: In function ‘pcie_send_fake’:
+../mbtest_trial_case1_speed_prod.c:7923: warning: unused variable ‘iprint’
+../mbtest_trial_case1_speed_prod.c:7923: warning: unused variable ‘j’
+../mbtest_trial_case1_speed_prod.c:7923: warning: unused variable ‘i’
+../mbtest_trial_case1_speed_prod.c:7921: warning: unused variable ‘pbuf_send’
+../mbtest_trial_case1_speed_prod.c:7918: warning: unused variable ‘dwOptions_send’
+../mbtest_trial_case1_speed_prod.c:7917: warning: unused variable ‘dwStatus’
+../mbtest_trial_case1_speed_prod.c:7916: warning: unused variable ‘pDma_send’
+../mbtest_trial_case1_speed_prod.c:7915: warning: unused variable ‘buf_send’
+../mbtest_trial_case1_speed_prod.c: In function ‘pcie_rec’:
+../mbtest_trial_case1_speed_prod.c:8114: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8114: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8148: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8148: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c: In function ‘pcie_rec_2’:
+../mbtest_trial_case1_speed_prod.c:8312: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8312: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8346: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8346: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c: In function ‘pcie_rec_16b’:
+../mbtest_trial_case1_speed_prod.c:8484: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8484: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8518: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8518: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c: In function ‘pcie_rec_6_1’:
+../mbtest_trial_case1_speed_prod.c:8763: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8763: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8797: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8797: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c: In function ‘pcie_rec_6_2’:
+../mbtest_trial_case1_speed_prod.c:8962: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8962: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8996: warning: format ‘%x’ expects type ‘unsigned int’, but argument 2 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c:8996: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘UINT64’
+../mbtest_trial_case1_speed_prod.c: In function ‘xmit_boot’:
+../mbtest_trial_case1_speed_prod.c:9089: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c: In function ‘fem_boot’:
+../mbtest_trial_case1_speed_prod.c:9187: warning: assignment from incompatible pointer type
+../mbtest_trial_case1_speed_prod.c: At top level:
+../pcie_lib.h:71: warning: ‘IsItemExists’ declared ‘static’ but never defined
+../mbtest_trial_case1_speed_prod.c:8592: warning: ‘pcie_send_6_1’ defined but not used
+../mbtest_trial_case1_speed_prod.c:7792: warning: ‘pcie_send_1’ defined but not used
+../mbtest_trial_case1_speed_prod.c:8421: warning: ‘pcie_rec_16b’ defined but not used
+../mbtest_trial_case1_speed_prod.c:8222: warning: ‘pcie_rec_2’ defined but not used
+../mbtest_trial_case1_speed_prod.c:8710: warning: ‘pcie_rec_6_1’ defined but not used
+../mbtest_trial_case1_speed_prod.c:8872: warning: ‘pcie_rec_6_2’ defined but not used
+../mbtest_trial_case1_speed_prod.c:9071: warning: ‘xmit_boot’ defined but not used
+../mbtest_trial_case1_speed_prod.c:9169: warning: ‘fem_boot’ defined but not used
+../mbtest_trial_case1_speed_prod.c:3904: warning: ‘pt_trig_filewrite’ defined but not used
+../mbtest_trial_case1_speed_prod.c:4563: warning: ‘pt_sn_filewrite_tpc’ defined but not used
+../mbtest_trial_case1_speed_prod.c:4511: warning: ‘pt_trig_filewrite_tpc’ defined but not used
+../mbtest_trial_case1_speed_prod.c:5394: warning: ‘pmt_adc_setup’ defined but not used
+../mbtest_trial_case1_speed_prod.c:4617: warning: ‘tpc_adc_setup’ defined but not used
+../mbtest_trial_case1_speed_prod.c:6281: warning: ‘pmt_link_setup’ defined but not used
+../mbtest_trial_case1_speed_prod.c:172: warning: ‘buff_snova’ defined but not used
+../mbtest_trial_case1_speed_prod.c:173: warning: ‘buff_trig’ defined but not used
+../mbtest_trial_case1_speed_prod.c:174: warning: ‘snova_pointer’ defined but not used
+../mbtest_trial_case1_speed_prod.c:175: warning: ‘trig_pointer’ defined but not used
+../mbtest_trial_case1_speed_prod.c:176: warning: ‘snova_wcount’ defined but not used
+../mbtest_trial_case1_speed_prod.c:177: warning: ‘trig_wcount’ defined but not used
+../mbtest_trial_case1_speed_prod.c:181: warning: ‘fd_monitor_pt’ defined but not used
+../mbtest_trial_case1_speed_prod.c:185: warning: ‘fd_trig_pt_m_tpc’ defined but not used
+../mbtest_trial_case1_speed_prod.c:186: warning: ‘fd_monitor_pt_tpc’ defined but not used
+../mbtest_trial_case1_speed_prod.c:189: warning: ‘itrig_m_d’ defined but not used
+../mbtest_trial_case1_speed_prod.c:189: warning: ‘itrig_m’ defined but not used

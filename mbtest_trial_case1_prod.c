@@ -1050,7 +1050,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     
     case 1:
       
-      pFilee = fopen("sn_tester.txt","a");
+      pFilee = fopen("sn_tester_20160127.txt","a");
 
       printf(" SuperNova readout test \n");
      printf(" enable number of loop\n");
@@ -1255,7 +1255,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
       /* inpf = fopen("/home/ub/feb_fpga_test_new_head_zero","r"); */
       //vic
-      inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r");
+      /* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
+      inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
       imod = imod_fem;
       ichip=mb_feb_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1450,7 +1451,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
        
 
-       sprintf(title1,"joses_data_01212015_min_%d_max_%d.txt",min__,max__);       
+       sprintf(title1,"joses_data_01272016_min_%d_max_%d.txt",min__,max__);       
        outfile = fopen(title1, "w");
        
        
@@ -1472,7 +1473,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
          iround = iround + idir;
          ijk= ibase + iround;
          
-	 if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase;
+	 /* if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase; */
+	 if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase;
 	 
 	 //if( (ik > 240) & (ik <247)) ijk=300+ibase;
 	 
@@ -1960,8 +1962,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //      turn the run on to start data flow
 //
          printf(" enter 1 to set the RUN on \n");
-         /* scanf("%d",&ik); */
-
+         scanf("%d",&ik);
+	 
          imod=0;
          ichip=1;
          buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
@@ -1972,8 +1974,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 /***    check to see if DMA is done or not **/
         idone =0;
-        //for (is=0; is<60000000; is++) {;
-	for (is=0; is<300000; is++) {;
+        for (is=0; is<60000000; is++) {;
+	  /* for (is=0; is<300000; is++) {; */
           dwAddrSpace =cs_bar;
  	  u64Data =0;
 	  dwOffset = cs_dma_cntrl;
@@ -2117,13 +2119,13 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //
 	
 	for (is=0; is<nwrite*2; is++) {
-         read_array[is+(iv*(nwrite*2))]= *buffp_rec32++;
+	  read_array[is+(iv*(nwrite*2))]= *buffp_rec32++;
         }
         ntot_rec = ntot_rec+(nwrite*2);
        }
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
-       sprintf(title,"joses_data_01212015_min_%d_max_%d.dat",min__,max__);
+       sprintf(title,"joses_data_01272016_min_%d_max_%d.dat",min__,max__);
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);

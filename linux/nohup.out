@@ -299,3 +299,170 @@ IndentationError: unindent does not match any outer indentation level
 /bin/sh: line 1:  2150 Aborted                 (core dumped) ./mbtest_trial_case1_prod 199 229 > tickScan.out 2> tickScan.err
 /bin/sh: line 1:  2153 Aborted                 (core dumped) ./mbtest_trial_case1_prod 200 230 > tickScan.out 2> tickScan.err
 /bin/sh: line 1:  2158 Aborted                 (core dumped) ./mbtest_trial_case1_prod 201 231 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7094 Aborted                 (core dumped) ./mbtest_trial_case1_prod 192 195 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7098 Aborted                 (core dumped) ./mbtest_trial_case1_prod 193 196 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7103 Aborted                 (core dumped) ./mbtest_trial_case1_prod 194 197 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7144 Aborted                 (core dumped) ./mbtest_trial_case1_prod 195 198 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7149 Aborted                 (core dumped) ./mbtest_trial_case1_prod 196 199 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7152 Aborted                 (core dumped) ./mbtest_trial_case1_prod 197 200 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7155 Aborted                 (core dumped) ./mbtest_trial_case1_prod 198 201 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7158 Aborted                 (core dumped) ./mbtest_trial_case1_prod 199 202 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7161 Aborted                 (core dumped) ./mbtest_trial_case1_prod 200 203 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7164 Aborted                 (core dumped) ./mbtest_trial_case1_prod 201 204 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7167 Aborted                 (core dumped) ./mbtest_trial_case1_prod 202 205 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7170 Aborted                 (core dumped) ./mbtest_trial_case1_prod 203 206 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7173 Aborted                 (core dumped) ./mbtest_trial_case1_prod 204 207 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7176 Aborted                 (core dumped) ./mbtest_trial_case1_prod 205 208 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7179 Aborted                 (core dumped) ./mbtest_trial_case1_prod 206 209 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7182 Aborted                 (core dumped) ./mbtest_trial_case1_prod 207 210 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7185 Aborted                 (core dumped) ./mbtest_trial_case1_prod 208 211 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7188 Aborted                 (core dumped) ./mbtest_trial_case1_prod 209 212 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7191 Aborted                 (core dumped) ./mbtest_trial_case1_prod 210 213 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7194 Aborted                 (core dumped) ./mbtest_trial_case1_prod 211 214 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7197 Aborted                 (core dumped) ./mbtest_trial_case1_prod 212 215 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7200 Aborted                 (core dumped) ./mbtest_trial_case1_prod 213 216 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7203 Aborted                 (core dumped) ./mbtest_trial_case1_prod 214 217 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7206 Aborted                 (core dumped) ./mbtest_trial_case1_prod 215 218 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7209 Aborted                 (core dumped) ./mbtest_trial_case1_prod 216 219 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7212 Aborted                 (core dumped) ./mbtest_trial_case1_prod 217 220 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7215 Aborted                 (core dumped) ./mbtest_trial_case1_prod 218 221 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7218 Aborted                 (core dumped) ./mbtest_trial_case1_prod 219 222 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7221 Aborted                 (core dumped) ./mbtest_trial_case1_prod 220 223 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7224 Aborted                 (core dumped) ./mbtest_trial_case1_prod 221 224 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7227 Aborted                 (core dumped) ./mbtest_trial_case1_prod 222 225 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7230 Aborted                 (core dumped) ./mbtest_trial_case1_prod 223 226 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7233 Aborted                 (core dumped) ./mbtest_trial_case1_prod 224 227 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7236 Aborted                 (core dumped) ./mbtest_trial_case1_prod 225 228 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7239 Aborted                 (core dumped) ./mbtest_trial_case1_prod 226 229 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7242 Aborted                 (core dumped) ./mbtest_trial_case1_prod 227 230 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7245 Aborted                 (core dumped) ./mbtest_trial_case1_prod 228 231 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7248 Aborted                 (core dumped) ./mbtest_trial_case1_prod 229 232 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7251 Aborted                 (core dumped) ./mbtest_trial_case1_prod 230 233 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7254 Aborted                 (core dumped) ./mbtest_trial_case1_prod 231 234 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7257 Aborted                 (core dumped) ./mbtest_trial_case1_prod 232 235 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7260 Aborted                 (core dumped) ./mbtest_trial_case1_prod 233 236 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7263 Aborted                 (core dumped) ./mbtest_trial_case1_prod 234 237 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7266 Aborted                 (core dumped) ./mbtest_trial_case1_prod 235 238 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7269 Aborted                 (core dumped) ./mbtest_trial_case1_prod 236 239 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7272 Aborted                 (core dumped) ./mbtest_trial_case1_prod 237 240 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7275 Aborted                 (core dumped) ./mbtest_trial_case1_prod 238 241 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7278 Aborted                 (core dumped) ./mbtest_trial_case1_prod 239 242 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7281 Aborted                 (core dumped) ./mbtest_trial_case1_prod 240 243 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7284 Aborted                 (core dumped) ./mbtest_trial_case1_prod 241 244 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7289 Aborted                 (core dumped) ./mbtest_trial_case1_prod 242 245 > tickScan.out 2> tickScan.err
+** Processing  ./mbtest_trial_case1_prod 192 195 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 193 196 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 194 197 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 195 198 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 196 199 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 197 200 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 198 201 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 199 202 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 200 203 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 201 204 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 202 205 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 203 206 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 204 207 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 205 208 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 206 209 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 207 210 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 208 211 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 209 212 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 210 213 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 211 214 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 212 215 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 213 216 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 214 217 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 215 218 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 216 219 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 217 220 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 218 221 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 219 222 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 220 223 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 221 224 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 222 225 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 223 226 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 224 227 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 225 228 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 226 229 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 227 230 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 228 231 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 229 232 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 230 233 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 231 234 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 232 235 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 233 236 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 234 237 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 235 238 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 236 239 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 237 240 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 238 241 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 239 242 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 240 243 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 241 244 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 242 245 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 243 246 > tickScan.out 2>t/bin/sh: line 1:  7292 Aborted                 (core dumped) ./mbtest_trial_case1_prod 243 246 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7295 Aborted                 (core dumped) ./mbtest_trial_case1_prod 244 247 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7298 Aborted                 (core dumped) ./mbtest_trial_case1_prod 245 248 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7301 Aborted                 (core dumped) ./mbtest_trial_case1_prod 246 249 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7304 Aborted                 (core dumped) ./mbtest_trial_case1_prod 247 250 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7307 Aborted                 (core dumped) ./mbtest_trial_case1_prod 248 251 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7310 Aborted                 (core dumped) ./mbtest_trial_case1_prod 249 252 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7313 Aborted                 (core dumped) ./mbtest_trial_case1_prod 250 253 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7316 Aborted                 (core dumped) ./mbtest_trial_case1_prod 251 254 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7319 Aborted                 (core dumped) ./mbtest_trial_case1_prod 252 255 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7322 Aborted                 (core dumped) ./mbtest_trial_case1_prod 192 196 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7325 Aborted                 (core dumped) ./mbtest_trial_case1_prod 193 197 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7328 Aborted                 (core dumped) ./mbtest_trial_case1_prod 194 198 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7331 Aborted                 (core dumped) ./mbtest_trial_case1_prod 195 199 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7334 Aborted                 (core dumped) ./mbtest_trial_case1_prod 196 200 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7337 Aborted                 (core dumped) ./mbtest_trial_case1_prod 197 201 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7340 Aborted                 (core dumped) ./mbtest_trial_case1_prod 198 202 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7343 Aborted                 (core dumped) ./mbtest_trial_case1_prod 199 203 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7346 Aborted                 (core dumped) ./mbtest_trial_case1_prod 200 204 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7349 Aborted                 (core dumped) ./mbtest_trial_case1_prod 201 205 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7352 Aborted                 (core dumped) ./mbtest_trial_case1_prod 202 206 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7355 Aborted                 (core dumped) ./mbtest_trial_case1_prod 203 207 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7358 Aborted                 (core dumped) ./mbtest_trial_case1_prod 204 208 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7361 Aborted                 (core dumped) ./mbtest_trial_case1_prod 205 209 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7364 Aborted                 (core dumped) ./mbtest_trial_case1_prod 206 210 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7367 Aborted                 (core dumped) ./mbtest_trial_case1_prod 207 211 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7370 Aborted                 (core dumped) ./mbtest_trial_case1_prod 208 212 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7373 Aborted                 (core dumped) ./mbtest_trial_case1_prod 209 213 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7376 Aborted                 (core dumped) ./mbtest_trial_case1_prod 210 214 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7379 Aborted                 (core dumped) ./mbtest_trial_case1_prod 211 215 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7382 Aborted                 (core dumped) ./mbtest_trial_case1_prod 212 216 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7385 Aborted                 (core dumped) ./mbtest_trial_case1_prod 213 217 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7388 Aborted                 (core dumped) ./mbtest_trial_case1_prod 214 218 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7391 Aborted                 (core dumped) ./mbtest_trial_case1_prod 215 219 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7394 Aborted                 (core dumped) ./mbtest_trial_case1_prod 216 220 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7397 Aborted                 (core dumped) ./mbtest_trial_case1_prod 217 221 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7400 Aborted                 (core dumped) ./mbtest_trial_case1_prod 218 222 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7403 Aborted                 (core dumped) ./mbtest_trial_case1_prod 219 223 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7406 Aborted                 (core dumped) ./mbtest_trial_case1_prod 220 224 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7409 Aborted                 (core dumped) ./mbtest_trial_case1_prod 221 225 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7412 Aborted                 (core dumped) ./mbtest_trial_case1_prod 222 226 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7415 Aborted                 (core dumped) ./mbtest_trial_case1_prod 223 227 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7418 Aborted                 (core dumped) ./mbtest_trial_case1_prod 224 228 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7421 Aborted                 (core dumped) ./mbtest_trial_case1_prod 225 229 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7424 Aborted                 (core dumped) ./mbtest_trial_case1_prod 226 230 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7427 Aborted                 (core dumped) ./mbtest_trial_case1_prod 227 231 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7430 Aborted                 (core dumped) ./mbtest_trial_case1_prod 228 232 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7433 Aborted                 (core dumped) ./mbtest_trial_case1_prod 229 233 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7436 Aborted                 (core dumped) ./mbtest_trial_case1_prod 230 234 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7439 Aborted                 (core dumped) ./mbtest_trial_case1_prod 231 235 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7442 Aborted                 (core dumped) ./mbtest_trial_case1_prod 232 236 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  7445 Aborted                 (core dumped) ./mbtest_trial_case1_prod 233 237 > tickScan.out 2> tickScan.err
+ickScan.err
+** Processing  ./mbtest_trial_case1_prod 244 247 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 245 248 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 246 249 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 247 250 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 248 251 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 249 252 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 250 253 > tickScan.out 2>tickScan.err
+** Processing  ./mbtest_trial_case1_prod 251 254 > tickScan.out 2>tickScan.err
+** Process/bin/sh: line 1:  1763 Aborted                 (core dumped) ./mbtest_trial_case1_prod 235 238 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  1770 Aborted                 (core dumped) ./mbtest_trial_case1_prod 236 239 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  1774 Aborted                 (core dumped) ./mbtest_trial_case1_prod 237 240 > tickScan.out 2> tickScan.err
+/bin/sh: line 1:  1779 Aborted                 (core dumped) ./mbtest_trial_case1_prod 238 241 > tickScan.out 2> tickScan.err
