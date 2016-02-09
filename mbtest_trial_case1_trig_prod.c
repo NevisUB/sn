@@ -1416,8 +1416,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	// send configuration data
 	/* inpf = fopen("/home/ub/config_files_041712/feb_fpga_080612","r"); */
-	inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r");
+	/* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
 	/* inpf = fopen("/home/ub/module1x_140820_chi_12_8_2014.rbf","r"); */
+	inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
 	ichip=mb_feb_conf_add; //ichip=mb_feb_config_add(=2) is for configuration chip
 	buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
 	i=1;
@@ -1946,7 +1947,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	scanf("%d",&ik);
 	nword = (((64*timesize*3)/2+5)*(imod_st-imod_xmit))+2; 
       }
-
+      
       printf(" Event length is %d words\n", nword); 
       last_dma_loop_size = (nword*4) % dwDMABufSize;          // last dma loop size
       //      ndma_loop = (nword*4)/dwDMABufSize;
@@ -2002,7 +2003,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	//god
 
 	for (iv=0; iv<(ndma_loop+1); iv++) {
-
+	  
+	  printf("\t==> iv is : %d\n",iv);
+	  
 	  if(ifr ==0) {//first dma
 
 	    if (idebug==1) printf(" buffer allocation 1\n");
@@ -2080,8 +2083,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	  if(iv != ndma_loop) nwrite_byte = dwDMABufSize;
 	  else nwrite_byte = last_dma_loop_size;
+	  
+	  
+	  // vic -- why ?
 	  nwrite_byte = 307109*4;
 	  if (iv==0 || iv==ndma_loop) nwrite_byte = 307110*4;
+	  // vic -- why ?
 
 	  for (is=1; is<3; is++) {
 	    tr_bar = t1_tr_bar;
@@ -2244,7 +2251,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    if (idebug==1) printf(" trigger send  \n");
 	    
 	    usleep(10000);
-	  
+	    
 	  }
 
 
