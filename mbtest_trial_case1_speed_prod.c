@@ -1972,6 +1972,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
          i=1;
          k=1;
          i = pcie_send(hDev3, i, k, px);
+	 
 	 gettimeofday(&starttest,NULL);	 
 
 
@@ -2060,7 +2061,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //     scanf("%d",&nloop);
       //     printf(" number of event per loop \n");
       //     scanf("%d",&nevent);
-      nloop  = 10000;
+      //nloop  = 10000;
+      nloop = 1;
       nevent = 10000;
       //printf(" enter 1 to turn on huffman encoding \n");
       //scanf("%d",&ihuff);
@@ -2188,7 +2190,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       itrig_delay = 10;
 
       //     timesize =4;
-      dwDMABufSize = 1000000;
+      dwDMABufSize = 1000000; // ~1MB?
+      
       printf(" frame size = %d, timesize = %d\n",iframe_length+1, timesize);
       printf(" buffer size = %d\n", dwDMABufSize);
       printf(" trigger delay = %d\n", itrig_delay);
@@ -2297,7 +2300,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //     printf(" enable number of loop\n");
       //     scanf("%d",&nloop);
       
-      for (j=0; j<nloop; j++) { 
+      for (j=0; j<nloop; j++) {
 	usleep(10000); // wait for 10ms
 
 	//
@@ -2497,7 +2500,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	u32Data = 0x8000000;    // set up transmitter to return the hold -- lower transciever
 	dwOffset = 0x20;
 	WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-
+	
 	//
 	/* if((ineu ==1) & (ith_fr ==1)) { */
 	/*   // */
@@ -2529,7 +2532,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	//
 	imod=0;
 	ichip=1;
-	iframe= iframe_length;    //1023
+	iframe= iframe_length;   
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_frame)+((iframe & 0xffff)<<16); //enable test mode
 	i=1;
 	k=1;
@@ -2630,7 +2633,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    }
 	  }
 	  
-	//      imod=11;
+	  //      imod=11;
 	  ichip=3;
 	  if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
 	  else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x1<<16);  // set b channel no compression
@@ -2754,11 +2757,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  k=1;
 	  i = pcie_send(hDev3, i, k, px);
 	}
-
-	//
-	//
-
-	//
 
 	//
 	//     set up xmit module  -- module count
@@ -3498,6 +3496,7 @@ void *pt_sn_dma(void *threadarg)
   write_point_s = 0;
   read_point_s = 0;
   while (1) {
+
     for (is=1; is<3; is++) {
       tr_bar = t1_tr_bar;
       r_cs_reg = r1_cs_reg;
@@ -3553,7 +3552,6 @@ void *pt_sn_dma(void *threadarg)
       u32Data = nwrite_byte_s;
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
 
-
       /* write this will start DMA */
       dwAddrSpace =2;
       dwOffset = cs_dma_cntrl;
@@ -3581,7 +3579,8 @@ void *pt_sn_dma(void *threadarg)
 	  icopy = 0;
         }
         if (sn_buf_filled[icopy] == 1) {
-	  //         printf("start array copy --- SN %d, %d\n",icopy,sn_buf_filled[icopy]);
+	  printf("\t==> start array copy --- SN %d, %d\n",icopy,sn_buf_filled[icopy]);
+
 	  pthread_mutex_lock (&mutexlock);
 	  if(write_point_s >= read_point_s) dis =  jbuf_ev_size - (write_point_s - read_point_s);
 	  else dis = read_point_s - write_point_s;
@@ -3589,6 +3588,7 @@ void *pt_sn_dma(void *threadarg)
 	  //
 	  //       wait for the space to open
 	  //
+	  printf("\t==> waiting for space to open\n");
 	  while (dis < nwrite) {
 	    usleep(300);
 	    pthread_mutex_lock (&mutexlock);
@@ -3599,7 +3599,7 @@ void *pt_sn_dma(void *threadarg)
 	  //
 	  //
 	  //
-	  //         printf("enter array copy --SN %d %d %d %d\n", iused, icopy, write_point_s, read_point_s);
+	  printf("\t==> enter array copy --SN %d %d %d %d\n", iused, icopy, write_point_s, read_point_s);
 	  read_point_s_tmp =  read_point_s;
 	  if(write_point_s >= read_point_s_tmp) {
 	    if((jbuf_ev_size - write_point_s) >= nwrite) {
@@ -3965,14 +3965,14 @@ void *pt_sn_filewrite(void *nword_write)
     r_t1 = read_point_s;
     nwrite = dwDMABufSize/4;
     dis =w_t1 - r_t1;
-    while (dis< nwrite) {
+    while (dis < nwrite) {
      w_t1 = write_point_s;
      r_t1 = read_point_s;
      dis =w_t1 - r_t1;
      if (dis < 0) dis = jbuf_ev_size + dis;
      usleep(300);
     }
-//    printf("wp, rp %d, %d \n",write_point_s, read_point_s);
+    printf("\t==> in pt_sn_write ... wp, rp %d, %d \n",write_point_s, read_point_s);
     if((w_t1 > r_t1) | ((jbuf_ev_size -r_t1)>nwrite)) {
      for (is=0; is<nwrite; is++) {
       file_buf[is] = buffer_ev_s[is+r_t1];
