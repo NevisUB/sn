@@ -1452,7 +1452,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
        
 
-       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
+       //       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
+       sprintf(title1,"input_data_02122016_ChiWaveform.txt");       
        outfile = fopen(title1, "w");
        
        
@@ -1471,11 +1472,17 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //           ijk= ibase+(ik-ibeg)*islope;
 //         }
 //         else ijk=ibase;
-         if(iround == 3) idir =-1;
-         if(iround == 0) idir = 1;
+//         if(iround == 3) idir =-1;
+	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
+//         if(iround == 0) idir = 1;
+         if(iround == 0) idir = +4; // Huffman-incompressible baseline
          iround = iround + idir;
          ijk= ibase + iround;
 
+	 if( ik < 2 ) ijk += 20;
+	 if( ik > 250 ) ijk += 300; 
+
+	 /*
          if (ik%2 == 0) inc += 4;
 	 else inc -= 4;
 	 
@@ -1484,6 +1491,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	 } else {
 	   if( (ik >= min__) || (ik <= max__) ) { ijk=300+ibase+inc; }
 	 }
+	 */
 	     
 	 /* if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase; */
 	 
@@ -2148,7 +2156,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        }
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
-       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
+       //       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
+       sprintf(title,"output_data_02122016_ChiWaveform");
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
