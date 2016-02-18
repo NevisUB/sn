@@ -253,7 +253,10 @@ static int buffer_ev_n_tpc[jbuf_ev_size], buffer_ev_s_tpc[jbuf_ev_size];
 /* int main(void) */
 int main(int argc, char **argv)
 {
-
+  if( argc != 3 ){
+    printf("Run it as ./mbtest_trial_case1_prod tstart tend, where tstart and tend are the start/end ticks of the signal. Exit... \n");
+    exit(-1);
+  }
   int min__ = atoi(argv[1]);
   int max__ = atoi(argv[2]);
 
@@ -1046,7 +1049,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     switch(newcmd) {
 
 
-    dwDMABufSize = 1000000;
+      dwDMABufSize = 1000000; 
     
     
     case 1:
@@ -1453,7 +1456,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
 
        //       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
-       sprintf(title1,"input_data_02122016_ChiWaveform.txt");       
+       sprintf(title1,"input_data_02172016_ChiWaveform.txt");       
        outfile = fopen(title1, "w");
        
        
@@ -1539,7 +1542,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
        ibase =ik+1;
        ijk=ik+10;     // threshold
-       ijk = 3;
+       //              ijk = 3;
        /* ijk = 0xc17; */
        
        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
@@ -1852,10 +1855,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 
 //       dwDMABufSize = 200000;
-       dwDMABufSize = 200000;
+       dwDMABufSize = 2000000; // changed: x 10
 
-//      ndma_loop =(dma_buffer_size*4)/dwDMABufSize;  // set DMA loop for 100 M 32bits words
-       ndma_loop =1;
+       //      ndma_loop =(dma_buffer_size*4)/dwDMABufSize;  // set DMA loop for 100 M 32bits words
+       ndma_loop =10;
+      //       ndma_loop =1;
        printf(" DMA will run %d loop\n", ndma_loop);
        ntot_rec=0;
        for (iv=0; iv<ndma_loop; iv++) {
@@ -2157,7 +2161,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
        //       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
-       sprintf(title,"output_data_02122016_ChiWaveform");
+       sprintf(title,"output_data_02172016_ChiWaveform.dat");
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
