@@ -253,10 +253,7 @@ static int buffer_ev_n_tpc[jbuf_ev_size], buffer_ev_s_tpc[jbuf_ev_size];
 /* int main(void) */
 int main(int argc, char **argv)
 {
-  if( argc != 3 ){
-    printf("Run it as ./mbtest_trial_case1_prod tstart tend, where tstart and tend are the start/end ticks of the signal. Exit... \n");
-    exit(-1);
-  }
+
   int min__ = atoi(argv[1]);
   int max__ = atoi(argv[2]);
 
@@ -292,7 +289,19 @@ int main(int argc, char **argv)
         return dwStatus;
     }
 
+    printf("Let me find devices...\n");
     /* Find and open a PCIE device (by default ID) */
+    if (PCIE_DEFAULT_VENDOR_ID)
+      hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
+    if (PCIE_DEFAULT_VENDOR_ID)
+      hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
+    /*
+    if (PCIE_DEFAULT_VENDOR_ID)
+      hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
+    if (PCIE_DEFAULT_VENDOR_ID)
+      hDev3 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
+    */
+    /*
     if (PCIE_DEFAULT_VENDOR_ID)
         hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
     if (PCIE_DEFAULT_VENDOR_ID)
@@ -305,7 +314,7 @@ int main(int argc, char **argv)
         hDev4 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+4);
     if (PCIE_DEFAULT_VENDOR_ID)
         hDev5 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+5);
-    
+    */    
     
     
     hDev3  = hDev;
@@ -963,7 +972,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //
     struct timeval start;
     
-    static int inc;
     
     static int fd_sn;
     //
@@ -1049,33 +1057,33 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     switch(newcmd) {
 
 
-      dwDMABufSize = 1000000; 
+    dwDMABufSize = 1000000;
     
     
     case 1:
       
-      pFilee = fopen("sn_tester_20160209.txt","a");
+      pFilee = fopen("sn_tester_20160127.txt","a");
 
       printf(" SuperNova readout test \n");
-      printf(" enable number of loop\n");
-      /* scanf("%d",&nloop); */
-      nloop = 1;
-      //     printf(" enter 1 to turn on huffman encoding \n");
-      //     scanf("%d",&ihuff);
+     printf(" enable number of loop\n");
+     /* scanf("%d",&nloop); */
+     nloop = 1;
+//     printf(" enter 1 to turn on huffman encoding \n");
+//     scanf("%d",&ihuff);
      
-      //vic
-      ihuff = 1;
-      //     printf("tyep 1 to compare with the 1st event\n");
-      //     scanf("%d",&comp_s);
-      printf("type 1 for print out debug information in dma loop\n");
-      /* scanf("%d",&idebug); */
+//vic
+     ihuff = 1;
+//     printf("tyep 1 to compare with the 1st event\n");
+//     scanf("%d",&comp_s);
+     printf("type 1 for print out debug information in dma loop\n");
+     /* scanf("%d",&idebug); */
 
-      idebug = 0;
-      /* printf("type 1 for raw data print \n"); */
-      /* scanf("%d",&irawprint); */
-      irawprint = 0;
-      /* printf(" enter buffer size in bytes \n"); */
-      /* scanf("%d",&dwDMABufSize); */
+     idebug = 0;
+     /* printf("type 1 for raw data print \n"); */
+     /* scanf("%d",&irawprint); */
+     irawprint = 0;
+     /* printf(" enter buffer size in bytes \n"); */
+     /* scanf("%d",&dwDMABufSize); */
 
 
 //     printf(" 1 for checking the event \n");
@@ -1102,8 +1110,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
      /* imod_fem =9; */
 
 
-     imod_xmit=2;
-     imod_fem =3;
+     imod_xmit=6;
+     imod_fem =7;
      
 // once the fpga is booted we should let system receive fill frame before send any data.
 // set system with normal transmitter mode
@@ -1175,7 +1183,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //    boot up xmit module 1st
 //
       printf(" boot xmit module \n");
-      inpf = fopen("/home/ub/xmit_fpga_link_header","r");
+      //inpf = fopen("/home/ub/xmit_fpga_link_header","r");
+      inpf = fopen("/home/kterao/local152_code/xmit_fpga_link_header","r");
       imod=imod_xmit;
       ichip=mb_xmit_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1260,7 +1269,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       /* inpf = fopen("/home/ub/feb_fpga_test_new_head_zero","r"); */
       //vic
       /* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
-      inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
+      //inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
+      inpf = fopen("/home/kterao/local152_code/feb_tpc_fpga_sn_zero_test","r");
       imod = imod_fem;
       ichip=mb_feb_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1455,17 +1465,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
        
 
-<<<<<<< HEAD
-       //       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
-       sprintf(title1,"input_data_02182016_thresholdTests_%d_wHuffman.txt", min__);       
-=======
-       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
+       sprintf(title1,"joses_data_01272016_min_%d_max_%d.txt",min__,max__);       
        outfile = fopen(title1, "w");
        
        
        ichip=3;
-       inc = 0;
        for (is=0; is<64; is++) {
         ik = 0x4000+is;                        // load channel address
         buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); // load channe address
@@ -1473,43 +1477,22 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
         ibase = is+1;    // set the base value of the ADC data
 //        printf("channel = %d, ibase = %x\n", is,ibase);
 //        scanf("%d", &ijk);
-	inc = 0;
         for (ik=0; ik< 256; ik++) {
 //         if((ik > ibeg) && (ik <= (ibeg+iwidth))) {
 //           ijk= ibase+(ik-ibeg)*islope;
 //         }
 //         else ijk=ibase;
          if(iround == 3) idir =-1;
-//	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
          if(iround == 0) idir = 1;
-	 //         if(iround == 0) idir = +4; // Huffman-incompressible baseline
          iround = iround + idir;
          ijk= ibase + iround;
+         
+	 /* if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase; */
+	 if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase;
+	 
+	 //if( (ik > 240) & (ik <247)) ijk=300+ibase;
+	 
 
-<<<<<<< HEAD
-	 if( ik < 2 ) ijk += 20;
-	 if( ik > 250 ) ijk += 300; 
-
-	 /*
-=======
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
-         if (ik%2 == 0) inc += 4;
-	 else inc -= 4;
-	 
-	 if ( max__ >= min__ ) {
-	   if( (ik >= min__) && (ik <= max__) ) { ijk=300+ibase+inc; }
-	 } else {
-	   if( (ik >= min__) || (ik <= max__) ) { ijk=300+ibase+inc; }
-	 }
-<<<<<<< HEAD
-	 */
-=======
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
-	     
-	 /* if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase; */
-	 
-	 /* if( (ik > 200) & (ik < 207)) ijk=300+ibase; */
-	 
 	 if(ik == 0) fprintf(outfile,"Channel %d fake data\n", is);
 	 fprintf(outfile,"\t%4d",ijk);
 	 if(((ik+1)%16)==0) fprintf(outfile,"\n");	     
@@ -1523,16 +1506,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
            //printf(" %4d", ijk);
            //if(((ik+1)%16)==0) printf("\n");
          //}
-         
-	 k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
-	 //        printf("k = %x\n", k);
-	 //        scanf("%d", &ijk);
+         k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
+ //        printf("k = %x\n", k);
+ //        scanf("%d", &ijk);
          buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
          i = pcie_send(hDev3, 1, 1, px);
          send_array[is*256+ik]=ijk;           //load up data map
         }
        }
-
        ichip=3;
        if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
        else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x1<<16);  // set b channel no compression
@@ -1546,21 +1527,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       ichip =3;
       printf(" loading zero suppression parameter \n");
       imod=imod_fem;
-      
-      //vic set threshold to maximum value
       for (ik=0; ik< 64; ik++) {
 
        ibase =ik+1;
-<<<<<<< HEAD
-       //       ijk=ik+10;     // threshold
-       //              ijk = 3;
-       ijk = ik + min__; // set the threshold from command line
-=======
        ijk=ik+10;     // threshold
-       ijk = 3;
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
-       /* ijk = 0xc17; */
-       
        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
        i = pcie_send(hDev3, 1, 1, px);
        usleep(10);
@@ -1586,15 +1556,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //       i = pcie_send(hDev3, 1, 1, px);
 //       usleep(10);
 //
-
-
-      //common channel threshold
-      
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_comthres)+((1 & 0xffff)<< 16); // channel threshold
       i = pcie_send(hDev3, 1, 1, px);
       usleep(10);
-
-
 //
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no biploar
       i = pcie_send(hDev3, 1, 1, px);
@@ -1870,12 +1834,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        printf(" XMIT re-align done \n");
 
 
+//       dwDMABufSize = 200000;
        dwDMABufSize = 200000;
-       //dwDMABufSize = 800000; // changed: x 4
 
-       //      ndma_loop =(dma_buffer_size*4)/dwDMABufSize;  // set DMA loop for 100 M 32bits words
+//      ndma_loop =(dma_buffer_size*4)/dwDMABufSize;  // set DMA loop for 100 M 32bits words
        ndma_loop =1;
-       //ndma_loop =4; // changed x 4
        printf(" DMA will run %d loop\n", ndma_loop);
        ntot_rec=0;
        for (iv=0; iv<ndma_loop; iv++) {
@@ -1962,15 +1925,15 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 // rreceiver only get initialize for the 1st time
 //
          if(ifr ==0) WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
-	 /** start the receiver **/
+/** start the receiver **/
          dwAddrSpace = cs_bar;
          u32Data = cs_start+(nwrite*2)*4;   /* 32 bits mode == 4 bytes per word *2 fibers **/
          dwOffset = r_cs_reg;
          WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
         }
         if((ifr ==0) &&(idebug ==1)) printf(" initial receiver \n");
-	//       scanf("%d",&ik);
-	/** set up DMA for both transceiver together **/
+//       scanf("%d",&ik);
+/** set up DMA for both transceiver together **/
 
         dwAddrSpace =cs_bar;
         dwOffset = cs_dma_add_low_reg;
@@ -2013,7 +1976,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //      turn the run on to start data flow
 //
          printf(" enter 1 to set the RUN on \n");
-         /* scanf("%d",&ik); */
+         scanf("%d",&ik);
 	 
          imod=0;
          ichip=1;
@@ -2025,8 +1988,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 /***    check to see if DMA is done or not **/
         idone =0;
-        /* for (is=0; is<60000000; is++) {; */
-	for (is=0; is<400000; is++) {;
+        for (is=0; is<60000000; is++) {;
+	  /* for (is=0; is<300000; is++) {; */
           dwAddrSpace =cs_bar;
  	  u64Data =0;
 	  dwOffset = cs_dma_cntrl;
@@ -2176,12 +2139,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        }
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
-<<<<<<< HEAD
-       //       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
-       sprintf(title,"output_data_02182016_thresholdTests_%d_wHuffman.dat", min__);
-=======
-       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
+       sprintf(title,"joses_data_01272016_min_%d_max_%d.dat",min__,max__);
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
