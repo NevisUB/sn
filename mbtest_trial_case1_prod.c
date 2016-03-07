@@ -1456,7 +1456,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
 
        //       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
-       sprintf(title1,"input_data_02172016_ChiWaveform.txt");       
+       sprintf(title1,"input_data_02182016_thresholdTests_%d_wHuffman.txt", min__);       
        outfile = fopen(title1, "w");
        
        
@@ -1475,10 +1475,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //           ijk= ibase+(ik-ibeg)*islope;
 //         }
 //         else ijk=ibase;
-//         if(iround == 3) idir =-1;
-	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
-//         if(iround == 0) idir = 1;
-         if(iround == 0) idir = +4; // Huffman-incompressible baseline
+         if(iround == 3) idir =-1;
+//	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
+         if(iround == 0) idir = 1;
+	 //         if(iround == 0) idir = +4; // Huffman-incompressible baseline
          iround = iround + idir;
          ijk= ibase + iround;
 
@@ -1541,8 +1541,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       for (ik=0; ik< 64; ik++) {
 
        ibase =ik+1;
-       ijk=ik+10;     // threshold
+       //       ijk=ik+10;     // threshold
        //              ijk = 3;
+       ijk = ik + min__; // set the threshold from command line
        /* ijk = 0xc17; */
        
        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
@@ -1854,12 +1855,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        printf(" XMIT re-align done \n");
 
 
-//       dwDMABufSize = 200000;
-       dwDMABufSize = 2000000; // changed: x 10
+       dwDMABufSize = 200000;
+       //dwDMABufSize = 800000; // changed: x 4
 
        //      ndma_loop =(dma_buffer_size*4)/dwDMABufSize;  // set DMA loop for 100 M 32bits words
-       ndma_loop =10;
-      //       ndma_loop =1;
+       ndma_loop =1;
+       //ndma_loop =4; // changed x 4
        printf(" DMA will run %d loop\n", ndma_loop);
        ntot_rec=0;
        for (iv=0; iv<ndma_loop; iv++) {
@@ -2161,7 +2162,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
        //       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
-       sprintf(title,"output_data_02172016_ChiWaveform.dat");
+       sprintf(title,"output_data_02182016_thresholdTests_%d_wHuffman.dat", min__);
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
