@@ -2891,7 +2891,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	//       nword = nword-20;
 	printf(" event length is %d \n", nword);
 	last_dma_loop_size = (nword*4) % dwDMABufSize;          // last dma loop size
-
 	ndma_loop = (nword*4)/dwDMABufSize;
 	printf(" DMA will run %d loop per events \n", (ndma_loop+1));
 
@@ -3526,6 +3525,7 @@ void *pt_sn_dma(void *threadarg)
       /** start the receiver **/
       dwAddrSpace = cs_bar;
       u32Data = cs_start+nwrite_byte_s;   /* 32 bits mode == 4 bytes per word *2 fibers **/
+
       /* if(idebug ==1) printf(" SN -- DMA data length %d \n", nwrite_byte_s); */
       dwOffset = r_cs_reg;
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
@@ -3534,6 +3534,7 @@ void *pt_sn_dma(void *threadarg)
     //
     //
     /** set up DMA for both transceiver together **/ //lie
+
 
     printf("\t==> iused... %d\n",iused);
     if(sn_buf_filled[iused] == 0) {
@@ -3808,6 +3809,7 @@ void *pt_trig_dma(void *threadarg)
 
       }
       ifr =1;
+
       //
       //
       /** set up DMA for both transceiver together **/
