@@ -339,7 +339,7 @@ int main(int argc, char **argv)
     
     
     hDev3  = hDev;
-    hDev5  = hDev1;
+    hDev5  = hDev2;
 
 
     /* Display main diagnostics menu for communicating with the device */
@@ -2240,8 +2240,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  
 	      usleep(5000);
 	    }
-
-
+	    
+	    
 	    imod=0;
 	    ichip=1;
 	    buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
@@ -2281,7 +2281,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    dwOffset = cs_dma_cntrl;
 	    WDC_ReadAddr32(hDev5, dwAddrSpace, dwOffset, &u32Data);
 
-	    
 	    
 	    
 	    /* if(idebug ==1) printf(" receive DMA status word %d %X \n", is, u32Data); */

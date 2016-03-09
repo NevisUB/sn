@@ -85,4 +85,3 @@ wdc_diag_lib.o : $(WD_BASEDIR)/samples/shared/wdc_diag_lib.c
 
 clean :
 	rm -f *~ core $(OBJS) $(TARGET) $(ARCH)
-

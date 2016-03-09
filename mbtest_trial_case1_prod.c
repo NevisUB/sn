@@ -307,9 +307,9 @@ int main(int argc, char **argv)
         hDev5 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+5);
     
     
-    
-    hDev3  = hDev;
-    hDev5  = hDev1;
+    // Adresses on March 8, 2016
+    hDev3  = hDev; //controller
+    hDev5  = hDev1; //sn stream
 
 
     /* Display main diagnostics menu for communicating with the device */
@@ -1260,7 +1260,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       /* inpf = fopen("/home/ub/feb_fpga_test_new_head_zero","r"); */
       //vic
       /* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
-      inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
+      // inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
+      inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code: Huffman-disabled near boundaries (Mar 8, 2016)
       imod = imod_fem;
       ichip=mb_feb_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1455,12 +1456,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
        
 
-<<<<<<< HEAD
        //       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
-       sprintf(title1,"input_data_02182016_thresholdTests_%d_wHuffman.txt", min__);       
-=======
-       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
+       sprintf(title1,"input_data_03092016_threshold_%d_noHuffmanBoundary.txt", min__);       
        outfile = fopen(title1, "w");
        
        
@@ -1486,13 +1483,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
          iround = iround + idir;
          ijk= ibase + iround;
 
-<<<<<<< HEAD
 	 if( ik < 2 ) ijk += 20;
 	 if( ik > 250 ) ijk += 300; 
 
 	 /*
-=======
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
          if (ik%2 == 0) inc += 4;
 	 else inc -= 4;
 	 
@@ -1501,10 +1495,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	 } else {
 	   if( (ik >= min__) || (ik <= max__) ) { ijk=300+ibase+inc; }
 	 }
-<<<<<<< HEAD
 	 */
-=======
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
 	     
 	 /* if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase; */
 	 
@@ -1551,14 +1542,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       for (ik=0; ik< 64; ik++) {
 
        ibase =ik+1;
-<<<<<<< HEAD
        //       ijk=ik+10;     // threshold
        //              ijk = 3;
        ijk = ik + min__; // set the threshold from command line
-=======
-       ijk=ik+10;     // threshold
-       ijk = 3;
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
        /* ijk = 0xc17; */
        
        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
@@ -1874,7 +1860,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        //dwDMABufSize = 800000; // changed: x 4
 
        //      ndma_loop =(dma_buffer_size*4)/dwDMABufSize;  // set DMA loop for 100 M 32bits words
-       ndma_loop =1;
+       ndma_loop =20;
        //ndma_loop =4; // changed x 4
        printf(" DMA will run %d loop\n", ndma_loop);
        ntot_rec=0;
@@ -2176,12 +2162,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        }
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
-<<<<<<< HEAD
        //       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
-       sprintf(title,"output_data_02182016_thresholdTests_%d_wHuffman.dat", min__);
-=======
-       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
->>>>>>> 270129553dfa7daa4db5774eb91a0f49d7bf79d2
+       sprintf(title,"output_data_03092016_threshold_%d_noHuffmanBoundary.dat", min__);
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
