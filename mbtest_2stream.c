@@ -1063,7 +1063,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //     timesize = 1000;
     //     itrig_delay = 10;
 
-    //iframe_length = 25599;
+    /* iframe_length = 25599; */
     iframe_length = 8191;
     //timesize = 3100;
     //itrig_delay = 10;
@@ -1421,16 +1421,18 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
+      
       //
       // load trig 1 position relative to the frame..
       //
+      
       imod=0;
       ichip=1;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_trig_pos)+((itrig_delay & 0xffff)<<16); //enable test mode
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-
+      
       //
       //    start testing routine
       //
@@ -1463,7 +1465,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	//
 	//
 	nword =1;
-
 	i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
 
 	//         imod=11;
@@ -1503,12 +1504,22 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  if(il == 0) printf(" loading channel %d\n",is);
 	  for (ik=0; ik< 256; ik++) {                 // loop over all possible address
 	    ibase = is+1;    // set the base value of the ADC data
-	    if(iround == 3) idir =-1;
-	    if(iround == 0) idir = 1;
+	    //if(iround == 3) idir =-1;
+	    if(iround == 12) idir =-4; // Huffman-incompressible baseline
+	    //if(iround == 0) idir = 1;
+	    if(iround == 0) idir = +4; // Huffman-incompressible baseline
 	    iround = iround + idir;
 	    ijk= ibase + iround;
-	    if( (ik >= 200) && (ik <= 227) ) ijk=300+ibase;
 
+	    if( ik < 2 )   ijk += 20;
+	    if( ik > 250 ) ijk += 300; 
+
+
+	    /* if(iround == 3) idir =-1; */
+	    /* if(iround == 0) idir = 1; */
+	    /* iround = iround + idir; */
+	    /* ijk= ibase + iround; */
+	    /* if( (ik >= 200) && (ik <= 208) ) ijk=300+ibase; */
 	    
 	    k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
 	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
@@ -1526,18 +1537,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
-
 	  ibase =ik+1;
 	  //       ijk=ik+10;     // threshold
 	  //              ijk = 3;
 	  ijk = ik + min__; // set the threshold from command line
 	  /* ijk = 0xc17; */
-       
-	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
 	  i = pcie_send(hDev3, 1, 1, px);
 	  usleep(10);
-
 	}
+
 	ijk=2;
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
@@ -1554,7 +1563,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
-
 	//
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no biploar
 	i = pcie_send(hDev3, 1, 1, px);
@@ -1570,10 +1578,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
-      
+	
 	//vic
 	//end copy
-      
 	//      imod=11;
 	ichip=3;
 	if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
@@ -1774,11 +1781,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-
       //
       //
       //
-
       for (is=0; is<1; is++) {
 	//
 	//      test re-align circuit
@@ -1789,7 +1794,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	i=1;
 	k=1;
 	i = pcie_send(hDev3, i, k, px);
-
 	//        printf(" enter 1 to set continue on re-align circuit \n");
 	//        scanf("%d",&ik);
       }
@@ -1797,7 +1801,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       usleep(5000); //wait for 5 ms
       printf(" XMIT re-align done \n");
       //
-      nword =1;
+      nword = 1;
 
       i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
 
@@ -1829,16 +1833,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
       nword = (((64*(iframe_length+1)/8)/2+5)*(imod_st-imod_xmit))+2;  //total number of 32 bits word
       //       nword = nword-20;
-      printf(" event length is %d \n", nword);
+      printf("\t==> event length is %d \n", nword);
       last_dma_loop_size = (nword*4) % dwDMABufSize;          // last dma loop size
       ndma_loop = (nword*4)/dwDMABufSize;
       printf(" DMA will run %d loop per events \n", (ndma_loop+1));
-
+      
       /** begin timer **/
       struct timeval starttest1, endtest1;
       gettimeofday(&starttest1,NULL);
       long mytime1, seconds1, useconds1;
-      seconds1 = starttest1.tv_sec;
+      seconds1  = starttest1.tv_sec;
       useconds1 = starttest1.tv_usec;
 
       printf("\n\nStart time of test: %ld sec %ld usec\n",seconds1,useconds1);
@@ -1998,7 +2002,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //
       //
       //
-
 	
       //file write threads
       if ( ineu == 1 )  {
@@ -2437,6 +2440,7 @@ void *pt_sn_dma(void *threadarg)
       }
     }
     
+    
     ch = 0;
     if     (iused == 0) ch=3;
     else if(iused == 1) ch=0;
@@ -2445,7 +2449,9 @@ void *pt_sn_dma(void *threadarg)
     
 
     printf("\n DMA done --SN on buffer: %d \n\n",ch);
-    
+    /* printf("\n Lets wait a bit...\n"); */
+    /* usleep(10000000); */
+   
     // send neutrino trigger......... why??????
     imod=0;
     ichip=1;
@@ -2731,7 +2737,6 @@ void *pt_trig_filewrite(void *nword_write)
       for (is=0; is<nwrite; is++) {
 	file_buf[is] = buffer_ev_n[is+r_t1];
       }
-      //     read_point_n = read_point_n+nwrite;
       read_point_tmp = read_point_n+nwrite;
     }
     else {
@@ -2743,7 +2748,7 @@ void *pt_trig_filewrite(void *nword_write)
 	file_buf[is] = buffer_ev_n[index];
 	index = index+1;
       }
-      //     read_point_n = index;
+      //read_point_n = index;
       read_point_tmp = index;
     }
     send_array[0] = nwrite;
@@ -2792,13 +2797,15 @@ void *pt_sn_copythread(void *arg)
     else if (ch == 1) { buffp_rec32_s = pbuf_rec_s2; }
     else if (ch == 2) { buffp_rec32_s = pbuf_rec_s3; }
     else if (ch == 3) { buffp_rec32_s = pbuf_rec_s4; }
-
+    
+      //vic doesn't completely undetstand following commented code, lets 
+      //read one out at a time?
     /* printf("[pt_sn_copythread] ==> check write and read point -- get lock\n"); */
     pthread_mutex_lock (&mutexlock);
     if(write_point_s >= read_point_s) dis =  jbuf_ev_size - (write_point_s - read_point_s);
     else dis = read_point_s - write_point_s;
     pthread_mutex_unlock (&mutexlock);
-    /* printf("[pt_sn_copythread] ==> release lock\n"); */
+    /* printf("[pt_sn_copythread] ==> release lock\n");*/
   
     while (dis < nwrite) {
       usleep(100);
@@ -2809,33 +2816,45 @@ void *pt_sn_copythread(void *arg)
       pthread_mutex_unlock (&mutexlock);
       /* printf("[pt_sn_copythread] ==> release lock\n"); */
     }
-
+    
     printf("[pt_sn_copythread] ==> enter array copy --SN : ch: %d wps: %d rps: %d\n", ch, write_point_s, read_point_s);
     read_point_s_tmp =  read_point_s;
     if(write_point_s >= read_point_s_tmp) {
       if((jbuf_ev_size - write_point_s) >= nwrite) {
-	for (ik=0; ik< nwrite; ik++) {
-	  buffer_ev_s[write_point_s+ik] = *buffp_rec32_s++;
-	}
-	write_point_s = write_point_s + nwrite;
+    	for (ik=0; ik< nwrite; ik++) {
+    	  buffer_ev_s[write_point_s+ik] = *buffp_rec32_s++;
+    	}
+    	write_point_s = write_point_s + nwrite;
       }
       else {
-	for (ik=0; ik< (jbuf_ev_size-write_point_s); ik++) {
-	  buffer_ev_s[write_point_s+ik] = *buffp_rec32_s++;
-	}
-	for (ik=0; ik< (nwrite-(jbuf_ev_size-write_point_s)); ik++) {
-	  buffer_ev_s[ik] = *buffp_rec32_s++;
-	}
-	write_point_s = write_point_s + nwrite- jbuf_ev_size;
+    	for (ik=0; ik< (jbuf_ev_size-write_point_s); ik++) {
+    	  buffer_ev_s[write_point_s+ik] = *buffp_rec32_s++;
+    	}
+    	for (ik=0; ik< (nwrite-(jbuf_ev_size-write_point_s)); ik++) {
+    	  buffer_ev_s[ik] = *buffp_rec32_s++;
+    	}
+    	write_point_s = write_point_s + nwrite- jbuf_ev_size;
       }
     }
     else {
       for (ik=0; ik< nwrite; ik++) {
-	buffer_ev_s[write_point_s+ik] = *buffp_rec32_s++;
+    	buffer_ev_s[write_point_s+ik] = *buffp_rec32_s++;
       }
       write_point_s = write_point_s+ nwrite;
     }
+
     /* printf("[pt_sn_copythread] ==> finished copy\n"); */
+    
+    //whats in the buffer?
+    /* printf("==> What is in the buffer? \n"); */
+    /* for(ik=0;ik<nwrite*4;++ik){ */
+      
+    /*   printf("%08x ",buffer_ev_s[ ik ] ); */
+    /*   if(ik%8==0)printf("\n"); */
+
+    /* } */
+    
+    
     sn_buf_filled[ch] = 0;
     total_used -= 1;
     printf("[pt_sn_copythread] ==> total_used: %d\n",total_used);
@@ -2879,7 +2898,6 @@ void *pt_sn_filewrite(void *nword_write)
       for (is=0; is<nwrite; is++) {
 	file_buf[is] = buffer_ev_s[is+r_t1];
       }
-      //     read_point_s = read_point_s+nwrite;
       read_point_tmp = read_point_s+nwrite;
     }
     else {
