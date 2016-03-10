@@ -946,7 +946,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     ineu = 0;
     //     printf(" enter buffer size in bytes \n");
     //     scanf("%d",&dwDMABufSize);
-    dwDMABufSize =1000;
+    //dwDMABufSize =1000;
       
     //printf(" xmit module address \n");
     //scanf("%d",&imod_xmit);
@@ -1063,12 +1063,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //     timesize = 1000;
     //     itrig_delay = 10;
 
-    iframe_length = 25599;
-    timesize = 3100;
-    itrig_delay = 10;
-
-    //     timesize =4;
-    dwDMABufSize = 1000000; // ~1MB?
+    //iframe_length = 25599;
+    iframe_length = 8191;
+    //timesize = 3100;
+    //itrig_delay = 10;
+    itrig_delay = 51;
+    timesize    =  4;
+    //dwDMABufSize = 1000000;
+    
+    //xxx
+    dwDMABufSize = 200000; // 2e5 same as BNB run fcl
       
     printf(" frame size = %d, timesize = %d\n",iframe_length+1, timesize);
     printf(" buffer size = %d\n", dwDMABufSize);
@@ -1282,7 +1286,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	i = pcie_send(hDev3, i, k, px);
 	usleep(200000);  // wait for 200 ms
 	//
-	inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
+	inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
 	/* inpf = fopen("/home/ub/feb_fpga_test","r"); */
 	printf(" start booting FEM %d\n", imod);
 	ichip=mb_feb_conf_add;
@@ -1512,7 +1516,64 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    send_array[is*256+ik]=ijk;           //load up data map
 	  }
 	}
-	  
+
+	//vic
+	//start copy
+
+	ichip =3;
+	printf(" loading zero suppression parameter \n");
+	imod=imod_fem;
+      
+	//vic set threshold to maximum value
+	for (ik=0; ik< 64; ik++) {
+
+	  ibase =ik+1;
+	  //       ijk=ik+10;     // threshold
+	  //              ijk = 3;
+	  ijk = ik + min__; // set the threshold from command line
+	  /* ijk = 0xc17; */
+       
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
+	  i = pcie_send(hDev3, 1, 1, px);
+	  usleep(10);
+
+	}
+	ijk=2;
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
+	i = pcie_send(hDev3, 1, 1, px);
+	usleep(10);
+
+	ijk=3;     //was 4
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
+	i = pcie_send(hDev3, 1, 1, px);
+	usleep(10);
+
+	//common channel threshold
+      
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_comthres)+((1 & 0xffff)<< 16); // channel threshold
+	i = pcie_send(hDev3, 1, 1, px);
+	usleep(10);
+
+
+	//
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no biploar
+	i = pcie_send(hDev3, 1, 1, px);
+	usleep(10);
+	//
+	//
+	ijk=10;
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16); // load preample
+	i = pcie_send(hDev3, 1, 1, px);
+	usleep(10);
+
+	ijk=100;
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
+	i = pcie_send(hDev3, 1, 1, px);
+	usleep(10);
+      
+	//vic
+	//end copy
+      
 	//      imod=11;
 	ichip=3;
 	if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
@@ -1910,7 +1971,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //
       /* set tx mode register */
 
-      u32Data = 0x00002000;
       dwOffset = tx_md_reg;
       dwAddrSpace =cs_bar;
       WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
@@ -1988,7 +2048,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	}
 
       }
-      //xxxxxxxxxxx
       usleep(100000000000); //30 minutes?
     }
 
@@ -2221,7 +2280,9 @@ void *pt_sn_dma(void *threadarg)
 
   struct thread_data *my_data;
 
-  dwDMABufSize = 1000000;
+  //dwDMABufSize = 1000000;
+  //xxx
+  dwDMABufSize = 200000;
   px = &buf_send;
 
   nwrite_byte_s = dwDMABufSize;
@@ -2277,7 +2338,7 @@ void *pt_sn_dma(void *threadarg)
       //       if(idebug ==1) printf(" SN -- DMA data length %d \n", nwrite_byte_s);
       /** start the receiver **/
       dwAddrSpace = cs_bar;
-      u32Data = cs_start+nwrite_byte_s;   /* 32 bits mode == 4 bytes per word *2 fibers **/
+      u32Data = cs_start+nwrite_byte_s;//*2 fibers?
       
       /* if(idebug ==1) printf(" SN -- DMA data length %d \n", nwrite_byte_s); */
       dwOffset = r_cs_reg;
@@ -2318,26 +2379,22 @@ void *pt_sn_dma(void *threadarg)
       dwAddrSpace =cs_bar;
       dwOffset = cs_dma_by_cnt;
       //       u32Data = (nwrite)*4*2;      /** twice more data - from fiber 1& 2**/
-      u32Data = nwrite_byte_s;
+      u32Data = nwrite_byte_s; //(*2 fibers?)
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
 
       /* write this will start DMA */
       dwAddrSpace =2;
       dwOffset = cs_dma_cntrl;
-      //        is = (pDma_rec_n->Page->pPhysicalAddr >> 32) & 0xffffffff;
       if(u32Data_h == 0) {
-	printf(" use 3dw \n");
+	/* printf(" use 3dw \n"); */
         u32Data = dma_tr12+dma_3dw_rec;
       }
       else {
         u32Data = dma_tr12+dma_4dw_rec;
-	printf(" use 4dw \n");
+	/* printf(" use 4dw \n"); */
       }
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
-      //       if(idebug ==1) printf(" trigger ---> DMA set up done, byte count = %d\n", nwrite_byte_s);
-      //
-      //
-      //
+
       printf("(pt_sn_dma) ==> total_used: %d\n",total_used);
     }
     else {  // this one was already used, go around the horn
@@ -2722,7 +2779,7 @@ void *pt_sn_copythread(void *arg)
       if( sn_buf_filled[ch] == 0 ) { // race condition on this array at all?
 	  ch += 1; 
 	  ch = ch%4; 
-	  usleep(500); // 500 microsecond wait until recheck
+	  usleep(100); // 1 microsecond wait until recheck
 	  continue; 
 	}
       
@@ -2736,21 +2793,21 @@ void *pt_sn_copythread(void *arg)
     else if (ch == 2) { buffp_rec32_s = pbuf_rec_s3; }
     else if (ch == 3) { buffp_rec32_s = pbuf_rec_s4; }
 
-    printf("[pt_sn_copythread] ==> check write and read point -- get lock\n");
+    /* printf("[pt_sn_copythread] ==> check write and read point -- get lock\n"); */
     pthread_mutex_lock (&mutexlock);
     if(write_point_s >= read_point_s) dis =  jbuf_ev_size - (write_point_s - read_point_s);
     else dis = read_point_s - write_point_s;
     pthread_mutex_unlock (&mutexlock);
-    printf("[pt_sn_copythread] ==> release lock\n");
+    /* printf("[pt_sn_copythread] ==> release lock\n"); */
   
     while (dis < nwrite) {
-      usleep(300);
+      usleep(100);
       pthread_mutex_lock (&mutexlock);
-      printf("[pt_sn_copythread] ==> have to wait for space -- get lock\n");
+      /* printf("[pt_sn_copythread] ==> have to wait for space -- get lock\n"); */
       if(write_point_s >= read_point_s) dis =  jbuf_ev_size - (write_point_s - read_point_s);
       else dis = read_point_s - write_point_s;
       pthread_mutex_unlock (&mutexlock);
-      printf("[pt_sn_copythread] ==> release lock\n");
+      /* printf("[pt_sn_copythread] ==> release lock\n"); */
     }
 
     printf("[pt_sn_copythread] ==> enter array copy --SN : ch: %d wps: %d rps: %d\n", ch, write_point_s, read_point_s);
@@ -2778,7 +2835,7 @@ void *pt_sn_copythread(void *arg)
       }
       write_point_s = write_point_s+ nwrite;
     }
-    printf("[pt_sn_copythread] ==> finished copy\n");
+    /* printf("[pt_sn_copythread] ==> finished copy\n"); */
     sn_buf_filled[ch] = 0;
     total_used -= 1;
     printf("[pt_sn_copythread] ==> total_used: %d\n",total_used);
@@ -2793,9 +2850,11 @@ void *pt_sn_filewrite(void *nword_write)
   static int w_t1,r_t1,nwrite,dis,is, index, n_write,ik;
   static int read_point_tmp;
   static UINT32 send_array[2];
-
-  dwDMABufSize = 1000000;
+  
+  //xxx
+  dwDMABufSize = 200000;
   printf("{pt_sn_filewrite} ==> sn file write thread started \n");
+
   //ch=0;
   while (1) {
     //vic
@@ -2808,13 +2867,14 @@ void *pt_sn_filewrite(void *nword_write)
       r_t1 = read_point_s;
       dis  = w_t1 - r_t1;
       if (dis < 0) dis = jbuf_ev_size + dis;
-      usleep(300);
+      //usleep(300);
+      usleep(100);
       /* printf("[pt_sn_filewrite] ==> dis: %d nwrite: %d \n",dis,nwrite); */
       /* printf("[pt_sn_filewrite] ==> wps: %d rps: %d \n",write_point_s,read_point_s); */
     
     }
     
-    printf("\t==> in pt_sn_write ... wp, rp %d, %d \n",write_point_s, read_point_s);
+    /* printf("\t==> in pt_sn_write ... wp, rp %d, %d \n",write_point_s, read_point_s); */
     if((w_t1 > r_t1) | ((jbuf_ev_size -r_t1)>nwrite)) {
       for (is=0; is<nwrite; is++) {
 	file_buf[is] = buffer_ev_s[is+r_t1];
@@ -2838,7 +2898,7 @@ void *pt_sn_filewrite(void *nword_write)
     n_write = write(fd_sn_pt,send_array,4);
     n_write = write(fd_sn_pt,file_buf,(nwrite*4));
     read_point_s = read_point_tmp;
-    printf(" SuperNova write point = %d, read point %d\n", write_point_s, read_point_s);
+    /* printf(" SuperNova write point = %d, read point %d\n", write_point_s, read_point_s); */
   }
 }
 //

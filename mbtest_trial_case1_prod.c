@@ -1530,13 +1530,13 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        i=1;
        k=1;
        i = pcie_send(hDev3, i, k, px);
-//      }
-//
-//
-//
-      ichip =3;
-      printf(" loading zero suppression parameter \n");
-      imod=imod_fem;
+       //      }
+       //
+       //
+       //
+       ichip =3;
+       printf(" loading zero suppression parameter \n");
+       imod=imod_fem;
       
       //vic set threshold to maximum value
       for (ik=0; ik< 64; ik++) {
@@ -1596,15 +1596,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
       i = pcie_send(hDev3, 1, 1, px);
       usleep(10);
-
-
-
+      //
 //
 //
-//
-
-
-
 
        imod=imod_fem;
        ichip=3;
@@ -1957,7 +1951,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
         if((ifr ==0) &&(idebug ==1)) printf(" initial receiver \n");
 	//       scanf("%d",&ik);
 	/** set up DMA for both transceiver together **/
-
+	
         dwAddrSpace =cs_bar;
         dwOffset = cs_dma_add_low_reg;
         if((iv%2) == 0) u32Data = pDma_rec1->Page->pPhysicalAddr & 0xffffffff;
@@ -1970,14 +1964,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
         else u32Data = (pDma_rec2->Page->pPhysicalAddr >> 32) & 0xffffffff;
         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
 
-/* byte count */
+	/* byte count */
         dwAddrSpace =cs_bar;
         dwOffset = cs_dma_by_cnt;
         u32Data = (nwrite)*4*2;      /** twice more data - from fiber 1& 2**/
         WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
 
 
-/* write this will start DMA */
+	/* write this will start DMA */
         dwAddrSpace =2;
         dwOffset = cs_dma_cntrl;
         if((iv%2) == 0) is = (pDma_rec1->Page->pPhysicalAddr >> 32) & 0xffffffff;
