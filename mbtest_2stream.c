@@ -888,9 +888,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     
   case 5:
     printf("Case 5 thread readout\n");
-    //printf(" MicroBoon readout test \n");
-    //     printf(" enable number of loop\n");
-    //     scanf("%d",&nloop);
     //     printf(" number of event per loop \n");
     //     scanf("%d",&nevent);
     //nloop  = 10000;
@@ -1024,18 +1021,15 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     /* itrig_delay = 10; */
 
 
-    iframe_length = 25599;
-    timesize = 3199;
-    itrig_delay = 16;
+    /* iframe_length = 25599; */
+    /* timesize = 3199; */
+    /* itrig_delay = 100000;//16 */
 
     //dwDMABufSize = 1000000;
     
     //xxx
     dwDMABufSize = 200000; // 2e5 same as BNB run fcl
       
-    printf(" frame size = %d, timesize = %d\n",iframe_length+1, timesize);
-    printf(" buffer size = %d\n", dwDMABufSize);
-    printf(" trigger delay = %d\n", itrig_delay);
 
     //     printf(" 1 for checking the event \n");
     //     scanf("%d",&icheck);
@@ -1057,10 +1051,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     /* timesize = 10; */
     /* itrig_delay = 10; */
 
-
     iframe_length = 25599;
     timesize = 3199;
     itrig_delay = 16;
+
+    printf(" frame size = %d, timesize = %d\n",iframe_length+1, timesize);
+    printf(" buffer size = %d\n", dwDMABufSize);
+    printf(" trigger delay = %d\n", itrig_delay);
+
 
     //dwDMABufSize = 1000000;
     
@@ -1732,8 +1730,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       k=1;
       i = pcie_send(hDev3, i, k, px);
 
-
-
       //
       //
       //       reset XMIT LINK PLL IN DPA
@@ -2129,6 +2125,19 @@ void *pt_sn_dma(void *threadarg)
       continue;
     }
 
+    /* //trigger block */
+    /* printf("\t(main) ==> Sent trigger)\n"); */
+    /* imod=0; */
+    /* ichip=1; */
+    /* buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger */
+    /* i=1; */
+    /* k=1; */
+    /* i = pcie_send(hDev, i, k, px); */
+    /* //end trigger block */
+    /* usleep(1000000); */
+    /* continue; */
+
+
     // two transceivers
     for (is=1; is<3; is++) {
       tr_bar   = t1_tr_bar;
@@ -2149,14 +2158,12 @@ void *pt_sn_dma(void *threadarg)
       if(ifr == 0) {
 	WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
       }
-
       /** start the receiver **/
       dwAddrSpace = cs_bar;
       u32Data     = cs_start+nwrite_byte_s;
       dwOffset    = r_cs_reg;
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
     }
-
     ifr = 1;
 
     //
@@ -2205,7 +2212,9 @@ void *pt_sn_dma(void *threadarg)
       }
 
       //This starts DMA
+      printf("(pt_sn_dma) ==> Start DMA \n");      
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
+      printf("(pt_sn_dma) ==> Started DMA \n");      
 
       printf("(pt_sn_dma) ==> total_used: %d\n",total_used_s);
     }
@@ -2220,7 +2229,7 @@ void *pt_sn_dma(void *threadarg)
     //
     //
     
-    printf("(pt_sn_dma) ==> DMA \n");
+
     //god
     dwAddrSpace =2;
     u32Data =0;
@@ -2239,7 +2248,7 @@ void *pt_sn_dma(void *threadarg)
     while (idone == 0) {
       ch += 1;
       
-      if (ch%100000 == 0){
+      if (ch%1000000 == 0){
 	printf("(pt_sn_dma) ==> receive DMA status word %d %X \n",ch,u32Data);
 	//god
 	dwAddrSpace =2;
@@ -2294,7 +2303,9 @@ void *pt_sn_dma(void *threadarg)
     k=1;
     i = pcie_send(hDev, i, k, px);
     //end trigger block
-    usleep(1000000);
+    printf("\t(main) ==> Waiting a bit for NU!)\n");
+    usleep(10000000);
+    printf("\t(main) ==> DONE waiting a bit for NU!)\n");
    
     // send neutrino trigger......... why??????
   }
@@ -2496,7 +2507,7 @@ void *pt_trig_dma(void *threadarg)
       ch+=1;
       
 
-      if (ch%100000 == 0){
+      if (ch%5000000 == 0){
 	printf("(pt_trig_dma) ==> receive DMA status word %d %X \n",ch,u32Data);
 	//god
 	dwAddrSpace =2;
@@ -2534,6 +2545,7 @@ void *pt_trig_dma(void *threadarg)
     else if(iused == 1) idone=0;
     
     printf("\n DMA done --Neu on buffer: %d \n\n",idone);
+    /* usleep(2000000); */
   }
 
 }
