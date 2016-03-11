@@ -100,19 +100,24 @@ static int pcie_send(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff_s
 static int pcie_rec(WDC_DEVICE_HANDLE hDev, int mode, int istart, int nword, int ipr_status, UINT32 *buff_rec);
 
 static void *pt_sn_copythread(void* arg);
+static void *pt_trig_copythread(void* arg);
+
 static void *pt_sn_filewrite(void *nword_write);
 static void *pt_trig_filewrite(void *nword_write);
-static void *pt_sn_filewrite_tpc(void *nword_write);
-static void *pt_trig_filewrite_tpc(void *nword_write);
 
 void *pt_trig_dma(void *threadarg);
 void *pt_sn_dma(void *threadarg);
-void *pt_trig_read(void *threadarg);
-void *pt_trig_dma_tpc(void *threadarg);
-void *pt_sn_dma_tpc(void *threadarg);
-void *pcie_send_fake(void *threadarg);
-//vic
-int nwrite_2;
+
+
+static int check_status(WDC_DEVICE_HANDLE hDevPMT,
+			WDC_DEVICE_HANDLE hDevTPC,
+			int imod_trig,
+			int imod_fem_pmt_start,
+			int imod_fem_pmt_end,
+			int imod_fem_tpc_start,
+			int imod_fem_tpc_end,
+			int imod_xmit_pmt,
+			int imod_xmit_tpc);
 
 
 //
@@ -139,7 +144,8 @@ static int itrig_m_d, itrig_m, ith_fr;
 
 //vic
 static int sn_buf_filled[4];
-static int total_used;
+static int neu_buf_filled[2];
+static int total_used_s,total_used_n;
 //vic
 
 #define  jbuf_ev_size 1000000
@@ -171,31 +177,6 @@ PVOID pbuf_rec_s3;
 WD_DMA *pDma_rec_s3;
 PVOID pbuf_rec_s4;
 WD_DMA *pDma_rec_s4;
-//
-//  for TPC
-//
-PVOID pbuf_rec_n1_tpc;
-WD_DMA *pDma_rec_n1_tpc;
-
-PVOID pbuf_rec_n2_tpc;
-WD_DMA *pDma_rec_n2_tpc;
-
-
-PVOID pbuf_rec_s_tpc;
-WD_DMA *pDma_rec_s_tpc;
-PVOID pbuf_rec_s1_tpc;
-WD_DMA *pDma_rec_s1_tpc;
-PVOID pbuf_rec_s2_tpc;
-WD_DMA *pDma_rec_s2_tpc;
-PVOID pbuf_rec_s3_tpc;
-WD_DMA *pDma_rec_s3_tpc;
-PVOID pbuf_rec_s4_tpc;
-WD_DMA *pDma_rec_s4_tpc;
-
-PVOID pbuf_send_fake;
-WD_DMA *pDma_send_fake;
-//
-
 /*************************************************************
   Functions implementation
 *************************************************************/
@@ -251,7 +232,6 @@ int main(int argc, char **argv)
     hDev4 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+4);
   if (PCIE_DEFAULT_VENDOR_ID)
     hDev5 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+5);
-    
     
     
   hDev3  = hDev;  // controller
@@ -794,8 +774,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
   static int   count,num,counta,nword,ireadback,nloop,ierror;
   static int   ij,nsend,iloop,inew,idma_readback,iadd,jevent;
   static int   itest,iframe,irun,ichip_c,dummy1,itrig_c;
-  static int  idup,ihold,idouble,ihold_set,istatus_read;
-  static int  idone,tr_bar,t_cs_reg,r_cs_reg,dma_tr;
+  static int   idup,ihold,idouble,ihold_set,istatus_read;
+  static int   idone,tr_bar,t_cs_reg,r_cs_reg,dma_tr;
   static int   timesize,ipulse,ibase,a_id,itrig_delay;
   static int   iset,ncount,nsend_f,nwrite,itrig_ext;
   static int   imod_xmit,idiv,isample;
@@ -813,18 +793,13 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
   static int   pt_trig_dmastart;
   static int   nremain, nread_dma,nremain_tran1, nremain_tran2,ig, nremain_dma;
   static int   rc_pt, nword_n, nwrite_byte_n, is1, event_head[100];
-  static int   wait_min, wait_max;
-  static int   iwait_usec,iwait_loop;
   static int   icom_factor,ifr_c2;
-  static int   pmt_dac_scan,idac_shaper;
   static int   itrig_pulse,p1_delay,p1_width,p2_delay,p2_width, pulse_trig_delay;
   static int   icont,ibytec,n_trig, imulti,isuper, ipr_trig, imonitor;
   static int   ipmt_read, itpc_read, itpc_adc, imod_xmit_tpc, imod_st_tpc,imod_last_tpc;
   static int   islope, iwidth, ibeg, izero_sup, istart, istart_old;
   static int   iround, idir;
   static int   icount, idiff, adc_v;
-  static int   ifake_kazu;
-  static int   frame_trig_sample, frame_trig_div;
   //
   struct timeval start;
     
@@ -835,11 +810,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
   size_t stacksize;
   //
   //
-  pthread_t threads[4];
+  pthread_t threads[6];
   //
-  pthread_attr_t attr_pt_sn_cp;
+  pthread_attr_t attr_pt_sn_cp, attr_pt_tr_cp;
   pthread_attr_t attr_pt_trig_dma, attr_pt_sn_dma;
   pthread_attr_t attr_pt_tr, attr_pt_sn;
+
   //
   pthread_attr_t attr_pt_trig_dma_tpc, attr_pt_sn_dma_tpc;
   pthread_attr_t attr_pt_tr_tpc, attr_pt_sn_tpc;
@@ -901,21 +877,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
   icheck =0;
   istop=0;
 
-  printf("Input the command code for test......\n");
-
-  /* printf("     (1) SuperNova readout test -- 2 buffer mode \n"); */
-  /* printf("     (2) SuperNova readout test -- multiple boards \n"); */
-  /* printf("     (3) Neutrino event readout -- multiple baotrds \n"); */
-  /* printf("     (4) Dev1 -- Neutrino event readout -- multiple baotrds \n"); */
-  printf("     Your only choice ==> (5) SuperNova readout test -- thread \n");
+  printf("\t==> Your only choice ==> (5) SuperNova readout test -- thread \n");
 
   scanf("%d",&newcmd);
-  /* newcmd =1; // Jose: choose case 1 */
+  
+  newcmd=5; 
+  switch(newcmd) { //useless switch statement
 
-  newcmd=5; // thread readout
-  switch(newcmd) {
-
-    dwDMABufSize = 1000000;
+    //dwDMABufSize = 1000000;
     
   case 5:
     printf("Case 5 thread readout\n");
@@ -936,18 +905,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //     scanf("%d",&idebug);
     //     printf("type 1 for raw data print, 2 for the decoded data \n");
     //     scanf("%d",&irawprint);
-      
     //printf(" enter compression factor \n");
     //scanf("%d",&icom_factor);
     icom_factor=1;
     /* printf(" enter 1 to enable the neutrino trigger \n"); */
     /* scanf("%d",&ineu); */
-
-    ineu = 0;
-    //     printf(" enter buffer size in bytes \n");
-    //     scanf("%d",&dwDMABufSize);
-    //dwDMABufSize =1000;
-      
+    ineu = 1;
     //printf(" xmit module address \n");
     //scanf("%d",&imod_xmit);
     imod_xmit = 2;
@@ -958,117 +921,113 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     /* printf(" write the file through thread \n"); */
     /* scanf("%d",&ith_fr); */
     ith_fr = 1;
-    //
-    //
-    //
     //     printf(" type 1 for neutrino event, 2 for superNova \n");
     //     scanf("%d",&itrig_type);
-    //
-    //
     itrig_type =2 ;
     if(ineu == 1) itrig_type = 3;
-    ifr_c2 =0;
-    //
-    //
-    if(ith_fr ==1) {
-      fd_sn_pt = creat("test123_pt_snova.dat",0755);
-      printf("fd_sn_pt = %d\n", fd_sn_pt);
-      if(ineu == 1) {
-	fd_trig_pt = creat("test123_pt_trig.dat",0755);
-	printf("fd_trig_pt = %d\n", fd_trig_pt);
-      }
-      pt_trig_wdone=1;
-      pt_snova_wdone=1;
-      pt_trig_dmastart=1;
-      //
-      //
-      pthread_mutex_init(&mutexlock, NULL);
-      pthread_mutex_init(&mutexlock, NULL);
-      //
-      /* Initialize and set thread detached attribute */
-      //
-      pthread_attr_init(&attr_pt_sn_dma);
-      pthread_attr_setdetachstate(&attr_pt_sn_dma, PTHREAD_CREATE_JOINABLE);
-      pthread_attr_getstacksize (&attr_pt_sn_dma, &stacksize);
-      printf("SuperNova DMA defualt stack size = %li\n", stacksize);
-      stacksize = 4*stacksize;
-      //      printf("Amount of stack needed per thread = %li\n",stacksize);
-      pthread_attr_setstacksize (&attr_pt_sn_dma, stacksize);
-      //      printf("Creating threads with stack size = %li bytes\n",stacksize);
-      //
-      //      superNova file write thread
-      //
-      pthread_attr_init(&attr_pt_sn);
-      pthread_attr_setdetachstate(&attr_pt_sn, PTHREAD_CREATE_JOINABLE);
-      pthread_attr_getstacksize (&attr_pt_sn, &stacksize);
-      printf("SuperNova filewrite defualt stack size = %li\n", stacksize);
-      stacksize = 4*stacksize;
-      //      printf("Amount of stack needed per thread = %li\n",stacksize);
-      pthread_attr_setstacksize (&attr_pt_sn, stacksize);
-      //      printf("Creating threads with stack size = %li bytes\n",stacksize);
-      //
 
-
-      //      superNova file copythread
-      //
-      pthread_attr_init(&attr_pt_sn_cp);
-      pthread_attr_setdetachstate(&attr_pt_sn_cp, PTHREAD_CREATE_JOINABLE);
-      pthread_attr_getstacksize (&attr_pt_sn_cp, &stacksize);
-      printf("SuperNova copythread defualt stack size = %li\n", stacksize);
-      stacksize = 4*stacksize;
-      //      printf("Amount of stack needed per thread = %li\n",stacksize);
-      pthread_attr_setstacksize (&attr_pt_sn_cp, stacksize);
-      //      printf("Creating threads with stack size = %li bytes\n",stacksize);
-      
-
-
-      if(ineu ==1 ) {
-	//
-	//   neutrino data thread
-	//
-	pthread_attr_init(&attr_pt_trig_dma);
-	pthread_attr_setdetachstate(&attr_pt_trig_dma, PTHREAD_CREATE_JOINABLE);
-	//
-	pthread_attr_getstacksize (&attr_pt_trig_dma, &stacksize);
-	printf("Trigger Default stack size = %li\n", stacksize);
-	stacksize = 4*stacksize;
-	//      printf("Amount of stack needed per thread = %li\n",stacksize);
-	pthread_attr_setstacksize (&attr_pt_trig_dma, stacksize);
-	//      printf("Creating threads with stack size = %li bytes\n",stacksize);
-	//
-	//    neutrino filewrite thread
-	//
-	pthread_attr_init(&attr_pt_tr);
-	pthread_attr_setdetachstate(&attr_pt_tr, PTHREAD_CREATE_JOINABLE);
-	//
-	pthread_attr_getstacksize (&attr_pt_tr, &stacksize);
-	printf("Trigger Default stack size = %li\n", stacksize);
-	stacksize = 4*stacksize;
-	//      printf("Amount of stack needed per thread = %li\n",stacksize);
-	pthread_attr_setstacksize (&attr_pt_tr, stacksize);
-	//      printf("Creating threads with stack size = %li bytes\n",stacksize);
-	//
-      }
-      
+    fd_sn_pt = creat("test123_pt_snova.dat",0755);
+    printf("fd_sn_pt = %d\n", fd_sn_pt);
+    if(ineu == 1) {
+      fd_trig_pt = creat("test123_pt_trig.dat",0755);
+      printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
+    pt_trig_wdone=1;
+    pt_snova_wdone=1;
+    pt_trig_dmastart=1;
+    //
+    //
+    pthread_mutex_init(&mutexlock, NULL);
+    pthread_mutex_init(&mutexlock, NULL);
+    //
+    /* Initialize and set thread detached attribute */
+    //
+    pthread_attr_init(&attr_pt_sn_dma);
+    pthread_attr_setdetachstate(&attr_pt_sn_dma, PTHREAD_CREATE_JOINABLE);
+    pthread_attr_getstacksize (&attr_pt_sn_dma, &stacksize);
+    printf("SuperNova DMA defualt stack size = %li\n", stacksize);
+    stacksize = 4*stacksize;
+    //      printf("Amount of stack needed per thread = %li\n",stacksize);
+    pthread_attr_setstacksize (&attr_pt_sn_dma, stacksize);
+    //      printf("Creating threads with stack size = %li bytes\n",stacksize);
 
     //
-    //     iframe_length = 2047;
+    //      superNova file write thread
+    //
+    pthread_attr_init(&attr_pt_sn);
+    pthread_attr_setdetachstate(&attr_pt_sn, PTHREAD_CREATE_JOINABLE);
+    pthread_attr_getstacksize (&attr_pt_sn, &stacksize);
+    printf("SuperNova filewrite defualt stack size = %li\n", stacksize);
+    stacksize = 4*stacksize;
+    //      printf("Amount of stack needed per thread = %li\n",stacksize);
+    pthread_attr_setstacksize (&attr_pt_sn, stacksize);
+    //      printf("Creating threads with stack size = %li bytes\n",stacksize);
+    //
 
-    //     iframe_length = 25599;
-    //     timesize = 3000;
-    //     itrig_delay = 200;
 
-    //     iframe_length = 8191;
-    //     timesize = 1000;
-    //     itrig_delay = 10;
+    //      superNova file copythread
+    //
+    pthread_attr_init(&attr_pt_sn_cp);
+    pthread_attr_setdetachstate(&attr_pt_sn_cp, PTHREAD_CREATE_JOINABLE);
+    pthread_attr_getstacksize (&attr_pt_sn_cp, &stacksize);
+    printf("SuperNova copythread defualt stack size = %li\n", stacksize);
+    stacksize = 4*stacksize;
+    //      printf("Amount of stack needed per thread = %li\n",stacksize);
+    pthread_attr_setstacksize (&attr_pt_sn_cp, stacksize);
+    //      printf("Creating threads with stack size = %li bytes\n",stacksize);
+      
 
-    /* iframe_length = 25599; */
-    iframe_length = 8191;
-    //timesize = 3100;
-    //itrig_delay = 10;
-    itrig_delay = 51;
-    timesize    =  4;
+
+    if(ineu == 1 ) {
+      //
+      //   neutrino data thread
+      //
+      pthread_attr_init(&attr_pt_trig_dma);
+      pthread_attr_setdetachstate(&attr_pt_trig_dma, PTHREAD_CREATE_JOINABLE);
+      //
+      pthread_attr_getstacksize (&attr_pt_trig_dma, &stacksize);
+      printf("Trigger Default stack size = %li\n", stacksize);
+      stacksize = 4*stacksize;
+      //      printf("Amount of stack needed per thread = %li\n",stacksize);
+      pthread_attr_setstacksize (&attr_pt_trig_dma, stacksize);
+      //      printf("Creating threads with stack size = %li bytes\n",stacksize);
+      //
+      //    neutrino filewrite thread
+      //
+      pthread_attr_init(&attr_pt_tr);
+      pthread_attr_setdetachstate(&attr_pt_tr, PTHREAD_CREATE_JOINABLE);
+      //
+      pthread_attr_getstacksize (&attr_pt_tr, &stacksize);
+      printf("Trigger Default stack size = %li\n", stacksize);
+      stacksize = 4*stacksize;
+      //      printf("Amount of stack needed per thread = %li\n",stacksize);
+      pthread_attr_setstacksize (&attr_pt_tr, stacksize);
+      //      printf("Creating threads with stack size = %li bytes\n",stacksize);
+      //
+
+      //      neutrion copythread
+      //
+      pthread_attr_init(&attr_pt_tr_cp);
+      pthread_attr_setdetachstate(&attr_pt_tr_cp, PTHREAD_CREATE_JOINABLE);
+      pthread_attr_getstacksize (&attr_pt_tr_cp, &stacksize);
+      printf("Trigger copythread defualt stack size = %li\n", stacksize);
+      stacksize = 4*stacksize;
+      //      printf("Amount of stack needed per thread = %li\n",stacksize);
+      pthread_attr_setstacksize (&attr_pt_tr_cp, stacksize);
+      //      printf("Creating threads with stack size = %li bytes\n",stacksize);
+    }
+      
+    
+
+    /* iframe_length = 8191; */
+    /* timesize = 10; */
+    /* itrig_delay = 10; */
+
+
+    iframe_length = 25599;
+    timesize = 3199;
+    itrig_delay = 16;
+
     //dwDMABufSize = 1000000;
     
     //xxx
@@ -1086,23 +1045,41 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     ifr=0;
     irand = 0;
     islow_read =0;
-    //     if(icheck != 1) {
-    //      printf(" 1 for print event\n");
-    //      scanf("%d",&iprint);
-    //    }
-    //     else iprint =0;
+
     iprint = 1;
-    //     printf(" number event \n");
-    //     scanf("%d",&nevent);
 
-    //     printf(" enter number of words per packet \n");
-    //     scanf("%d",&nsend);
     nsend=500;
-    //     imod_xmit=10;
-
+ 
     // once the fpga is booted we should let system receive fill frame before send any data.
     // set system with normal transmitter mode
 
+    /* iframe_length = 8191; */
+    /* timesize = 10; */
+    /* itrig_delay = 10; */
+
+
+    iframe_length = 25599;
+    timesize = 3199;
+    itrig_delay = 16;
+
+    //dwDMABufSize = 1000000;
+    
+    //xxx
+    dwDMABufSize = 200000; // 2e5 same as BNB run fcl
+      
+    printf(" frame size = %d, timesize = %d\n",iframe_length+1, timesize);
+    printf(" buffer size = %d\n", dwDMABufSize);
+    printf(" trigger delay = %d\n", itrig_delay);
+    icheck =0;
+    ifr=0;
+    irand = 0;
+    islow_read =0;
+
+    iprint = 1;
+
+    nsend=500;
+    
+    //initialize SN transmitters
     dwAddrSpace =2;
     u32Data = 0x20000000;    // initial transmitter, no hold
     dwOffset = 0x18;
@@ -1126,10 +1103,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     dwOffset = 0x28;
     WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
       
-    
-    
     if ( ineu == 1 ) {
-    //neutrino
+      //neutrino
       dwAddrSpace =2;
       u32Data = 0x20000000;    // initial transmitter, no hold
       dwOffset = 0x18;
@@ -1153,7 +1128,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       dwOffset = 0x28;
       WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
     }
-
     //
     //
     //
@@ -1176,14 +1150,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //disable the run command
     imod=0;
     ichip=1;
-    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_off)+(0x0<<16); //trun off run
+    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_off)+(0x0<<16); //turn off run
     i=1;
     k=1;
     i = pcie_send(hDev3, i, k, px);
 
-    //     printf(" enable number of loop\n");
-    //     scanf("%d",&nloop);
-      
     for (j=0; j<nloop; j++) {
       usleep(10000); // wait for 10ms
 
@@ -1199,11 +1170,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
+      
       //      for (i=0; i<100000; i++) {
       //          ik= i%2;
       //          dummy1= (ik+i)*(ik+i);
       //      }
-
 
       /* read data as characters (28941) */
       usleep(1000);   // wait fior a while
@@ -1268,8 +1239,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       fclose(inpf);
       //
       printf(" xmit done, booting FEM \n");
-      /* scanf("%d",&ik); */
-
       //
       //    Boot stratix after XMIT module
       //
@@ -1386,6 +1355,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
 	
       //
+      ith_fr=1;
       if((ineu ==1) & (ith_fr ==1)) {
 	//
 	/* set tx mode register */
@@ -1408,9 +1378,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	dwOffset = 0x20;
 	WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
       }
-
-      //
-      //
       //
       // set frame set to be 255 --- there will be 256/8 = 32 adc samples.
       //
@@ -1504,16 +1471,26 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  if(il == 0) printf(" loading channel %d\n",is);
 	  for (ik=0; ik< 256; ik++) {                 // loop over all possible address
 	    ibase = is+1;    // set the base value of the ADC data
-	    //if(iround == 3) idir =-1;
+
+	    /* if(iround == 3) idir =-1; */
+	    /* if(iround == 0) idir = 1; */
+	    /* iround = iround + idir; */
+	    /* ijk= ibase + iround; */
+         
+	    /* /\* if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase; *\/ */
+	    /* /\* if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase; *\/ */
+	    /* if( (ik >= 200) && (ik <= 207) ) ijk=300+ibase; */
+
+	    /* if(iround == 3) idir =-1; */
 	    if(iround == 12) idir =-4; // Huffman-incompressible baseline
-	    //if(iround == 0) idir = 1;
+	    /* if(iround == 0) idir = 1; */
 	    if(iround == 0) idir = +4; // Huffman-incompressible baseline
 	    iround = iround + idir;
 	    ijk= ibase + iround;
-
+	    
 	    if( ik < 2 )   ijk += 20;
 	    if( ik > 250 ) ijk += 300; 
-
+	    
 
 	    /* if(iround == 3) idir =-1; */
 	    /* if(iround == 0) idir = 1; */
@@ -1532,14 +1509,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	//start copy
 
 	ichip =3;
-	printf(" loading zero suppression parameter \n");
+	printf("\t==> Loading zero suppression parameter\n");
 	imod=imod_fem;
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
 	  ibase =ik+1;
-	  //       ijk=ik+10;     // threshold
-	  //              ijk = 3;
+	  //ijk=ik+10;     // threshold
+	  //ijk = 3;
 	  ijk = ik + min__; // set the threshold from command line
 	  /* ijk = 0xc17; */
 	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
@@ -1731,21 +1708,31 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       printf(" trigger type = %d \n", itrig_type);
       imod=imod_xmit;
       ichip=3;
-      if((itrig_type & 0x1) == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_1+(0x1<<16);  // enable token 1 pass
-      else buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_1+(0x0<<16);  // disable token 1 pass
+      
+      //
+      // I WANT BOTH DMA TO BE ON WHY IS IT FAILING ONLY HERE
+      //
+
+      /* if((itrig_type & 0x1) == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_1+(0x1<<16);  // enable token 1 pass */
+      /* else buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_1+(0x0<<16);  // disable token 1 pass */
+      //
+      /* if((itrig_type & 0x2) == 2) buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_2+(0x1<<16);  // enable token 2 pass */
+      /* else buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_2+(0x0<<16);  // enable token 2 pass */
+
+      
+      //enable neutrino stream
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_1+(0x1<<16);
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-      //
-      if((itrig_type & 0x2) == 2) buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_2+(0x1<<16);  // enable token 2 pass
-      else buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_2+(0x0<<16);  // enable token 2 pass
+
+      //enable supernova stream
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_enable_2+(0x1<<16);
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-      //
-      //
-      //       printf(" enter 1 to reset the DPA \n");
-      //       scanf("%d",&ik);
+
+
 
       //
       //
@@ -1784,19 +1771,17 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //
       //
       //
-      for (is=0; is<1; is++) {
-	//
-	//      test re-align circuit
-	//
-	imod=imod_xmit;
-	ichip=3;
-	buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_dpa_word_align+(0x1<<16);  //  send alignment pulse
-	i=1;
-	k=1;
-	i = pcie_send(hDev3, i, k, px);
-	//        printf(" enter 1 to set continue on re-align circuit \n");
-	//        scanf("%d",&ik);
-      }
+      is = 0;
+      //
+      //      test re-align circuit
+      //
+      imod=imod_xmit;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_dpa_word_align+(0x1<<16);  //  send alignment pulse
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
+
 
       usleep(5000); //wait for 5 ms
       printf(" XMIT re-align done \n");
@@ -1848,65 +1833,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       printf("\n\nStart time of test: %ld sec %ld usec\n",seconds1,useconds1);
       //get a fresh timestamp
       gettimeofday(&starttest1,NULL);
-
-	
-      
-      if ( ineu == 1 ) {
-	//
-	//       allocate Neutrino Buffer 1
-	//
-	printf(" buffer allocation --- Neutrino 1\n");
-	dwStatus = WDC_DMAContigBufLock(hDev4, &pbuf_rec_n1, dwOptions_rec, dwDMABufSize, &pDma_rec_n1);
-	if (WD_STATUS_SUCCESS != dwStatus) {
-	  printf("Failed locking a Neutrino Rec Contiguous DMA buffer 1. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
-	  printf("enter 1 to continue \n");
-	  scanf("%d",&is);
-	}
-	else {
-	  u32Data = pDma_rec_n1->Page->pPhysicalAddr & 0xffffffff;
-	  printf(" buffer allocation 1 lower address = %x\n", u32Data);
-	  u32Data = (pDma_rec_n1->Page->pPhysicalAddr >> 32) & 0xffffffff;
-	  printf(" buffer allocation 1 higher address = %x\n", u32Data);
-	}
-	//
-	//        allocate Neutrino buffer 2
-	//
-	printf(" buffer allocation --- Neutrino 2\n");
-	dwStatus = WDC_DMAContigBufLock(hDev4, &pbuf_rec_n2, dwOptions_rec, dwDMABufSize, &pDma_rec_n2);
-	if (WD_STATUS_SUCCESS != dwStatus) {
-	  printf("Failed locking a Neutrino Rec Contiguous DMA buffer 2. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
-	  printf("enter 1 to continue \n");
-	  scanf("%d",&is);
-	}
-	else {
-	  u32Data = pDma_rec_n2->Page->pPhysicalAddr & 0xffffffff;
-	  printf(" buffer allocation lower address = %x\n", u32Data);
-	  u32Data = (pDma_rec_n2->Page->pPhysicalAddr >> 32) & 0xffffffff;
-	  printf(" buffer allocation higher address = %x\n", u32Data);
-	}
-	//
-	//      set up the Neutrino data stream PCIe mode and reset DMA
-	//
-
-	//set tx mode register
-	u32Data = 0x00002000;
-	dwOffset = tx_md_reg;
-	dwAddrSpace =cs_bar;
-	WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
-	/* write this will abort previous DMA */
-	dwAddrSpace =2;
-	dwOffset = cs_dma_msi_abort;
-	u32Data = dma_abort;
-	WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
-	/* clear DMA register after the abort */
-	dwAddrSpace =2;
-	dwOffset = cs_dma_msi_abort;
-	u32Data = 0;
-	WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
-	printf(" initial abort finished \n");
-      }
-
-      //
+//
       //     allocate SuperNova buffer 1
       //
       printf(" buffer allocation --- SuperNova 1\n");
@@ -1970,11 +1897,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	u32Data = (pDma_rec_s4->Page->pPhysicalAddr >> 32) & 0xffffffff;
 	printf(" buffer allocation s 4 higher address = %x\n", u32Data);
       }
+
       //
       //     set up the SuperNova data stream PCIe mode and reset DMA
       //
       /* set tx mode register */
-
+      u32Data = 0x00002000;//GOGOGOGOGOGO
       dwOffset = tx_md_reg;
       dwAddrSpace =cs_bar;
       WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
@@ -1989,32 +1917,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       u32Data = 0;
       WDC_WriteAddr32(hDev5, dwAddrSpace, dwOffset, u32Data);
       printf(" initial abort finished \n");
-      //
-      //
-      //
-      if ( ineu == 1 ) {
-	thread_data_n.id = 0;
-	thread_data_n.hdev = hDev4;
-	thread_data_n.hdevc = hDev3;
-	rc_pt = pthread_create(&threads[0], &attr_pt_trig_dma, pt_trig_dma, (void *)&thread_data_n);
-	if(rc_pt) printf("ERROR; return code from pthread_create() for pt_trig_DMA is %d\n", rc_pt);
-      }
-      //
-      //
-      //
-	
-      //file write threads
-      if ( ineu == 1 )  {
-	//neutrino
-	rc_pt = pthread_create(&threads[0], &attr_pt_tr, pt_trig_filewrite, (void *)nword_n);
-	if(rc_pt) printf("ERROR; return code from pthread_create() for trig_filewrite is %d\n", rc_pt);
-      }
-      
+
       //sn
       rc_pt = pthread_create(&threads[0], &attr_pt_sn, pt_sn_filewrite, (void *)nword_n);
       if(rc_pt) printf("ERROR; return code from pthread_create() for sn_filewrite is %d\n", rc_pt);
       
-      //copy thread
+      //sn copy thread
       rc_pt = pthread_create(&threads[0], &attr_pt_sn_cp, pt_sn_copythread,(void *)nword_n);
       if(rc_pt) printf("ERROR; return code from pthread_create() for sn_copythread is %d\n", rc_pt);
       
@@ -2026,188 +1934,95 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       rc_pt = pthread_create(&threads[0], &attr_pt_sn_dma, pt_sn_dma, (void *)&thread_data_sn);
       if(rc_pt) printf("ERROR; return code from pthread_create() for pt_sn_dma is %d\n", rc_pt);
 
+      
+      if ( ineu == 1 ) {
+      	//
+      	//       allocate Neutrino Buffer 1
+      	//
+      	printf(" buffer allocation --- Neutrino 1\n");
+      	dwStatus = WDC_DMAContigBufLock(hDev4, &pbuf_rec_n1, dwOptions_rec, dwDMABufSize, &pDma_rec_n1);
+      	if (WD_STATUS_SUCCESS != dwStatus) {
+      	  printf("Failed locking a Neutrino Rec Contiguous DMA buffer 1. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
+      	  printf("enter 1 to continue \n");
+      	  scanf("%d",&is);
+      	}
+      	else {
+      	  u32Data = pDma_rec_n1->Page->pPhysicalAddr & 0xffffffff;
+      	  printf(" buffer allocation 1 lower address = %x\n", u32Data);
+      	  u32Data = (pDma_rec_n1->Page->pPhysicalAddr >> 32) & 0xffffffff;
+      	  printf(" buffer allocation 1 higher address = %x\n", u32Data);
+      	}
+      	//
+      	//        allocate Neutrino buffer 2
+      	//
+      	printf(" buffer allocation --- Neutrino 2\n");
+      	dwStatus = WDC_DMAContigBufLock(hDev4, &pbuf_rec_n2, dwOptions_rec, dwDMABufSize, &pDma_rec_n2);
+      	if (WD_STATUS_SUCCESS != dwStatus) {
+      	  printf("Failed locking a Neutrino Rec Contiguous DMA buffer 2. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
+      	  printf("enter 1 to continue \n");
+      	  scanf("%d",&is);
+      	}
+      	else {
+      	  u32Data = pDma_rec_n2->Page->pPhysicalAddr & 0xffffffff;
+      	  printf(" buffer allocation lower address = %x\n", u32Data);
+      	  u32Data = (pDma_rec_n2->Page->pPhysicalAddr >> 32) & 0xffffffff;
+      	  printf(" buffer allocation higher address = %x\n", u32Data);
+      	}
+      	//
+      	//      set up the Neutrino data stream PCIe mode and reset DMA
+      	//
 
-      usleep(1000);
-	
-      if(ifr == 0 ) {
-	printf("\t==>start the run !\n");
-	ifr =1;
-	imod=0;
-	ichip=1;
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
-	i=1;
-	k=1;
-	i = pcie_send(hDev3, i, k, px);
-	usleep(1000000);
-	
-	if (ineu == 1) {
-	  printf("\t==> Sending a trigger from usleep(1000000)\n");
-	  imod=0;
-	  ichip=1;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev3, i, k, px);
-	}
+      	//set tx mode register
+      	u32Data = 0x00002000;
+      	dwOffset = tx_md_reg;
+      	dwAddrSpace =cs_bar;
+      	WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
+      	/* write this will abort previous DMA */
+      	dwAddrSpace =2;
+      	dwOffset = cs_dma_msi_abort;
+      	u32Data = dma_abort;
+      	WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
+      	/* clear DMA register after the abort */
+      	dwAddrSpace =2;
+      	dwOffset = cs_dma_msi_abort;
+      	u32Data = 0;
+      	WDC_WriteAddr32(hDev4, dwAddrSpace, dwOffset, u32Data);
+      	printf(" initial abort finished \n");
 
+
+      	thread_data_n.id = 0;
+      	thread_data_n.hdev  = hDev4;
+      	thread_data_n.hdevc = hDev3;
+      	rc_pt = pthread_create(&threads[0], &attr_pt_trig_dma, pt_trig_dma, (void *)&thread_data_n);
+      	if(rc_pt) printf("ERROR; return code from pthread_create() for pt_trig_DMA is %d\n", rc_pt);
+      
+      	//file write and copy threads
+      	//neutrino
+      	rc_pt = pthread_create(&threads[0], &attr_pt_tr, pt_trig_filewrite, (void *)nword_n);
+      	if(rc_pt) printf("ERROR; return code from pthread_create() for trig_filewrite is %d\n", rc_pt);
+      
+      	//neu copy thread
+      	rc_pt = pthread_create(&threads[0], &attr_pt_tr_cp, pt_trig_copythread,(void *)nword_n);
+      	if(rc_pt) printf("ERROR; return code from pthread_create() for trig_copythread is %d\n", rc_pt);
+	
       }
+      
+      usleep(1000);
+      ifr = 0;
+	
+      printf("\t==>start the run !\n");
+      ifr =1;
+      imod=0;
+      ichip=1;
+      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
+      i=1;
+      k=1;
+      i = pcie_send(hDev3, i, k, px);
+	
+      
       usleep(100000000000); //30 minutes?
     }
-
     break;
-  }
-}
-
-
-
-
-void  *pt_trig_read(void *threadarg)
-{
-#include "wdc_defs.h"
-#define  t1_tr_bar 0
-#define  t2_tr_bar 4
-#define  cs_bar 2
-
-  /**  command register location **/
-
-#define  tx_mode_reg 0x28
-#define  t1_cs_reg 0x18
-#define  r1_cs_reg 0x1c
-#define  t2_cs_reg 0x20
-#define  r2_cs_reg 0x24
-
-#define  tx_md_reg 0x28
-
-#define  cs_dma_add_low_reg 0x0
-#define  cs_dma_add_high_reg  0x4
-#define  cs_dma_by_cnt 0x8
-#define  cs_dma_cntrl 0xc
-#define  cs_dma_msi_abort 0x10
-
-  /** define status bits **/
-
-#define  cs_init  0x20000000
-#define  cs_mode_p 0x8000000
-#define  cs_mode_n 0x0
-#define  cs_start 0x40000000
-#define  cs_done  0x80000000
-
-#define  dma_tr1  0x100000
-#define  dma_tr2  0x200000
-#define  dma_tr12 0x300000
-#define  dma_3dw_trans 0x0
-#define  dma_4dw_trans 0x0
-#define  dma_3dw_rec   0x40
-#define  dma_4dw_rec   0x60
-#define  dma_in_progress 0x80000000
-
-#define  dma_abort 0x2
-
-  static DWORD dwAddrSpace;
-  static UINT32 u32Data;
-  static unsigned long long u64Data;
-  static DWORD dwOffset;
-  static UINT32 read_array[100];
-
-  static int is,iused,nwrite,nwrite_byte_n, taskid;
-  static int icopy, idebug, read_point_n_tmp;
-  static int idone,tr_bar,t_cs_reg,r_cs_reg,dma_tr;
-  static int neu_buf_filled[2], dis, ik;
-  static UINT32 *buffp_rec32_n;
-  static int ifr=0;
-  static int ifr1=0;
-  static int i,j,iold;
-  static int ipr_trig = 0;
-  struct timeval start;
-
-  WDC_DEVICE_HANDLE hDev,hDev1;
-
-  struct thread_data
-  {
-    int thread_id;
-    WDC_DEVICE_HANDLE hDev;
-    WDC_DEVICE_HANDLE hDevc;
-  };
-
-  struct thread_data *my_data;
-
-
-  dwDMABufSize = 1000000;
-  //
-  //
-  //
-  printf("trigger thread started \n");
-  my_data = (struct thread_data *) threadarg;
-  taskid = my_data->thread_id;
-  hDev = my_data->hDev;
-  hDev1 = my_data->hDevc;
-
-
-  if(ifr == 0){
-    ifr=1;
-    iold = 0xffffff;
-  }
-  dwAddrSpace =cs_bar;
-  dwOffset = t2_cs_reg;
-  WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
-  i=(u64Data>>32) & 0xffffff;
-
-
-  //
-  //
-  while (1) {
-    dwAddrSpace =cs_bar;
-    dwOffset = t2_cs_reg;
-    WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
-    i=(u64Data>>32) & 0xffffff;
-    //    printf (" receiver 2 status = %8X \n",i);
-
-    if((iold - i) >= 16) {
-      if(ifr1 == 0) {
-	gettimeofday(&start,NULL);
-	read_array[0] = start.tv_sec;
-	read_array[1] = start.tv_usec;
-	ifr1= 1;
-	i= write(fd_trig_pt_m, read_array, 8);
-      }
-      dwAddrSpace =t2_tr_bar;
-      dwOffset = 0x0;
-      u64Data =0xbad;
-      WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
-      read_array[0] = u64Data & 0xffffffff;
-      read_array[1] = (u64Data>> 32);
-      WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
-      read_array[2] = u64Data & 0xffffffff;
-      read_array[3] = (u64Data>> 32);
-
-
-      iold = iold-16;
-      //
-      //
-      if(ith_fr == 1){
-	i= write(fd_trig_pt_m, read_array, 16);
-      }
-      if(ipr_trig == 1) {
-	printf("optical receive data word = %x, %x, %x, %x\n", read_array[0], read_array[1],read_array[2], read_array[3]);
-	printf("busy   %d \n", (read_array[0] & 0x1));
-	printf("sample number %d \n", ((read_array[0]>>4) & 0xfff));
-	printf("16 MHz clock remine %d\n", ((read_array[0]>>1) & 0x7));
-	ik = ((read_array[1] & 0xff)<<16) + ((read_array[0] >>16));
-	printf("frame number %x \n",ik);
-	ik = (read_array[1] >> 8);
-	printf("trigger number %x\n",ik);
-	printf("PMT trigger data %x\n", (read_array[2] & 0xff));
-	printf("PC trig          %x\n", ((read_array[2]>>8) & 0x1));
-	printf("External Trig    %x\n", ((read_array[2]>>9) & 0x1));
-	printf("Active           %x\n", ((read_array[2]>>10) & 0x1));
-	printf("Gate2 In         %x\n", ((read_array[2]>>11) & 0x1));
-	printf("Gate1 In         %x\n", ((read_array[2]>>12) & 0x1));
-	printf("Veto in          %x\n", ((read_array[2]>>13) & 0x1));
-	printf("Calib trig       %x\n", ((read_array[2]>>14) & 0x1));
-	printf("64MHz remine     %x\n", ((read_array[2]>>15) & 0x3));
-      }
-    }
-    usleep(200);
   }
 }
 
@@ -2283,7 +2098,6 @@ void *pt_sn_dma(void *threadarg)
 
   struct thread_data *my_data;
 
-  //dwDMABufSize = 1000000;
   //xxx
   dwDMABufSize = 200000;
   px = &buf_send;
@@ -2304,54 +2118,50 @@ void *pt_sn_dma(void *threadarg)
     sn_buf_filled[is] = 0;
   }
 
-  total_used = 0;
+  total_used_s = 0;
   iused = 0;
   printf("\n(pt_sn_dma) ==> dma thread started \n");
 
   while (1) {
-    
-    while(total_used == 4) {
+
+    while(total_used_s == 4) {
       usleep(1000);//wait a millisecond if they are all full
-      break;
+      continue;
     }
 
     // two transceivers
     for (is=1; is<3; is++) {
-      tr_bar = t1_tr_bar;
+      tr_bar   = t1_tr_bar;
       r_cs_reg = r1_cs_reg;
-      dma_tr = dma_tr1;
+      dma_tr   = dma_tr1;
       if(is == 2) {
-        tr_bar = t2_tr_bar;
+        tr_bar   = t2_tr_bar;
         r_cs_reg = r2_cs_reg;
-        dma_tr = dma_tr2;
+        dma_tr   = dma_tr2;
       }
 
-      /* if(idebug ==1) printf(" is = %d\n",is); */
       /** initialize the receiver ***/
-      u32Data = cs_init;
-      dwOffset = r_cs_reg;
-      dwAddrSpace =cs_bar;
-      //
-      // rreceiver only get initialize for the 1st time
-      //
-      if(ifr ==0) {
-        /* printf(" initialize the input fifo -- SN\n"); */
-        WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
+      u32Data     = cs_init;
+      dwOffset    = r_cs_reg;
+      dwAddrSpace = cs_bar;
+      
+      // receiver only get initialize for the 1st time -->gives problem to neutrino trigger...
+      if(ifr == 0) {
+	WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
       }
-      //       if(idebug ==1) printf(" SN -- DMA data length %d \n", nwrite_byte_s);
+
       /** start the receiver **/
       dwAddrSpace = cs_bar;
-      u32Data = cs_start+nwrite_byte_s;//*2 fibers?
-      
-      /* if(idebug ==1) printf(" SN -- DMA data length %d \n", nwrite_byte_s); */
-      dwOffset = r_cs_reg;
+      u32Data     = cs_start+nwrite_byte_s;
+      dwOffset    = r_cs_reg;
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
     }
-    ifr =1;
+
+    ifr = 1;
+
     //
     //
     /** set up DMA for both transceiver together **/ //lie
-    
     printf("(pt_sn_dma) ==> iused: %d\n",iused);
     if(sn_buf_filled[iused] == 0) {
       printf("(pt_sn_dma) ==> unused!\n");
@@ -2361,7 +2171,7 @@ void *pt_sn_dma(void *threadarg)
       else if(iused ==1)  u32Data = pDma_rec_s2->Page->pPhysicalAddr & 0xffffffff;
       else if(iused ==2)  u32Data = pDma_rec_s3->Page->pPhysicalAddr & 0xffffffff;
       else if(iused ==3)  u32Data = pDma_rec_s4->Page->pPhysicalAddr & 0xffffffff;
-
+      
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
 
       dwAddrSpace =cs_bar;
@@ -2377,28 +2187,27 @@ void *pt_sn_dma(void *threadarg)
       else if(iused ==2)  WDC_DMASyncCpu(pDma_rec_s3);
       else if(iused ==3)  WDC_DMASyncCpu(pDma_rec_s4);
       
-      
       /* byte count */
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_by_cnt;
-      //       u32Data = (nwrite)*4*2;      /** twice more data - from fiber 1& 2**/
-      u32Data = nwrite_byte_s; //(*2 fibers?)
+      dwAddrSpace = cs_bar;
+      dwOffset    = cs_dma_by_cnt;
+      u32Data     = nwrite_byte_s; //(*2 fibers?)
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
 
       /* write this will start DMA */
       dwAddrSpace =2;
-      dwOffset = cs_dma_cntrl;
+      dwOffset   =cs_dma_cntrl;
+      
       if(u32Data_h == 0) {
-	/* printf(" use 3dw \n"); */
         u32Data = dma_tr12+dma_3dw_rec;
       }
       else {
         u32Data = dma_tr12+dma_4dw_rec;
-	/* printf(" use 4dw \n"); */
       }
+
+      //This starts DMA
       WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
 
-      printf("(pt_sn_dma) ==> total_used: %d\n",total_used);
+      printf("(pt_sn_dma) ==> total_used: %d\n",total_used_s);
     }
     else {  // this one was already used, go around the horn
       if     (iused == 0) iused=1;
@@ -2410,27 +2219,53 @@ void *pt_sn_dma(void *threadarg)
     //
     //
     //
-    printf("(pt_sn_dma) ==> DMA \n");
     
+    printf("(pt_sn_dma) ==> DMA \n");
+    //god
+    dwAddrSpace =2;
+    u32Data =0;
+    dwOffset = 0x1c;
+    WDC_ReadAddr32(hDev2, dwAddrSpace, dwOffset, &u32Data);
+    printf ("(pt_sn_dma) ==> status R1 word before read = %x ~ ",u32Data);
+    dwAddrSpace =2;
+    u32Data =0;
+    dwOffset = 0x24;
+    WDC_ReadAddr32(hDev2, dwAddrSpace, dwOffset, &u32Data);
+    printf ("status R2 word before read = %x\n\n",u32Data);
+    //god
+
     idone=0;
     ch = 0;
     while (idone == 0) {
       ch += 1;
       
+      if (ch%100000 == 0){
+	printf("(pt_sn_dma) ==> receive DMA status word %d %X \n",ch,u32Data);
+	//god
+	dwAddrSpace =2;
+	u32Data =0;
+	dwOffset = 0x1c;
+	WDC_ReadAddr32(hDev2, dwAddrSpace, dwOffset, &u32Data);
+	printf ("(pt_sn_dma) ==> status R1 word DMA = %x ~ ",u32Data);
+	dwAddrSpace =2;
+	u32Data =0;
+	dwOffset = 0x24;
+	WDC_ReadAddr32(hDev2, dwAddrSpace, dwOffset, &u32Data);
+	printf ("status R2 word DMA = %x\n\n",u32Data);
+	//god
+      }
+
       dwAddrSpace = cs_bar;
       dwOffset    = cs_dma_cntrl;
       WDC_ReadAddr32(hDev2, dwAddrSpace, dwOffset, &u32Data);
 
-      if (ch%1000000 == 0){
-	printf("(pt_sn_dma) ==> receive DMA status word %d %X \n", ch, u32Data);
-      }
 
       if((u32Data & dma_in_progress) == 0) {
       	
 	idone =1;
 	
 	sn_buf_filled[iused] = 1;
-	total_used++;
+	total_used_s++;
       	
 	if     (iused == 0) { WDC_DMASyncIo(pDma_rec_s1); iused=1; }
 	else if(iused == 1) { WDC_DMASyncIo(pDma_rec_s2); iused=2; }
@@ -2446,21 +2281,22 @@ void *pt_sn_dma(void *threadarg)
     else if(iused == 1) ch=0;
     else if(iused == 2) ch=1;
     else if(iused == 3) ch=2;
-    
 
+    
     printf("\n DMA done --SN on buffer: %d \n\n",ch);
-    /* printf("\n Lets wait a bit...\n"); */
-    /* usleep(10000000); */
-   
-    // send neutrino trigger......... why??????
+
+    //trigger block
+    printf("\t(main) ==> Sent trigger)\n");
     imod=0;
     ichip=1;
     buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
     i=1;
     k=1;
-    //vic
-    //i = pcie_send(hDev, i, k, px);
-    
+    i = pcie_send(hDev, i, k, px);
+    //end trigger block
+    usleep(1000000);
+   
+    // send neutrino trigger......... why??????
   }
 
 }
@@ -2514,9 +2350,9 @@ void *pt_trig_dma(void *threadarg)
   static DWORD dwOffset;
 
   static int ifr,is,iused,nwrite,nwrite_byte_n, taskid;
-  static int icopy, idebug, read_point_n_tmp;
+  static int icopy, idebug, read_point_n_tmp,ch;
   static int idone,tr_bar,t_cs_reg,r_cs_reg,dma_tr;
-  static int neu_buf_filled[2], dis, ik;
+  static int dis, ik;
   static UINT32 *buffp_rec32_n;
 
   WDC_DEVICE_HANDLE hDev,hDev1;
@@ -2530,16 +2366,16 @@ void *pt_trig_dma(void *threadarg)
 
   struct thread_data *my_data;
 
-
-  dwDMABufSize = 1000000;
+  //xx
+  dwDMABufSize = 200000;
   //
   //
   //
   printf("\t==> trigger thread started \n");
   my_data = (struct thread_data *) threadarg;
   taskid = my_data->thread_id;
-  hDev1 = my_data->hDev;
-  hDev = my_data->hDevc;
+  hDev1  = my_data->hDev;
+  hDev   = my_data->hDevc;
   //
   //
   //
@@ -2549,12 +2385,19 @@ void *pt_trig_dma(void *threadarg)
     neu_buf_filled[is] = 0;
   }
   iused =0;
-  nwrite_byte_n = dwDMABufSize;
+  nwrite_byte_n = dwDMABufSize;  //0x30d40
   nwrite = nwrite_byte_n/4;
   write_point_n = 0;
   read_point_n = 0;
-
+  total_used_n = 0;
+  
   while (1) {
+    printf("\ntotal_used_n == %d\n",total_used_n);
+    while(total_used_n == 2) {
+      usleep(1000);//wait a millisecond if they are all full
+      continue;
+    }
+
     for (is=1; is<3; is++) {
       tr_bar = t1_tr_bar;
       r_cs_reg = r1_cs_reg;
@@ -2564,7 +2407,7 @@ void *pt_trig_dma(void *threadarg)
         r_cs_reg = r2_cs_reg;
         dma_tr = dma_tr2;
       }
-      if(idebug ==1) printf(" is = %d\n",is);
+
       /** initialize the receiver ***/
       u32Data = cs_init;
       dwOffset = r_cs_reg;
@@ -2573,36 +2416,38 @@ void *pt_trig_dma(void *threadarg)
       // rreceiver only get initialize for the 1st time
       //
       if(ifr ==0) {
-        printf(" initialize the input fifo -- Tr\n");
+        /* printf(" initialize the input fifo -- Tr\n"); */
         WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
       }
       /** start the receiver **/
       dwAddrSpace = cs_bar;
       u32Data = cs_start+nwrite_byte_n;   /* 32 bits mode == 4 bytes per word *2 fibers **/
-      if(idebug == 1) printf(" trigger -- DMA loop with DMA data length %d \n", nwrite_byte_n);
+      /* if(idebug == 1) printf(" trigger -- DMA loop with DMA data length %d \n", nwrite_byte_n); */
       dwOffset = r_cs_reg;
       WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
 
     }
-    ifr =1;
-
-    //
-    //
-    /** set up DMA for both transceiver together **/
+    ifr=1;
+    
+    printf("(pt_trig_dma) ==> iused: %d\n",iused);
     if(neu_buf_filled[iused] == 0) {
       dwAddrSpace =cs_bar;
       dwOffset = cs_dma_add_low_reg;
-      if(iused ==0)  u32Data = pDma_rec_n1->Page->pPhysicalAddr & 0xffffffff;
-      else u32Data = pDma_rec_n2->Page->pPhysicalAddr & 0xffffffff;
+      if(iused ==0)     u32Data = pDma_rec_n1->Page->pPhysicalAddr & 0xffffffff;
+      else if(iused==1) u32Data = pDma_rec_n2->Page->pPhysicalAddr & 0xffffffff;
+      
       WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
 
       dwAddrSpace =cs_bar;
       dwOffset = cs_dma_add_high_reg;
-      if(iused ==0)  u32Data_h = (pDma_rec_n1->Page->pPhysicalAddr >>32) & 0xffffffff;
-      else u32Data_h = (pDma_rec_n2->Page->pPhysicalAddr >> 32) & 0xffffffff;
+      if(iused==0)      u32Data_h = (pDma_rec_n1->Page->pPhysicalAddr >>32) & 0xffffffff;
+      else if(iused==1) u32Data_h = (pDma_rec_n2->Page->pPhysicalAddr >> 32) & 0xffffffff;
       WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data_h);
 
-
+      
+      if(iused==0)      WDC_DMASyncCpu(pDma_rec_n1);
+      else if(iused==1) WDC_DMASyncCpu(pDma_rec_n2);
+      
       /* byte count */
       dwAddrSpace =cs_bar;
       dwOffset = cs_dma_by_cnt;
@@ -2612,98 +2457,83 @@ void *pt_trig_dma(void *threadarg)
 
 
       /* write this will start DMA */
-      dwAddrSpace =2;
-      dwOffset = cs_dma_cntrl;
-      //        is = (pDma_rec_n->Page->pPhysicalAddr >> 32) & 0xffffffff;
+      dwAddrSpace = 2;
+      dwOffset    = cs_dma_cntrl;
+
       if(u32Data_h == 0) {
-	if(idebug ==1) printf(" use 3dw \n");
         u32Data = dma_tr12+dma_3dw_rec;
       }
       else {
         u32Data = dma_tr12+dma_4dw_rec;
-        if(idebug ==1) printf(" use 4dw \n");
       }
       WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
-      if(idebug ==1) printf(" trigger ---> DMA set up done, byte count = %d\n", nwrite_byte_n);
-      //
-      //
-      //
-      if(ith_fr == 1) {
-	if (iused == 0) {
-	  icopy = 1;
-	  buffp_rec32_n = pbuf_rec_n2;
-	}
-	else {
-	  buffp_rec32_n = pbuf_rec_n1;
-	  icopy = 0;
-	}
-	printf("iused: %d  -- icopy: %d -- neu_buf_filled[iused]: %d -- neu_buf_filled[icopy]: %d ",
-	       iused,icopy,neu_buf_filled[iused],neu_buf_filled[icopy]);
-	if (neu_buf_filled[icopy] == 1) {
-	  pthread_mutex_lock (&mutexlock);
-	  if(write_point_n >= read_point_n) dis =  jbuf_ev_size - (write_point_n - read_point_n);
-	  else dis = read_point_n - write_point_n;
-	  pthread_mutex_unlock (&mutexlock);
-	  //
-	  //       wait for the space to open
-	  //
-	  while (dis < nwrite) {
-	    usleep(300);
-	    pthread_mutex_lock (&mutexlock);
-	    if(write_point_n >= read_point_n) dis =  jbuf_ev_size - (write_point_n - read_point_n);
-	    else dis = read_point_n - write_point_n;
-	    pthread_mutex_unlock (&mutexlock);
-	  }
-	  //
-	  //
-	  //
-	  read_point_n_tmp =  read_point_n;
-	  if(write_point_n >= read_point_n_tmp) {
-	    if((jbuf_ev_size - write_point_n) >= nwrite) {
-	      for (ik=0; ik< nwrite; ik++) {
-		buffer_ev_n[write_point_n+ik] = *buffp_rec32_n++;
-	      }
-	      write_point_n = write_point_n+ nwrite;
-	    }
-	    else {
-	      for (ik=0; ik< (jbuf_ev_size-write_point_n); ik++) {
-		buffer_ev_n[write_point_n+ik] = *buffp_rec32_n++;
-	      }
-	      for (ik=0; ik< (nwrite-(jbuf_ev_size-write_point_n)); ik++) {
-		buffer_ev_n[ik] = *buffp_rec32_n++;
-	      }
-	      write_point_n = write_point_n+ nwrite- jbuf_ev_size;
-	    }
-	  }
-	  else {
-	    for (ik=0; ik< nwrite; ik++) {
-	      buffer_ev_n[write_point_n+ik] = *buffp_rec32_n++;
-	    }
-	    write_point_n = write_point_n+ nwrite;
-	  }
-	  neu_buf_filled[icopy] = 0;
-	}
-      }
+      
     }
-    //
-    //
-    //
+    else {
+      if      (iused==0) iused=1;
+      else if (iused==1) iused=0;
+    }
+
     idone =0;
+    ch    =0;
+    
+    //god
+    dwAddrSpace =2;
+    u32Data =0;
+    dwOffset = 0x1c;
+    WDC_ReadAddr32(hDev1, dwAddrSpace, dwOffset, &u32Data);
+    printf ("(pt_trig_dma) ==> status R1 word before read = %x ~ ",u32Data);
+    dwAddrSpace =2;
+    u32Data =0;
+    dwOffset = 0x24;
+    WDC_ReadAddr32(hDev1, dwAddrSpace, dwOffset, &u32Data);
+    printf ("status R2 word before read = %x\n\n",u32Data);
+    //god
+
+       
     while (idone == 0) {
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_cntrl;
+      
+      ch+=1;
+      
+
+      if (ch%100000 == 0){
+	printf("(pt_trig_dma) ==> receive DMA status word %d %X \n",ch,u32Data);
+	//god
+	dwAddrSpace =2;
+	u32Data =0;
+	dwOffset = 0x1c;
+	WDC_ReadAddr32(hDev1, dwAddrSpace, dwOffset, &u32Data);
+	printf ("(pt_trig_dma) ==> status R1 word DMA = %x ~ ",u32Data);
+	dwAddrSpace =2;
+	u32Data =0;
+	dwOffset = 0x24;
+	WDC_ReadAddr32(hDev1, dwAddrSpace, dwOffset, &u32Data);
+	printf ("status R2 word DMA = %x\n\n",u32Data);
+	//god
+    
+      }
+      dwAddrSpace = cs_bar;
+      dwOffset    = cs_dma_cntrl;
       WDC_ReadAddr32(hDev1, dwAddrSpace, dwOffset, &u32Data);
-      /* printf("in trig... u32Data = %x \n",u32Data); */
+
       if((u32Data & dma_in_progress) == 0) {
 	idone =1;
-	if(ith_fr == 1) { //will always be true
-	  neu_buf_filled[iused] = 1;
-	  if(iused == 0) iused =1;
-	  else iused = 0;
-	}
+	  
+	neu_buf_filled[iused] = 1;
+
+	total_used_n++;
+	if     (iused == 0) { WDC_DMASyncIo(pDma_rec_n1); iused=1; }
+	else if(iused == 1) { WDC_DMASyncIo(pDma_rec_n2); iused=0; }
+
       }
     }
-    printf(" DMA done --TR\n");
+    
+    
+    idone = 0;
+    if     (iused == 0) idone=1;
+    else if(iused == 1) idone=0;
+    
+    printf("\n DMA done --Neu on buffer: %d \n\n",idone);
   }
 
 }
@@ -2718,8 +2548,9 @@ void *pt_trig_filewrite(void *nword_write)
   static int read_point_tmp;
   static UINT32 send_array[2];
 
-  dwDMABufSize = 1000000;
-  printf("trigger file write thread started \n");
+  //xxx
+  dwDMABufSize = 200000;
+  printf("{pt_trig_filewrite} ==> trig file write thread started \n");
   while (1) {
     w_t1 = write_point_n;
     r_t1 = read_point_n;
@@ -2755,7 +2586,7 @@ void *pt_trig_filewrite(void *nword_write)
     n_write = write(fd_trig_pt,send_array,4);
     n_write = write(fd_trig_pt,file_buf,(nwrite*4));
     read_point_n = read_point_tmp;
-    printf(" Neutrino write point = %d, read point %d\n", write_point_n, read_point_n);
+    printf("{pt_trig_filewrite} ==> Nuetrino write point = %d, read point %d\n", write_point_n, read_point_n);
   }
 }
 
@@ -2781,6 +2612,7 @@ void *pt_sn_copythread(void *arg)
   while(1) {
     
     while(1) {
+      
       if( sn_buf_filled[ch] == 0 ) { // race condition on this array at all?
 	  ch += 1; 
 	  ch = ch%4; 
@@ -2791,7 +2623,7 @@ void *pt_sn_copythread(void *arg)
       printf("[pt_sn_copythread] ==> Buffer ch: %d is filled!\n",ch);
       // buffer is filled!
       break;
-    }   
+    }
     
     if      (ch == 0) { buffp_rec32_s = pbuf_rec_s1; }
     else if (ch == 1) { buffp_rec32_s = pbuf_rec_s2; }
@@ -2856,8 +2688,102 @@ void *pt_sn_copythread(void *arg)
     
     
     sn_buf_filled[ch] = 0;
-    total_used -= 1;
-    printf("[pt_sn_copythread] ==> total_used: %d\n",total_used);
+    total_used_s -= 1;
+    printf("[pt_sn_copythread] ==> total_used: %d\n",total_used_s);
+    //vic
+  }  
+}
+
+
+void *pt_trig_copythread(void *arg)
+{
+
+  static int ch;
+  static int dis, ik;
+  static int nwrite;
+  static int nwrite_byte_n;
+  static UINT32 *buffp_rec32_n;
+  static int read_point_n_tmp;
+  
+  ch = 0;
+
+  printf("[pt_trig_copythread] ==> Started\n");
+  
+  nwrite_byte_n = dwDMABufSize;
+  nwrite        = nwrite_byte_n/4;
+  write_point_n = 0;
+  read_point_n  = 0;
+
+  while(1) {
+    
+    while(1) {
+      if( neu_buf_filled[ch] == 0 ) { // race condition on this array at all?
+	  ch += 1; 
+	  ch = ch%2; 
+	  usleep(100); // 1 microsecond wait until recheck
+	  continue; 
+	}
+      
+      printf("[pt_trig_copythread] ==> Buffer ch: %d is filled!\n",ch);
+      // buffer is filled!
+      break;
+    }   
+    
+    if      (ch == 0) { buffp_rec32_n = pbuf_rec_n1; }
+    else if (ch == 1) { buffp_rec32_n = pbuf_rec_n2; }
+    /* else if (ch == 2) { buffp_rec32_n = pbuf_rec_n3; } */
+    /* else if (ch == 3) { buffp_rec32_n = pbuf_rec_n4; } */
+    
+    //vic doesn't completely undetstand following commented code, lets 
+    //read one out at a time?
+    /* printf("[pt_sn_copythread] ==> check write and read point -- get lock\n"); */
+    pthread_mutex_lock (&mutexlock);
+    if(write_point_n >= read_point_n) dis =  jbuf_ev_size - (write_point_n - read_point_n);
+    else dis = read_point_n - write_point_n;
+    pthread_mutex_unlock (&mutexlock);
+    /* printf("[pt_sn_copythread] ==> release lock\n");*/
+  
+    while (dis < nwrite) {
+      usleep(100);
+      pthread_mutex_lock (&mutexlock);
+      /* printf("[pt_sn_copythread] ==> have to wait for space -- get lock\n"); */
+      if(write_point_n >= read_point_n) dis =  jbuf_ev_size - (write_point_n - read_point_n);
+      else dis = read_point_n - write_point_n;
+      pthread_mutex_unlock (&mutexlock);
+      /* printf("[pt_sn_copythread] ==> release lock\n"); */
+    }
+    
+    printf("[pt_trig_copythread] ==> enter array copy --NU : ch: %d wps: %d rps: %d\n", ch, write_point_n, read_point_n);
+    read_point_n_tmp =  read_point_n;
+    if(write_point_n >= read_point_n_tmp) {
+      if((jbuf_ev_size - write_point_n) >= nwrite) {
+    	for (ik=0; ik< nwrite; ik++) {
+    	  buffer_ev_n[write_point_n+ik] = *buffp_rec32_n++;
+    	}
+    	write_point_n = write_point_n + nwrite;
+      }
+      else {
+    	for (ik=0; ik< (jbuf_ev_size-write_point_n); ik++) {
+    	  buffer_ev_n[write_point_n+ik] = *buffp_rec32_n++;
+    	}
+    	for (ik=0; ik< (nwrite-(jbuf_ev_size-write_point_n)); ik++) {
+    	  buffer_ev_n[ik] = *buffp_rec32_n++;
+    	}
+    	write_point_n = write_point_n + nwrite- jbuf_ev_size;
+      }
+    }
+    else {
+      for (ik=0; ik< nwrite; ik++) {
+    	buffer_ev_n[write_point_n+ik] = *buffp_rec32_n++;
+      }
+      write_point_n = write_point_n+ nwrite;
+    }
+
+    /* printf("[pt_sn_copythread] ==> finished copy\n"); */
+    
+    neu_buf_filled[ch] = 0;
+    total_used_n -= 1;
+    printf("[pt_trig_copythread] ==> total_used: %d\n",total_used_n);
     //vic
   }  
 
@@ -2916,623 +2842,19 @@ void *pt_sn_filewrite(void *nword_write)
     n_write = write(fd_sn_pt,send_array,4);
     n_write = write(fd_sn_pt,file_buf,(nwrite*4));
     read_point_s = read_point_tmp;
-    /* printf(" SuperNova write point = %d, read point %d\n", write_point_s, read_point_s); */
-  }
-}
-//
-//
-//
-void *pt_sn_dma_tpc(void *threadarg)
-{
-
-#include "wdc_defs.h"
-#define  t1_tr_bar 0
-#define  t2_tr_bar 4
-#define  cs_bar 2
-
-  /**  command register location **/
-
-#define  tx_mode_reg 0x28
-#define  t1_cs_reg 0x18
-#define  r1_cs_reg 0x1c
-#define  t2_cs_reg 0x20
-#define  r2_cs_reg 0x24
-
-#define  tx_md_reg 0x28
-
-#define  cs_dma_add_low_reg 0x0
-#define  cs_dma_add_high_reg  0x4
-#define  cs_dma_by_cnt 0x8
-#define  cs_dma_cntrl 0xc
-#define  cs_dma_msi_abort 0x10
-
-  /** define status bits **/
-
-#define  cs_init  0x20000000
-#define  cs_mode_p 0x8000000
-#define  cs_mode_n 0x0
-#define  cs_start 0x40000000
-#define  cs_done  0x80000000
-
-#define  dma_tr1  0x100000
-#define  dma_tr2  0x200000
-#define  dma_tr12 0x300000
-#define  dma_3dw_trans 0x0
-#define  dma_4dw_trans 0x0
-#define  dma_3dw_rec   0x40
-#define  dma_4dw_rec   0x60
-#define  dma_in_progress 0x80000000
-
-#define  dma_abort 0x2
-
-#define  mb_cntrl_set_trig1 0x4
-
-  static DWORD dwAddrSpace;
-  static UINT32 u32Data, u32Data_h;
-  static DWORD dwOffset;
-
-  static int ifr,is,iused,nwrite,nwrite_byte_s, taskid;
-  static int icopy, idebug, read_point_s_tmp;
-  static int idone,tr_bar,t_cs_reg,r_cs_reg,dma_tr;
-  static int sn_buf_filled[2], dis, ik;
-  static int i,k,imod,ichip;
-  static UINT32 *buffp_rec32_s;
-  UINT32 *px;
-  UINT32 buf_send[40];
-
-  WDC_DEVICE_HANDLE hDev,hDev2;
-
-  struct thread_data
-  {
-    int thread_id;
-    WDC_DEVICE_HANDLE hDev;
-    WDC_DEVICE_HANDLE hDevc;
-  };
-
-  struct thread_data *my_data;
-
-
-  //
-  //
-  //
-  printf("sn thread started \n");
-  dwDMABufSize = 1000000;
-  px = &buf_send;
-  my_data = (struct thread_data *) threadarg;
-  taskid = my_data->thread_id;
-  hDev2 = my_data->hDev;
-  hDev = my_data->hDevc;
-  //    printf("\nReceived event notification (device handle 0x%p): ", hDev);
-  //    printf("\nReceived event notification (device handle 0x%p): ", hDev2);
-  //
-  //
-  idebug =1;
-  ifr = 0;
-  for (is=0; is< 2; is++) {
-    sn_buf_filled[is] = 0;
-  }
-  iused =0;
-  nwrite_byte_s = dwDMABufSize;
-  nwrite = nwrite_byte_s/4;
-  write_point_s_tpc = 0;
-  read_point_s_tpc = 0;
-  while (1) {
-    for (is=1; is<3; is++) {
-      tr_bar = t1_tr_bar;
-      r_cs_reg = r1_cs_reg;
-      dma_tr = dma_tr1;
-      if(is == 2) {
-        tr_bar = t2_tr_bar;
-        r_cs_reg = r2_cs_reg;
-        dma_tr = dma_tr2;
-      }
-      if(idebug ==1) printf(" is = %d\n",is);
-      /** initialize the receiver ***/
-      u32Data = cs_init;
-      dwOffset = r_cs_reg;
-      dwAddrSpace =cs_bar;
-      //
-      // rreceiver only get initialize for the 1st time
-      //
-      if(ifr ==0) {
-        printf(" initialize the input fifo -- SN\n");
-        WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
-      }
-      //       if(idebug ==1) printf(" SN -- DMA data length %d \n", nwrite_byte_s);
-      /** start the receiver **/
-      dwAddrSpace = cs_bar;
-      u32Data = cs_start+nwrite_byte_s;   /* 32 bits mode == 4 bytes per word *2 fibers **/
-      if(idebug ==1) printf(" SN -- DMA data length %d \n", nwrite_byte_s);
-      dwOffset = r_cs_reg;
-      WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
-    }
-    ifr =1;
-    //
-    //
-    /** set up DMA for both transceiver together **/
-
-    if(sn_buf_filled[iused] == 0) {
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_add_low_reg;
-      if(iused ==0)  u32Data = pDma_rec_s1_tpc->Page->pPhysicalAddr & 0xffffffff;
-      else u32Data = pDma_rec_s2_tpc->Page->pPhysicalAddr & 0xffffffff;
-      WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
-
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_add_high_reg;
-      if(iused ==0)  u32Data_h = (pDma_rec_s1_tpc->Page->pPhysicalAddr >>32) & 0xffffffff;
-      else u32Data_h = (pDma_rec_s2_tpc->Page->pPhysicalAddr >> 32) & 0xffffffff;
-      WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data_h);
-
-
-      /* byte count */
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_by_cnt;
-      //       u32Data = (nwrite)*4*2;      /** twice more data - from fiber 1& 2**/
-      u32Data = nwrite_byte_s;
-      WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
-
-
-      /* write this will start DMA */
-      dwAddrSpace =2;
-      dwOffset = cs_dma_cntrl;
-      //        is = (pDma_rec_n->Page->pPhysicalAddr >> 32) & 0xffffffff;
-      if(u32Data_h == 0) {
-	//        if(idebug ==1) printf(" use 3dw \n");
-        u32Data = dma_tr12+dma_3dw_rec;
-      }
-      else {
-        u32Data = dma_tr12+dma_4dw_rec;
-	//        if(idebug ==1) printf(" use 4dw \n");
-      }
-      WDC_WriteAddr32(hDev2, dwAddrSpace, dwOffset, u32Data);
-      //       if(idebug ==1) printf(" trigger ---> DMA set up done, byte count = %d\n", nwrite_byte_s);
-      //
-      //
-      //
-      if(ith_fr == 1) {
-        if (iused == 0) {
-	  icopy = 1;
-	  buffp_rec32_s = pbuf_rec_s2_tpc;
-        }
-        else {
-	  buffp_rec32_s = pbuf_rec_s1_tpc;
-	  icopy = 0;
-        }
-        if (sn_buf_filled[icopy] == 1) {
-	  //         printf("start array copy --- SN %d, %d\n",icopy,sn_buf_filled[icopy]);
-	  pthread_mutex_lock (&mutexlock);
-	  if(write_point_s_tpc >= read_point_s_tpc) dis =  jbuf_ev_size - (write_point_s_tpc - read_point_s_tpc);
-	  else dis = read_point_s_tpc - write_point_s_tpc;
-	  pthread_mutex_unlock (&mutexlock);
-	  //
-	  //       wait for the space to open
-	  //
-	  while (dis < nwrite) {
-	    usleep(300);
-	    pthread_mutex_lock (&mutexlock);
-	    if(write_point_s_tpc >= read_point_s_tpc) dis =  jbuf_ev_size - (write_point_s_tpc - read_point_s_tpc);
-	    else dis = read_point_s_tpc - write_point_s_tpc;
-	    pthread_mutex_unlock (&mutexlock);
-	  }
-	  //
-	  //
-	  //
-	  //         printf("enter array copy --SN %d %d %d %d\n", iused, icopy, write_point_s, read_point_s);
-	  read_point_s_tmp =  read_point_s_tpc;
-	  if(write_point_s_tpc >= read_point_s_tmp) {
-	    if((jbuf_ev_size - write_point_s_tpc) >= nwrite) {
-	      for (ik=0; ik< nwrite; ik++) {
-		buffer_ev_s_tpc[write_point_s_tpc+ik] = *buffp_rec32_s++;
-	      }
-	      write_point_s_tpc = write_point_s_tpc+ nwrite;
-	    }
-	    else {
-	      for (ik=0; ik< (jbuf_ev_size-write_point_s_tpc); ik++) {
-		buffer_ev_s_tpc[write_point_s_tpc+ik] = *buffp_rec32_s++;
-	      }
-	      for (ik=0; ik< (nwrite-(jbuf_ev_size-write_point_s_tpc)); ik++) {
-		buffer_ev_s_tpc[ik] = *buffp_rec32_s++;
-	      }
-	      write_point_s_tpc = write_point_s_tpc+ nwrite- jbuf_ev_size;
-	    }
-	  }
-	  else {
-	    for (ik=0; ik< nwrite; ik++) {
-	      buffer_ev_s_tpc[write_point_s_tpc+ik] = *buffp_rec32_s++;
-	    }
-	    write_point_s_tpc = write_point_s_tpc+ nwrite;
-	  }
-	  sn_buf_filled[icopy] = 0;
-        }
-      }
-    }
-    //
-    //
-    //
-    idone =0;
-    while (idone == 0) {
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_cntrl;
-      WDC_ReadAddr32(hDev2, dwAddrSpace, dwOffset, &u32Data);
-      if((u32Data & dma_in_progress) == 0) {
-        idone =1;
-        if(ith_fr == 1) {
-	  sn_buf_filled[iused] = 1;
-	  if(iused == 1) iused =0;
-	  else iused=1;
-        }
-      }
-    }
-    printf(" DMA done --SN\n");
-    imod=0;
-    ichip=1;
-    buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
-    i=1;
-    k=1;
-    i = pcie_send(hDev, i, k, px);
-  }
-
-}
-
-
-void *pt_trig_dma_tpc(void *threadarg)
-{
-
-#include "wdc_defs.h"
-#define  t1_tr_bar 0
-#define  t2_tr_bar 4
-#define  cs_bar 2
-
-  /**  command register location **/
-
-#define  tx_mode_reg 0x28
-#define  t1_cs_reg 0x18
-#define  r1_cs_reg 0x1c
-#define  t2_cs_reg 0x20
-#define  r2_cs_reg 0x24
-
-#define  tx_md_reg 0x28
-
-#define  cs_dma_add_low_reg 0x0
-#define  cs_dma_add_high_reg  0x4
-#define  cs_dma_by_cnt 0x8
-#define  cs_dma_cntrl 0xc
-#define  cs_dma_msi_abort 0x10
-
-  /** define status bits **/
-
-#define  cs_init  0x20000000
-#define  cs_mode_p 0x8000000
-#define  cs_mode_n 0x0
-#define  cs_start 0x40000000
-#define  cs_done  0x80000000
-
-#define  dma_tr1  0x100000
-#define  dma_tr2  0x200000
-#define  dma_tr12 0x300000
-#define  dma_3dw_trans 0x0
-#define  dma_4dw_trans 0x0
-#define  dma_3dw_rec   0x40
-#define  dma_4dw_rec   0x60
-#define  dma_in_progress 0x80000000
-
-#define  dma_abort 0x2
-
-  static DWORD dwAddrSpace;
-  static UINT32 u32Data, u32Data_h;
-  static DWORD dwOffset;
-
-  static int ifr,is,iused,nwrite,nwrite_byte_n, taskid;
-  static int icopy, idebug, read_point_n_tmp;
-  static int idone,tr_bar,t_cs_reg,r_cs_reg,dma_tr;
-  static int neu_buf_filled[2], dis, ik;
-  static UINT32 *buffp_rec32_n;
-
-  WDC_DEVICE_HANDLE hDev,hDev1;
-
-  struct thread_data
-  {
-    int thread_id;
-    WDC_DEVICE_HANDLE hDev;
-    WDC_DEVICE_HANDLE hDevc;
-  };
-
-  struct thread_data *my_data;
-
-
-  dwDMABufSize = 1000000;
-  //
-  //
-  //
-  printf("TPC trigger thread started \n");
-  my_data = (struct thread_data *) threadarg;
-  taskid = my_data->thread_id;
-  hDev1 = my_data->hDev;
-  hDev = my_data->hDevc;
-  //
-  //
-  //
-  idebug =0;
-  ifr = 0;
-  for (is=0; is< 2; is++) {
-    neu_buf_filled[is] = 0;
-  }
-  iused =0;
-  nwrite_byte_n = dwDMABufSize;
-  nwrite = nwrite_byte_n/4;
-  write_point_n_tpc = 0;
-  read_point_n_tpc = 0;
-
-  while (1) {
-    for (is=1; is<3; is++) {
-      tr_bar = t1_tr_bar;
-      r_cs_reg = r1_cs_reg;
-      dma_tr = dma_tr1;
-      if(is == 2) {
-        tr_bar = t2_tr_bar;
-        r_cs_reg = r2_cs_reg;
-        dma_tr = dma_tr2;
-      }
-      if(idebug ==1) printf(" is = %d\n",is);
-      /** initialize the receiver ***/
-      u32Data = cs_init;
-      dwOffset = r_cs_reg;
-      dwAddrSpace =cs_bar;
-      //
-      // rreceiver only get initialize for the 1st time
-      //
-      if(ifr ==0) {
-        printf(" initialize the input fifo -- Tr\n");
-        WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
-      }
-      /** start the receiver **/
-      dwAddrSpace = cs_bar;
-      u32Data = cs_start+nwrite_byte_n;   /* 32 bits mode == 4 bytes per word *2 fibers **/
-      if(idebug == 1) printf(" trigger -- DMA loop with DMA data length %d \n", nwrite_byte_n);
-      dwOffset = r_cs_reg;
-      WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
-
-    }
-    ifr =1;
-    //
-    //
-    /** set up DMA for both transceiver together **/
-
-    if(neu_buf_filled[iused] == 0) {
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_add_low_reg;
-      if(iused ==0)  u32Data = pDma_rec_n1_tpc->Page->pPhysicalAddr & 0xffffffff;
-      else u32Data = pDma_rec_n2_tpc->Page->pPhysicalAddr & 0xffffffff;
-      WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
-
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_add_high_reg;
-      if(iused ==0)  u32Data_h = (pDma_rec_n1_tpc->Page->pPhysicalAddr >>32) & 0xffffffff;
-      else u32Data_h = (pDma_rec_n2_tpc->Page->pPhysicalAddr >> 32) & 0xffffffff;
-      WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data_h);
-
-
-      /* byte count */
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_by_cnt;
-      //       u32Data = (nwrite)*4*2;      /** twice more data - from fiber 1& 2**/
-      u32Data = nwrite_byte_n;
-      WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
-
-
-      /* write this will start DMA */
-      dwAddrSpace =2;
-      dwOffset = cs_dma_cntrl;
-      //        is = (pDma_rec_n->Page->pPhysicalAddr >> 32) & 0xffffffff;
-      if(u32Data_h == 0) {
-        if(idebug ==1) printf(" use 3dw \n");
-        u32Data = dma_tr12+dma_3dw_rec;
-      }
-      else {
-        u32Data = dma_tr12+dma_4dw_rec;
-        if(idebug ==1) printf(" use 4dw \n");
-      }
-      WDC_WriteAddr32(hDev1, dwAddrSpace, dwOffset, u32Data);
-      if(idebug ==1) printf(" trigger ---> DMA set up done, byte count = %d\n", nwrite_byte_n);
-      //
-      //
-      //
-      if(ith_fr == 1) {
-        if (iused == 0) {
-	  icopy = 1;
-	  buffp_rec32_n = pbuf_rec_n2_tpc;
-        }
-        else {
-	  buffp_rec32_n = pbuf_rec_n1_tpc;
-	  icopy = 0;
-        }
-        if (neu_buf_filled[icopy] == 1) {
-	  pthread_mutex_lock (&mutexlock);
-	  if(write_point_n_tpc >= read_point_n_tpc) dis =  jbuf_ev_size - (write_point_n_tpc - read_point_n_tpc);
-	  else dis = read_point_n_tpc - write_point_n_tpc;
-	  pthread_mutex_unlock (&mutexlock);
-	  //
-	  //       wait for the space to open
-	  //
-	  while (dis < nwrite) {
-	    usleep(300);
-	    pthread_mutex_lock (&mutexlock);
-	    if(write_point_n_tpc >= read_point_n_tpc) dis =  jbuf_ev_size - (write_point_n_tpc - read_point_n_tpc);
-	    else dis = read_point_n_tpc - write_point_n_tpc;
-	    pthread_mutex_unlock (&mutexlock);
-	  }
-	  //
-	  //
-	  //
-	  read_point_n_tmp =  read_point_n_tpc;
-	  //         printf(" icopy = %d, neu_buf_filled[icopy] = %d, write_point_n_tpc \n", icopy, neu_buf_filled[icopy], write_point_n_tpc );
-	  //         printf(" %x, %x, %x, %x \n", buffp_rec32_n[0], buffp_rec32_n[1],  buffp_rec32_n[2],  buffp_rec32_n[3]);
-	  if(write_point_n_tpc >= read_point_n_tmp) {
-	    if((jbuf_ev_size - write_point_n_tpc) >= nwrite) {
-	      for (ik=0; ik< nwrite; ik++) {
-		buffer_ev_n_tpc[write_point_n_tpc+ik] = *buffp_rec32_n++;
-	      }
-	      write_point_n_tpc = write_point_n_tpc+ nwrite;
-	    }
-	    else {
-	      for (ik=0; ik< (jbuf_ev_size-write_point_n_tpc); ik++) {
-		buffer_ev_n_tpc[write_point_n_tpc+ik] = *buffp_rec32_n++;
-	      }
-	      for (ik=0; ik< (nwrite-(jbuf_ev_size-write_point_n_tpc)); ik++) {
-		buffer_ev_n_tpc[ik] = *buffp_rec32_n++;
-	      }
-	      write_point_n_tpc = write_point_n_tpc+ nwrite- jbuf_ev_size;
-	    }
-	  }
-	  else {
-	    for (ik=0; ik< nwrite; ik++) {
-	      buffer_ev_n_tpc[write_point_n_tpc+ik] = *buffp_rec32_n++;
-	    }
-	    write_point_n_tpc = write_point_n_tpc+ nwrite;
-	  }
-	  neu_buf_filled[icopy] = 0;
-	  //         printf(" %x, %x, %x, %x \n", buffer_ev_n_tpc[0], buffer_ev_n_tpc[1],  buffer_ev_n_tpc[2],  buffer_ev_n_tpc[3]);
-        }
-      }
-    }
-    //
-    //
-    //
-    idone =0;
-    while (idone == 0) {
-      dwAddrSpace =cs_bar;
-      dwOffset = cs_dma_cntrl;
-      WDC_ReadAddr32(hDev1, dwAddrSpace, dwOffset, &u32Data);
-      //       printf(" u32Data = %x \n",u32Data);
-      if((u32Data & dma_in_progress) == 0) {
-        buffp_rec32_n = pbuf_rec_n1_tpc;
-	//        printf(" %x, %x, %x, %x \n", buffp_rec32_n[0], buffp_rec32_n[1],  buffp_rec32_n[2],  buffp_rec32_n[3]);
-	//        printf(" %x, %x, %x, %x \n", buffer_ev_n_tpc[0], buffer_ev_n_tpc[1],  buffer_ev_n_tpc[2],  buffer_ev_n_tpc[3]);
-        idone =1;
-        if(ith_fr == 1) {
-	  neu_buf_filled[iused] = 1;
-	  if(iused == 0) iused =1;
-	  else iused = 0;
-	  //         printf(" iused = %d, neu_buf_filled[iused] = %d, icopy = %d\n", iused, neu_buf_filled[iused], icopy);
-	  //         printf(" write_point_n_tpc = %d , read_point_n_tpc = %d \n", write_point_n_tpc, read_point_n_tpc);
-        }
-      }
-    }
-    printf(" DMA done --TR-- TPC\n");
-  }
-
-}
-
-
-
-
-
-void *pt_trig_filewrite_tpc(void *nword_write)
-{
-  static int file_buf[250000];
-  static int w_t1,r_t1,nwrite,dis,is, index, n_write;
-  static int read_point_tmp;
-  static UINT32 send_array[2];
-
-  dwDMABufSize = 1000000;
-  printf("trigger file write thread started \n");
-  while (1) {
-    w_t1 = write_point_n_tpc;
-    r_t1 = read_point_n_tpc;
-    nwrite = dwDMABufSize/4;
-    dis =w_t1 - r_t1;
-    while (dis< nwrite) {
-      w_t1 = write_point_n_tpc;
-      r_t1 = read_point_n_tpc;
-      dis =w_t1 - r_t1;
-      if (dis < 0) dis = jbuf_ev_size + dis;
-      usleep(300);
-    }
-
-    if((w_t1 > r_t1) | ((jbuf_ev_size -r_t1)>nwrite)) {
-      for (is=0; is<nwrite; is++) {
-	file_buf[is] = buffer_ev_n_tpc[is+r_t1];
-      }
-      //     read_point_n = read_point_n+nwrite;
-      read_point_tmp = read_point_n_tpc+nwrite;
-    }
-    else {
-      for (is=0; is<(jbuf_ev_size-r_t1); is++) {
-	file_buf[is] = buffer_ev_n_tpc[is+r_t1];
-      }
-      index =0;
-      for (is=(jbuf_ev_size-r_t1); is< (nwrite- (jbuf_ev_size-r_t1)); is++) {
-	file_buf[is] = buffer_ev_n_tpc[index];
-	index = index+1;
-      }
-      //     read_point_n = index;
-      read_point_tmp = index;
-    }
-    send_array[0] = nwrite;
-    n_write = write(fd_trig_pt_tpc,send_array,4);
-    n_write = write(fd_trig_pt_tpc,file_buf,(nwrite*4));
-    read_point_n_tpc = read_point_tmp;
-    printf(" Neutrino write point TPC = %d, read point %d\n", write_point_n_tpc, read_point_n_tpc);
-    //    printf(" file_write_tpc %x, %x, %x, %x \n", file_buf[0], file_buf[1], file_buf[2], file_buf[3]);
-    //    printf(" file_write_tpc %x, %x, %x, %x \n", buffer_ev_n_tpc[0], buffer_ev_n_tpc[1], buffer_ev_n_tpc[2], buffer_ev_n_tpc[3]);
+    printf("[pt_sn_filewrite] ==> SuperNova write point = %d, read point %d\n", write_point_s, read_point_s);
   }
 }
 
 
-void *pt_sn_filewrite_tpc(void *nword_write)
-{
-  static int file_buf[250000];
-  static int w_t1,r_t1,nwrite,dis,is, index, n_write;
-  static int read_point_tmp;
-  static UINT32 send_array[2];
-
-  dwDMABufSize = 1000000;
-  printf("sn file write thread started \n");
-  while (1) {
-    w_t1 = write_point_s_tpc;
-    r_t1 = read_point_s_tpc;
-    nwrite = dwDMABufSize/4;
-    dis =w_t1 - r_t1;
-    while (dis< nwrite) {
-      w_t1 = write_point_s_tpc;
-      r_t1 = read_point_s_tpc;
-      dis =w_t1 - r_t1;
-      if (dis < 0) dis = jbuf_ev_size + dis;
-      usleep(300);
-    }
-    //    printf("wp, rp %d, %d \n",write_point_s, read_point_s);
-    if((w_t1 > r_t1) | ((jbuf_ev_size -r_t1)>nwrite)) {
-      for (is=0; is<nwrite; is++) {
-	file_buf[is] = buffer_ev_s_tpc[is+r_t1];
-      }
-      //     read_point_s = read_point_s+nwrite;
-      read_point_tmp = read_point_s_tpc+nwrite;
-    }
-    else {
-      for (is=0; is<(jbuf_ev_size-r_t1); is++) {
-	file_buf[is] = buffer_ev_s_tpc[is+r_t1];
-      }
-      index =0;
-      for (is=(jbuf_ev_size-r_t1); is< (nwrite- (jbuf_ev_size-r_t1)); is++) {
-	file_buf[is] = buffer_ev_s_tpc[index];
-	index = index+1;
-      }
-      //     read_point_s = index;
-      read_point_tmp = index;
-    }
-    send_array[0] = nwrite;
-    n_write = write(fd_sn_pt_tpc,send_array,4);
-    n_write = write(fd_sn_pt_tpc,file_buf,(nwrite*4));
-    read_point_s_tpc = read_point_tmp;
-    printf(" SuperNova write point = %d, read point %d\n", write_point_s_tpc, read_point_s_tpc);
-  }
-}
 
 
-//
-//
-//
+
+
+
+
+
+
 
 
 static int pcie_send(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff_send)
@@ -3765,147 +3087,6 @@ static int pcie_send_1(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff
     WDC_DMASyncIo(pDma_send);
   }
   return i;
-}
-
-void *pcie_send_fake(void *threadarg)
-{
-  /* imode =0 single word transfer, imode =1 DMA */
-#include "wdc_defs.h"
-  static DWORD dwAddrSpace;
-  static DWORD dwDMABufSize;
-
-  static UINT32 *buf_send;
-  static WD_DMA *pDma_send;
-  static DWORD dwStatus;
-  static DWORD dwOptions_send = DMA_TO_DEVICE;
-  static DWORD dwOffset;
-  static UINT32 u32Data;
-  static PVOID pbuf_send;
-  int nword;
-  int nwrite,i,j, iprint,k;
-  int taskid;
-  static int ifr=0;
-  //
-  //
-  WDC_DEVICE_HANDLE hDev,hDev1;
-
-  struct thread_data
-  {
-    int thread_id;
-    WDC_DEVICE_HANDLE hDev;
-    WDC_DEVICE_HANDLE hDevc;
-  };
-
-  struct thread_data *my_data;
-
-
-  dwDMABufSize = 1000000;
-  //
-  //
-  //
-
-  printf("trigger thread started \n");
-  my_data = (struct thread_data *) threadarg;
-  taskid = my_data->thread_id;
-  hDev = my_data->hDev;
-  hDev1 = my_data->hDevc;
-  //
-  //
-  //
-  ifr=0;
-  //    if (ifr == 0) {
-  //      ifr=1;
-  //      dwDMABufSize = 140000;
-  //      dwStatus = WDC_DMAContigBufLock(hDev, &pbuf_send, dwOptions_send, dwDMABufSize, &pDma_send);
-  //      if (WD_STATUS_SUCCESS != dwStatus) {
-  //             printf("Failed locking a send Contiguous DMA buffer. Error 0x%lx - %s\n", dwStatus, Stat2Str(dwStatus));
-  //      }
-  //      buf_send = pbuf_send;
-  //    }
-  nword = 1000000;
-  nwrite = 1000000;
-  //    for (i=0; i< nword; i++) {
-  //        *(buf_send+i) = i+1;
-  /*	printf("%d \n",*(buf_send+i));   */
-  //     }
-
-  //     is = (pDma_send_fake->Page->pPhysicalAddr >> 32) & 0xffffffff;
-
-  //
-  /* write this will abort previous DMA */
-  dwAddrSpace =2;
-  dwOffset = 0x10;
-  u32Data = 0x2;
-  WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-  /* clear DMA register after the abort */
-  dwAddrSpace =2;
-  dwOffset = 0x10;
-  u32Data = 0;
-  WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-  //
-  //
-  while (dwDMABufSize >=0) {
-    if(ifr == 0){
-      /*setup transmiiter */
-      dwAddrSpace =2;
-      u32Data = 0x20000000;
-      dwOffset = 0x20;
-      WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-      ifr=1 ;
-      printf(" sned fake initialize the interface \n");
-    }
-
-    WDC_DMASyncCpu(pDma_send_fake);
-    /*setup transmiiter */
-    dwAddrSpace =2;
-    u32Data = 0x40000000+nwrite;
-    dwOffset = 0x20;
-    WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-
-    /* set up sending DMA starting address */
-
-    dwAddrSpace =2;
-    u32Data = 0x20000000;
-    dwOffset = 0x0;
-    u32Data = pDma_send_fake->Page->pPhysicalAddr & 0xffffffff;
-    WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-
-    dwAddrSpace =2;
-    u32Data = 0x20000000;
-    dwOffset = 0x4;
-    u32Data = (pDma_send_fake->Page->pPhysicalAddr >> 32) & 0xffffffff;
-    WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-
-    /* byte count */
-    dwAddrSpace =2;
-    dwOffset = 0x8;
-    u32Data = nwrite;
-    WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-
-    /* write this will start DMA */
-    dwAddrSpace =2;
-    dwOffset = 0xc;
-    u32Data = 0x00230000;
-    WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
-
-    //     for (i=0; i<20000000; i++) {
-    dwAddrSpace =2;
-    dwOffset = 0xc;
-    WDC_ReadAddr32(hDev, dwAddrSpace, dwOffset, &u32Data);
-    k=0;
-    while ((u32Data & 0x80000000) != 0) {
-      usleep(1);
-      k=k+1;
-      dwAddrSpace =2;
-      dwOffset = 0xc;
-      WDC_ReadAddr32(hDev, dwAddrSpace, dwOffset, &u32Data);
-      //      if((i%100000) == 0) printf(" DMA status reed %d %X \n", i, u32Data);
-      //      if(((u32Data & 0x80000000) == 0) && iprint == 1) printf(" DMA complete %d \n", i);
-      //      if((u32Data & 0x80000000) == 0) break;
-    }
-    //     printf(" end dma loop,%d \n", k);
-    WDC_DMASyncIo(pDma_send_fake);
-  }
 }
 
 
