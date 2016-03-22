@@ -1253,14 +1253,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	i = pcie_send(hDev3, i, k, px);
 	usleep(200000);  // wait for 200 ms
 	//
-	inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
-	/* inpf = fopen("/home/ub/feb_fpga_test","r"); */
-	printf(" start booting FEM %d\n", imod);
+	/* inpf = fopen("/home/ub/feb_fpga_test","r"); */ // old reference code
+	//inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
+	inpf = fopen("/home/ub/module1x_140820_deb_3_21_2016.rbf","r"); // Chi's new-est FPGA code (Mar 21, 2016)
+	printf("\n\t==> Start booting FEM %d\n", imod);
 	ichip=mb_feb_conf_add;
 	buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
 	i=1;
 	k=1;
 	i = pcie_send(hDev3, i, k, px);
+	
 	//      for (i=0; i<100000; i++) {
 	//          ik= i%2;
 	//          dummy1= (ik+i)*(ik+i);
@@ -2006,16 +2008,33 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       usleep(1000);
       ifr = 0;
 	
-      printf("\t==>start the run !\n");
+      printf("\t==>Start-ing the run in 2 seconds!\n");
+      usleep(2000000);
       ifr =1;
       imod=0;
       ichip=1;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
+      printf("\t==>Start-ed the run...\n");
       i=1;
       k=1;
       i = pcie_send(hDev3, i, k, px);
-	
       
+ 
+      while(1) {
+	usleep(300000);
+	  //trigger block
+	  printf("\e[1;35m\t(main) ==> Sending trigger trigger)\n\e[0m");
+	imod=0;
+	ichip=1;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+	//end trigger block
+	printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU! 3 seconds until next trigger...\n\e[0m");
+	//usleep(1000000);
+	//printf("\e[1;35m\t(main) ==> \e[1;33mDONE...\e[1;35m waiting a bit for NU!)\e[0m\n"); 
+      }
       usleep(100000000000); //30 minutes?
     }
     break;
@@ -2116,7 +2135,7 @@ void *pt_sn_dma(void *threadarg)
 
   total_used_s = 0;
   iused = 0;
-  printf("\n(pt_sn_dma) ==> dma thread started \n");
+  printf("\e[1;34m\n(pt_sn_dma) ==> dma thread started\e[0m\n");
 
   while (1) {
 
@@ -2292,22 +2311,8 @@ void *pt_sn_dma(void *threadarg)
     else if(iused == 3) ch=2;
 
     
-    printf("\n DMA done --SN on buffer: %d \n\n",ch);
+    printf("\e[1;32m\n DMA done --\e[1;34mSN on buffer: %d \n\n\e[0m",ch);
 
-    //trigger block
-    printf("\t(main) ==> Sent trigger)\n");
-    imod=0;
-    ichip=1;
-    buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
-    i=1;
-    k=1;
-    i = pcie_send(hDev, i, k, px);
-    //end trigger block
-    printf("\t(main) ==> Waiting a bit for NU!)\n");
-    usleep(10000000);
-    printf("\t(main) ==> DONE waiting a bit for NU!)\n");
-   
-    // send neutrino trigger......... why??????
   }
 
 }
@@ -2382,7 +2387,7 @@ void *pt_trig_dma(void *threadarg)
   //
   //
   //
-  printf("\t==> trigger thread started \n");
+  printf("\e[1;31m\t==> trigger thread started\e[0\n");
   my_data = (struct thread_data *) threadarg;
   taskid = my_data->thread_id;
   hDev1  = my_data->hDev;
@@ -2544,7 +2549,7 @@ void *pt_trig_dma(void *threadarg)
     if     (iused == 0) idone=1;
     else if(iused == 1) idone=0;
     
-    printf("\n DMA done --Neu on buffer: %d \n\n",idone);
+    printf("\e[1;32m\n DMA done --\e[1;31m Neu on buffer: %d \e[0m\n\n",idone);
     /* usleep(2000000); */
   }
 
@@ -2562,7 +2567,7 @@ void *pt_trig_filewrite(void *nword_write)
 
   //xxx
   dwDMABufSize = 200000;
-  printf("{pt_trig_filewrite} ==> trig file write thread started \n");
+  printf("\e[1;31m{pt_trig_filewrite} ==> trig file write thread started\e[0m\n");
   while (1) {
     w_t1 = write_point_n;
     r_t1 = read_point_n;
@@ -2573,7 +2578,7 @@ void *pt_trig_filewrite(void *nword_write)
       r_t1 = read_point_n;
       dis =w_t1 - r_t1;
       if (dis < 0) dis = jbuf_ev_size + dis;
-      usleep(300);
+      usleep(5); // sleep less time
     }
 
     if((w_t1 > r_t1) | ((jbuf_ev_size -r_t1)>nwrite)) {
@@ -2598,7 +2603,7 @@ void *pt_trig_filewrite(void *nword_write)
     n_write = write(fd_trig_pt,send_array,4);
     n_write = write(fd_trig_pt,file_buf,(nwrite*4));
     read_point_n = read_point_tmp;
-    printf("{pt_trig_filewrite} ==> Nuetrino write point = %d, read point %d\n", write_point_n, read_point_n);
+    printf("\e[1;31m{pt_trig_filewrite} ==> Nuetrino write point = %d, read point %d\e[0m\n", write_point_n, read_point_n);
   }
 }
 
@@ -2614,7 +2619,7 @@ void *pt_sn_copythread(void *arg)
   
   ch = 0;
 
-  printf("[pt_sn_copythread] ==> Started\n");
+  printf("\e[1;34m[pt_sn_copythread] ==> Started\e[0m\n");
   
   nwrite_byte_s = dwDMABufSize;
   nwrite        = nwrite_byte_s/4;
@@ -2632,7 +2637,7 @@ void *pt_sn_copythread(void *arg)
 	  continue; 
 	}
       
-      printf("[pt_sn_copythread] ==> Buffer ch: %d is filled!\n",ch);
+      printf("\e[1;34m[pt_sn_copythread] ==> Buffer ch: %d is filled!\n\e[0m",ch);
       // buffer is filled!
       break;
     }
@@ -2661,7 +2666,7 @@ void *pt_sn_copythread(void *arg)
       /* printf("[pt_sn_copythread] ==> release lock\n"); */
     }
     
-    printf("[pt_sn_copythread] ==> enter array copy --SN : ch: %d wps: %d rps: %d\n", ch, write_point_s, read_point_s);
+    printf("\e[1;34m[pt_sn_copythread] ==> enter array copy --SN : ch: %d wps: %d rps: %d\e[0m\n", ch, write_point_s, read_point_s);
     read_point_s_tmp =  read_point_s;
     if(write_point_s >= read_point_s_tmp) {
       if((jbuf_ev_size - write_point_s) >= nwrite) {
@@ -2701,7 +2706,7 @@ void *pt_sn_copythread(void *arg)
     
     sn_buf_filled[ch] = 0;
     total_used_s -= 1;
-    printf("[pt_sn_copythread] ==> total_used: %d\n",total_used_s);
+    printf("\e[1;34m[pt_sn_copythread] ==> total_used: %d\e[0m\n",total_used_s);
     //vic
   }  
 }
@@ -2719,7 +2724,7 @@ void *pt_trig_copythread(void *arg)
   
   ch = 0;
 
-  printf("[pt_trig_copythread] ==> Started\n");
+  printf("\e[1;31m[pt_trig_copythread] ==> Started\e[0m\n");
   
   nwrite_byte_n = dwDMABufSize;
   nwrite        = nwrite_byte_n/4;
@@ -2732,11 +2737,11 @@ void *pt_trig_copythread(void *arg)
       if( neu_buf_filled[ch] == 0 ) { // race condition on this array at all?
 	  ch += 1; 
 	  ch = ch%2; 
-	  usleep(100); // 1 microsecond wait until recheck
+	  usleep(5); // 5 microsecond wait until recheck
 	  continue; 
 	}
       
-      printf("[pt_trig_copythread] ==> Buffer ch: %d is filled!\n",ch);
+      printf("\e[1;31m[pt_trig_copythread] ==> Buffer ch: %d is filled!\e[0m\n",ch);
       // buffer is filled!
       break;
     }   
@@ -2765,7 +2770,7 @@ void *pt_trig_copythread(void *arg)
       /* printf("[pt_sn_copythread] ==> release lock\n"); */
     }
     
-    printf("[pt_trig_copythread] ==> enter array copy --NU : ch: %d wps: %d rps: %d\n", ch, write_point_n, read_point_n);
+    printf("\e[1;31m[pt_trig_copythread] ==> enter array copy --NU : ch: %d wps: %d rps: %d\n\e[0m", ch, write_point_n, read_point_n);
     read_point_n_tmp =  read_point_n;
     if(write_point_n >= read_point_n_tmp) {
       if((jbuf_ev_size - write_point_n) >= nwrite) {
@@ -2795,7 +2800,7 @@ void *pt_trig_copythread(void *arg)
     
     neu_buf_filled[ch] = 0;
     total_used_n -= 1;
-    printf("[pt_trig_copythread] ==> total_used: %d\n",total_used_n);
+    printf("\e[1;31m[pt_trig_copythread] ==> total_used: %d\e[0m\n",total_used_n);
     //vic
   }  
 
@@ -2810,7 +2815,7 @@ void *pt_sn_filewrite(void *nword_write)
   
   //xxx
   dwDMABufSize = 200000;
-  printf("{pt_sn_filewrite} ==> sn file write thread started \n");
+  printf("\e[1;34m{pt_sn_filewrite} ==> sn file write thread started\e[0m\n");
 
   //ch=0;
   while (1) {
@@ -2854,18 +2859,9 @@ void *pt_sn_filewrite(void *nword_write)
     n_write = write(fd_sn_pt,send_array,4);
     n_write = write(fd_sn_pt,file_buf,(nwrite*4));
     read_point_s = read_point_tmp;
-    printf("[pt_sn_filewrite] ==> SuperNova write point = %d, read point %d\n", write_point_s, read_point_s);
+    printf("\e[1;34m[pt_sn_filewrite] ==> SuperNova write point = %d, read point %d\e[0m\n", write_point_s, read_point_s);
   }
 }
-
-
-
-
-
-
-
-
-
 
 
 
