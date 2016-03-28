@@ -1270,7 +1270,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //vic
       /* inpf = fopen("/home/ub/feb_tpc_fpga_sn_zero_test","r"); */
       //inpf = fopen("/home/ub/module1x_140820_deb_1_25_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
-      inpf = fopen("/home/kterao/local152_code/feb_tpc_fpga_sn_zero_test","r");
+      //inpf = fopen("/home/kterao/local152_code/feb_tpc_fpga_sn_zero_test","r");
+      inpf = fopen("/home/davidc1/firmware/module1x_140820_deb_3_21_2016.rbf","r");
       imod = imod_fem;
       ichip=mb_feb_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -2146,17 +2147,17 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        printf("\n\n\n\n\t==> Done writing the file: n_write2: %d !!!!!\n\n\n\n",nwrite_2);
 
        
-       	fprintf(pFilee,"%d,%d,%d\n",min__,(max__ - min__),1);
-	fclose(pFilee);
-	
-	return;
-	
-	
-//
-//
-//
-//       if(irawprint ==1) {
-	if(1) { // Jose: run this
+       fprintf(pFilee,"%d,%d,%d\n",min__,(max__ - min__),1);
+       fclose(pFilee);
+       
+       return;
+       
+       
+       //
+       //
+       //
+       //       if(irawprint ==1) {
+       if(1) { // Jose: run this
 
 	 // hhhh: use this to decode file output
 
