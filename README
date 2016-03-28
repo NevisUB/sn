@@ -1,0 +1,26 @@
+Nevis Supernova Readout Repository for MicroBooNE
+
+# How to run on the LArTF machines:
+# setup your environment
+source /uboonenew/setup_online.sh
+# setup the windriver
+setup windriver v11_00_01 -q debug:e6
+# currently using this code:
+lartf_trial_case1_prod.c
+# slot order @ LArTF:
+1,3 # 03/28/2016
+
+# debugging log:
+
+# PCIe licence issue. Error looks like:
+PCIE diagnostic utility.
+Application accesses hardware using WinDriver.
+pcie_diag: Failed to initialize the PCIE library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+# solution: log on as ksu and renew the licence:
+ksu
+source /etc/rc.local
+
+
+# useful comands:
+# hedump for binary files:
+hexdump -v -e '8/4 "%08X " "\n"'
