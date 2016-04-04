@@ -146,6 +146,8 @@ static int VDEBUG;
 static int sn_buf_filled[4];
 static int neu_buf_filled[2];
 static int total_used_s,total_used_n;
+static long mytime1, seconds1, useconds1;
+struct timeval starttest1, endtest1;
 //vic
 
 #define  jbuf_ev_size 1000000
@@ -1826,16 +1828,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       ndma_loop = (nword*4)/dwDMABufSize;
       printf(" DMA will run %d loop per events \n", (ndma_loop+1));
       
-      /** begin timer **/
-      struct timeval starttest1, endtest1;
-      gettimeofday(&starttest1,NULL);
-      long mytime1, seconds1, useconds1;
-      seconds1  = starttest1.tv_sec;
-      useconds1 = starttest1.tv_usec;
-
-      printf("\n\nStart time of test: %ld sec %ld usec\n",seconds1,useconds1);
-      //get a fresh timestamp
-      gettimeofday(&starttest1,NULL);
 //
       //     allocate SuperNova buffer 1
       //
@@ -2024,22 +2016,38 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       k=1;
       i = pcie_send(hDev3, i, k, px);
       
+      
+
+      //start the clock
+      
+      /** begin timer **/
+
+      gettimeofday(&starttest1,NULL);
+      seconds1  = starttest1.tv_sec;
+      useconds1 = starttest1.tv_usec;
+
+      printf("\n\nStart time of test: %ld sec %ld usec\n",seconds1,useconds1);
+      printf("\n\nWill let you know when you crash!!\n");
+      //get a fresh timestamp
+      gettimeofday(&starttest1,NULL);
+
+      
  
-      while(1) {
-	usleep(200000);
-	//trigger block
-	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m");
-	imod=0;
-	ichip=1;
-	buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	//end trigger block
-	printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU!\n\e[0m");
-	//printf("\e[1;35m\t(main) ==> \e[1;33mDONE...\e[1;35m waiting a bit for NU!)\e[0m\n"); 
-      }
-      usleep(100000000000); //30 minutes?
+      /* while(1) { */
+      /* 	usleep(200000); */
+      /* 	//trigger block */
+      /* 	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m"); */
+      /* 	imod=0; */
+      /* 	ichip=1; */
+      /* 	buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger */
+      /* 	i=1; */
+      /* 	k=1; */
+      /* 	i = pcie_send(hDev, i, k, px); */
+      /* 	//end trigger block */
+      /* 	printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU!\n\e[0m"); */
+      /* 	//printf("\e[1;35m\t(main) ==> \e[1;33mDONE...\e[1;35m waiting a bit for NU!)\e[0m\n");  */
+      /* } */
+      usleep(10000000000000); //30 minutes?
     }
     break;
   }
@@ -2271,7 +2279,18 @@ void *pt_sn_dma(void *threadarg)
     while (idone == 0) {
       ch += 1;
       
-      if (ch%1000000 == 0){
+      if (ch%10000000 == 0){ 
+	
+
+	// small delay here BUT should be accurate ``enough"
+	gettimeofday(&endtest1,NULL);
+	long mytime2, seconds2, useconds2;
+	seconds2  = endtest1.tv_sec;
+	useconds2 = endtest1.tv_usec;
+	
+	printf("\n\n\tTime elapsed: %ld sec %ld usec\n",seconds2-seconds1,useconds2-useconds1);
+	//get a fresh timestamp
+	
 	printf("(pt_sn_dma) ==> receive DMA status word %d %X \n",ch,u32Data);
 	//god
 	dwAddrSpace =2;
@@ -2285,6 +2304,8 @@ void *pt_sn_dma(void *threadarg)
 	WDC_ReadAddr32(hDev2, dwAddrSpace, dwOffset, &u32Data);
 	printf ("status R2 word DMA = %x\n\n",u32Data);
 	//god
+
+	exit(0);
       }
 
       dwAddrSpace = cs_bar;
