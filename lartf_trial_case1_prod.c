@@ -253,6 +253,10 @@ static int buffer_ev_n_tpc[jbuf_ev_size], buffer_ev_s_tpc[jbuf_ev_size];
 /* int main(void) */
 int main(int argc, char **argv)
 {
+  if( argc != 3 ){
+    printf("Run it as ./mbtest_trial_case1_prod tstart tend, where tstart and tend are the start/end ticks of the signal (currently ignored). Exit... \n");
+    exit(-1);
+  }
 
   int min__ = atoi(argv[1]);
   int max__ = atoi(argv[2]);
@@ -1466,7 +1470,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
        
 
-       sprintf(title1,"joses_data_01272016_min_%d_max_%d.txt",min__,max__);       
+       //       sprintf(title1,"joses_data_01272016_min_%d_max_%d.txt",min__,max__);       
+       sprintf(title1,"joses_data_04062016_firmwareTest.txt");       
        outfile = fopen(title1, "w");
        
        
@@ -1483,16 +1488,31 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //           ijk= ibase+(ik-ibeg)*islope;
 //         }
 //         else ijk=ibase;
+
+
+	  // Chi waveform
+	  if(iround == 3) idir = -1;
+//	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
+	  if(iround == 0) idir = 1;
+	  //         if(iround == 0) idir = +4; // Huffman-incompressible baseline
+	  iround = iround + idir;
+	  ijk= ibase + iround;
+	  
+	  if( ik < 2 ) ijk += 20;
+	  if( ik > 250 ) ijk += 300; 
+
+
+	 /*
          if(iround == 3) idir =-1;
          if(iround == 0) idir = 1;
          iround = iround + idir;
          ijk= ibase + iround;
          
-	 /* if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase; */
+	 // if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase; 
 	 if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase;
 	 
 	 //if( (ik > 240) & (ik <247)) ijk=300+ibase;
-	 
+	 */	 
 
 	 if(ik == 0) fprintf(outfile,"Channel %d fake data\n", is);
 	 fprintf(outfile,"\t%4d",ijk);
@@ -2140,7 +2160,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        }
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
-       sprintf(title,"joses_data_01272016_min_%d_max_%d.dat",min__,max__);
+       //       sprintf(title,"joses_data_01272016_min_%d_max_%d.dat",min__,max__);
+       sprintf(title,"joses_data_04062016_firmwareTest.dat");
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
