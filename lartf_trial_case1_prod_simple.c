@@ -105,14 +105,6 @@ static BOOL DeviceFind(DWORD dwVendorId, DWORD dwDeviceId, WD_PCI_SLOT *pSlot);
 static WDC_DEVICE_HANDLE DeviceOpen(const WD_PCI_SLOT *pSlot);
 static void DeviceClose(WDC_DEVICE_HANDLE hDev);
 
-/* -----------------------------------------------
-    Read/write memory and I/O addresses
-   ----------------------------------------------- */
-
-
-/* -----------------------------------------------
-    Read/write the configuration space
-   ----------------------------------------------- */
 
 /* ----------------------------------------------------
     Plug-and-play and power management events handling
@@ -129,6 +121,13 @@ void *pt_trig_dma(void *threadarg);
 //vic
 int nwrite_2;
 
+
+void wait(char * msg) {
+  printf("\n%sPress enter to continue...\n\n",msg);
+  char enter = 0;
+  while (enter != '\r' && enter != '\n') { enter = getchar(); }
+  return;
+}
 
 //
 //     data storage
@@ -259,32 +258,11 @@ int main(int argc, char **argv)
       hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
     if (PCIE_DEFAULT_VENDOR_ID)
       hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
-    /*
-    if (PCIE_DEFAULT_VENDOR_ID)
-      hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
-    if (PCIE_DEFAULT_VENDOR_ID)
-      hDev3 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
-    */
-    /*
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+1);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+2);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev3 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+3);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev4 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+4);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev5 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+5);
-    */    
-    
     
     hDev3  = hDev;
     hDev5  = hDev1;
-
-
+    
+    
     /* Display main diagnostics menu for communicating with the device */
     /* MenuMain(&hDev, &hDev1, &hDev2, &hDev3, &hDev4, &hDev5); */
     MenuMain(&hDev, &hDev1, &hDev2, &hDev3, &hDev4, &hDev5,min__,max__);
@@ -292,13 +270,13 @@ int main(int argc, char **argv)
 
     /* Perform necessary cleanup before exiting the program */
     if (hDev)
-        DeviceClose(hDev);
-        DeviceClose(hDev1);
-        DeviceClose(hDev2);
-        DeviceClose(hDev3);
-        DeviceClose(hDev4);
-        DeviceClose(hDev5);
-
+      DeviceClose(hDev);
+    DeviceClose(hDev1);
+    DeviceClose(hDev2);
+    DeviceClose(hDev3);
+    DeviceClose(hDev4);
+    DeviceClose(hDev5);
+    
     dwStatus = PCIE_LibUninit();
     if (WD_STATUS_SUCCESS != dwStatus)
         PCIE_ERR("pcie_diag: Failed to uninit the PCIE library: %s", PCIE_GetLastErr());
@@ -1350,22 +1328,30 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
       
       ichip=3;
+
+      // loop over all 64 channels in the FEM module
       for (is=0; is<64; is++) {
         ik = 0x4000+is;                        // load channel address
-        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); // load channe address
+	printf("Loading channel address for channel : %i",is);
+	wait("");
+        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); // load channel address
         i = pcie_send(hDev3, 1, 1, px);
         ibase = is+1;    // set the base value of the ADC data
 	//        printf("channel = %d, ibase = %x\n", is,ibase);
 	//        scanf("%d", &ijk);
         for (ik=0; ik< 256; ik++) {
-	  //         if((ik > ibeg) && (ik <= (ibeg+iwidth))) {
-	  //           ijk= ibase+(ik-ibeg)*islope;
-	  //         }
-	  //         else ijk=ibase;
-	  if(iround == 3) idir =-1;
+
+
+	  // Chi waveform
+	  if(iround == 3) idir = -1;
+	  //	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
 	  if(iround == 0) idir = 1;
+	  //         if(iround == 0) idir = +4; // Huffman-incompressible baseline
 	  iround = iround + idir;
 	  ijk= ibase + iround;
+	  
+	  if( ik < 2 ) ijk += 20;
+	  if( ik > 250 ) ijk += 300; 
 	  
 	  /* if( (ik >= min__) && (ik <= max__) ) ijk=300+ibase; */
 	  if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase;
@@ -1377,18 +1363,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  fprintf(outfile,"\t%4d",ijk);
 	  if(((ik+1)%16)==0) fprintf(outfile,"\n");	     
 	  
-	  /* } */
-	  
-	  
-	  /* //         if ((ik>247)) ijk=300+ibase; */
-	  //if(is%4 == 0) {
-	  //           if(ik == 0) printf(" channel %d fake data \n",is);
-	  //printf(" %4d", ijk);
-	  //if(((ik+1)%16)==0) printf("\n");
-	  //}
 	  k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
-	  //        printf("k = %x\n", k);
-	  //        scanf("%d", &ijk);
+
 	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
 	  i = pcie_send(hDev3, 1, 1, px);
 	  send_array[is*256+ik]=ijk;           //load up data map
@@ -2227,10 +2203,22 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 
 
+
 static int pcie_send(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff_send)
 {
+
   /* imode =0 single word transfer, imode =1 DMA */
 #include "wdc_defs.h"
+
+  /*
+  printf("PCIe send command called\n");
+  printf("hDev  = %i",hDev);
+  printf("mode  = %i",mode);
+  printf("nword = %i",nword);
+  printf("buff send = %i",buff_send);
+  wait("");
+  */
+  
   static DWORD dwAddrSpace;
   static DWORD dwDMABufSize;
   
