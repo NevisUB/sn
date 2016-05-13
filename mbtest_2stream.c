@@ -932,10 +932,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     itrig_type =2 ;
     if(ineu == 1) itrig_type = 3;
 
-    fd_sn_pt = creat("test123_pt_snova.dat",0755);
+    fd_sn_pt = creat("test123_pt_snova_thres0_Bmean1000_BVar10000.dat",0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
     if(ineu == 1) {
-      fd_trig_pt = creat("test123_pt_trig.dat",0755);
+      fd_trig_pt = creat("test123_pt_trig_thres0_Bmean1000_BVar10000.dat",0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
     pt_trig_wdone=1;
@@ -1551,7 +1551,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  //ijk = 3;
 	  ijk = ik + min__; // set the threshold from command line
 
-	  ijk = 0x1; //  threshold of 1
+	  ijk = 0x0; //  threshold of 0
 
 	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
 	  i = pcie_send(hDev3, 1, 1, px);
@@ -1580,12 +1580,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	usleep(10);
 	//
 	//
-	ijk=10;
+	//	ijk=10;
+	ijk=1000; // increased to accept any baseline
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
-	ijk=100;
+	//ijk=100;
+	ijk=10000; // increased to accept any baseline
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
