@@ -431,8 +431,6 @@ static void DeviceClose(WDC_DEVICE_HANDLE hDev)
 
 
 /* Read/write memory or I/O space address menu */
-//static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVICE_HANDLE hDev2, 
-//		       WDC_DEVICE_HANDLE hDev3, WDC_DEVICE_HANDLE hDev4, WDC_DEVICE_HANDLE hDev5)
 static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVICE_HANDLE hDev2, 
 		       WDC_DEVICE_HANDLE hDev3, WDC_DEVICE_HANDLE hDev4, WDC_DEVICE_HANDLE hDev5,int min__, int max__)
 
@@ -2016,7 +2014,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       k=1;
       i = pcie_send(hDev3, i, k, px);
       
-      
 
       //start the clock
       
@@ -2033,20 +2030,21 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
       
  
-      /* while(1) { */
-      /* 	usleep(200000); */
-      /* 	//trigger block */
-      /* 	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m"); */
-      /* 	imod=0; */
-      /* 	ichip=1; */
-      /* 	buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger */
-      /* 	i=1; */
-      /* 	k=1; */
-      /* 	i = pcie_send(hDev, i, k, px); */
-      /* 	//end trigger block */
-      /* 	printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU!\n\e[0m"); */
-      /* 	//printf("\e[1;35m\t(main) ==> \e[1;33mDONE...\e[1;35m waiting a bit for NU!)\e[0m\n");  */
-      /* } */
+      while(1) {
+      	usleep(200000);
+      	//trigger block
+      	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m");
+      	imod=0;
+      	ichip=1;
+      	buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
+      	i=1;
+      	k=1;
+      	i = pcie_send(hDev, i, k, px);
+      	//end trigger block
+      	printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU!\n\e[0m");
+      	//printf("\e[1;35m\t(main) ==> \e[1;33mDONE...\e[1;35m waiting a bit for NU!)\e[0m\n");
+      }
+
       usleep(10000000000000); //30 minutes?
     }
     break;
