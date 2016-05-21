@@ -150,6 +150,13 @@ static int neu_buf_filled[2];
 static int total_used_s,total_used_n;
 static long mytime1, seconds1, useconds1;
 struct timeval starttest1, endtest1;
+
+static int base_mean;
+static int base_var;
+static int amp_thresh;
+static int presamples;
+static int postsamples;
+
 //vic
 
 #define  jbuf_ev_size 1000000
@@ -187,10 +194,18 @@ WD_DMA *pDma_rec_s4;
 /* int main(void) */
 int main(int argc, char **argv)
 {
+  
 
-  int min__ = atoi(argv[1]);
-  int max__ = atoi(argv[2]);
+  amp_thresh = atoi(argv[1]);
+  base_mean = atoi(argv[2]);
+  base_var = atoi(argv[3]);
 
+  presamples = atoi(argv[4]);
+  postsamples = atoi(argv[5]);
+  
+  int min__ = -1;
+  int max__ = -1;
+  
   struct timeval start;
   gettimeofday(&start,NULL);
 
@@ -931,11 +946,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //     scanf("%d",&itrig_type);
     itrig_type =2 ;
     if(ineu == 1) itrig_type = 3;
+    
+    char oname_snova[100];
+    char oname_trig[100];
+    sprintf(oname_snova, "Friday_test_snova_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
+    sprintf(oname_trig, "Friday_test_trig_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
 
-    fd_sn_pt = creat("test123_pt_snova_thres0_Bmean1000_BVar10000.dat",0755);
+    fd_sn_pt = creat(oname_snova,0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
     if(ineu == 1) {
-      fd_trig_pt = creat("test123_pt_trig_thres0_Bmean1000_BVar10000.dat",0755);
+      fd_trig_pt = creat(oname_trig,0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
     pt_trig_wdone=1;
@@ -1253,7 +1273,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       imod_last = imod_xmit+1;
       for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
 
-      	ik=tpc_adc_setup(hDev3, imod_fem, iframe_length, 1, 0, 4, timesize);
+      	ik=tpc_adc_setup(hDev3, imod_fem, iframe_length, 1, 1, 4, timesize);
 
       }
       //vic: stop
@@ -1263,6 +1283,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //
       
       
+      //if 0
+      //if 0
+      //if 0
+      //if 0
+      //if 0
       #if 0
       imod_last = imod_xmit+1;
       for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
@@ -1546,30 +1571,39 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
-	  ibase =ik+1;
+	  //ibase =ik+1;
 	  //ijk=ik+10;     // threshold
 	  //ijk = 3;
-	  ijk = ik + min__; // set the threshold from command line
-
-	  ijk = 0x0; //  threshold of 0
-
+	  /* ijk = ik + amp_thresh; // set the threshold from command line */
+	  
+	  //ijk = 0x0; //  threshold of 0
+	  
+	  ijk = amp_thresh;
+	  
 	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
 	  i = pcie_send(hDev3, 1, 1, px);
 	  usleep(10);
 	}
 
-	ijk=2;
+	//nijk=2;
+	ijk=presamples;
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
-	ijk=3;     //was 4
+	//ijk=3;     //was 4
+	ijk=postsamples;     //was 4
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
 	//common channel threshold
       
+	/* 	static int base_mean; */
+	/* static int base_var; */
+	/* static int amp_thresh; */
+
+
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_comthres)+((1 & 0xffff)<< 16); // channel threshold
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
@@ -1580,15 +1614,17 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	usleep(10);
 	//
 	//
+	
+
 	//	ijk=10;
-	ijk=1000; // increased to accept any baseline
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16); // load preample
+	ijk=base_mean; // increased to accept any baseline
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16);
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
 	//ijk=100;
-	ijk=10000; // increased to accept any baseline
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
+	ijk=base_var; // increased to accept any baseline
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16);
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 	
@@ -2080,7 +2116,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	i = pcie_send(hDev, i, k, px);
       	//end trigger block
       	printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU!\n\e[0m");
-      	//printf("\e[1;35m\t(main) ==> \e[1;33mDONE...\e[1;35m waiting a bit for NU!)\e[0m\n");
       }
 
       usleep(10000000000000); //30 minutes?
@@ -4161,8 +4196,10 @@ int tpc_adc_setup(WDC_DEVICE_HANDLE hDev, int imod_fem, int iframe, int itpc_adc
   i = pcie_send(hDev, i, k, px);
   //    printf(" type 1 to continue, ihuff = %d\n", ihuff);
   //    scanf("%d", &i);
+
   if(ihuff == 1) buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16);  // turn the compression
   else buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x1<<16);  // set b channel no compression
+
   //  buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_b_nocomp+(0x0<<16); // always turn on supernova compression
   i=1;
   k=1;
