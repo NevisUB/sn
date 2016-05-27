@@ -56,8 +56,8 @@ LFLAGS += -lwdapi1021
 # need also thread support for interrupt handling
 LFLAGS += -lpthread
 
-TARGET = mbtest_2stream
-SRCS = ../mbtest_2stream.c ../pcie_lib.c $(WD_BASEDIR)/samples/shared/diag_lib.c $(WD_BASEDIR)/samples/shared/wdc_diag_lib.c
+TARGET = mbtest_2stream_real
+SRCS = ../mbtest_2stream_real.c ../pcie_lib.c $(WD_BASEDIR)/samples/shared/diag_lib.c $(WD_BASEDIR)/samples/shared/wdc_diag_lib.c
 
 LD = gcc
 
@@ -70,7 +70,7 @@ all : $(TARGET)
 $(TARGET) : $(OBJS)
 	$(LD) $(LFLAGS) -o $@ $(OBJS) $(ADDITIONAL_LIBS) 
 
-mbtest_2stream.o : ../mbtest_2stream.c
+mbtest_2stream_real.o : ../mbtest_2stream_real.c
 	$(CC) -c $(CFLAGS) -o $@ $< 
 
 pcie_lib.o : ../pcie_lib.c

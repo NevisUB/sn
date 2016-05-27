@@ -949,8 +949,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     
     char oname_snova[100];
     char oname_trig[100];
-    sprintf(oname_snova, "Friday_test_snova_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
-    sprintf(oname_trig, "Friday_test_trig_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
+    sprintf(oname_snova, "BaselineCable_test_snova_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
+    sprintf(oname_trig, "BaselineCable_test_trig_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
 
     fd_sn_pt = creat(oname_snova,0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
