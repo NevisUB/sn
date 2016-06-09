@@ -165,6 +165,10 @@ void *pcie_send_fake(void *threadarg);
 //vic
 int nwrite_2;
 
+// Global variables for argv
+static int aThresh; // amplitude threshold
+static int bMean; // baseline mean threshold
+static int bVar; // baseline variance threshold
 
 //
 //     data storage
@@ -253,12 +257,19 @@ static int buffer_ev_n_tpc[jbuf_ev_size], buffer_ev_s_tpc[jbuf_ev_size];
 /* int main(void) */
 int main(int argc, char **argv)
 {
-  if( argc != 3 ){
-    printf("Run it as ./mbtest_trial_case1_prod tstart tend, where tstart and tend are the start/end ticks of the signal. Exit... \n");
+  //  if( argc != 3 ){
+  if( argc != 4 ){
+    //    printf("Run it as ./mbtest_trial_case1_prod tstart tend, where tstart and tend are the start/end ticks of the signal. Exit... \n");
+    printf("Run it as ./mbtest_trial_case1_prod $amplitudeThreshold $baselineMean $baselineVariance. Exit... \n");
     exit(-1);
   }
-  int min__ = atoi(argv[1]);
-  int max__ = atoi(argv[2]);
+  //  int min__ = atoi(argv[1]);
+  //  int max__ = atoi(argv[2]);
+  aThresh = atoi(argv[1]);
+  bMean = atoi(argv[2]);
+  bVar = atoi(argv[3]);
+  int min__ = -1;
+  int max__ = -1;
 
   struct timeval start;
   gettimeofday(&start,NULL);
@@ -1458,7 +1469,17 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        
 
        //       sprintf(title1,"joses_data_02092016_min_%d_max_%d.txt",min__,max__);       
-       sprintf(title1,"input_data_03212016_threshold_%d_noHuffmanBoundary.txt", min__);       
+       //       sprintf(title1,"input_data_04212016_threshold_%d_smallSignalBegin.txt", min__);       
+       //       sprintf(title1,"input_data_04212016_threshold_%d_bigSignalBegin_Bmean1000_Bvar10000.txt", min__);       
+       char nameSetup[100];
+       time_t t = time(NULL);
+       struct tm ltm = *localtime(&t);
+       sprintf(nameSetup, "%4i%02i%02i%02i%02i%02i_threshold%i_Bmean%i_Bvar%i",
+	       ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
+	       aThresh, bMean, bVar
+	       );
+
+       sprintf(title1,"%s_input.txt", nameSetup);       
        outfile = fopen(title1, "w");
        
        
@@ -1477,18 +1498,19 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //           ijk= ibase+(ik-ibeg)*islope;
 //         }
 //         else ijk=ibase;
-         if(iround == 3) idir =-1;
-//	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
-         if(iround == 0) idir = 1;
-	 //         if(iround == 0) idir = +4; // Huffman-incompressible baseline
-         iround = iround + idir;
-         ijk= ibase + iround;
-
-	 if( ik < 2 ) ijk += 20;
-	 if( ik > 250 ) ijk += 300; 
-
-	 /*
-         if (ik%2 == 0) inc += 4;
+	  //if(iround == 3) idir =-1;
+	  if(iround == 12) idir =-4; // Huffman-incompressible baseline
+	  //if(iround == 0) idir = 1;
+	  if(iround == 0) idir = +4; // Huffman-incompressible baseline
+	  iround = iround + idir;
+	  ijk= ibase + iround;
+	  
+	  //if( ik < 2 ) ijk += 20;
+	  //if( ik < 2 ) ijk += 300;
+	  if( ik > 235 && ik < 250) ijk += 300; 
+	  
+	  /*
+	    if (ik%2 == 0) inc += 4;
 	 else inc -= 4;
 	 
 	 if ( max__ >= min__ ) {
@@ -1545,7 +1567,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
        ibase =ik+1;
        //       ijk=ik+10;     // threshold
        //              ijk = 3;
-       ijk = ik + min__; // set the threshold from command line
+       //       ijk = ik + min__; // set the threshold from command line
+
+       ijk = aThresh; // set the threshold from command line
+
        /* ijk = 0xc17; */
        
        buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold
@@ -1559,12 +1584,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 //        i = pcie_send(hDev3, 1, 1, px);
 //        usleep(10);
       }
-      ijk=2;
+      //ijk=2;
+      //ijk=10;
+      ijk=6;
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
       i = pcie_send(hDev3, 1, 1, px);
       usleep(10);
 
-      ijk=3;     //was 4
+      ijk=6;     //was 4
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
       i = pcie_send(hDev3, 1, 1, px);
       usleep(10);
@@ -1588,12 +1615,20 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       usleep(10);
 //
 //
-      ijk=10;
+//      ijk=10;
+//      ijk=1000;
+
+      ijk=bMean;
+
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16); // load preample
       i = pcie_send(hDev3, 1, 1, px);
       usleep(10);
 
-      ijk=100;
+      //      ijk=100;
+      //      ijk=10000;
+
+      ijk=bVar;
+
       buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
       i = pcie_send(hDev3, 1, 1, px);
       usleep(10);
@@ -2165,7 +2200,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
         //vic - this may be slower, but we wait for read_array to be filled from the raw buffer returned from DMA
        //       sprintf(title,"joses_data_02092016_min_%d_max_%d.dat",min__,max__);
-       sprintf(title,"output_data_03212016_threshold_%d_noHuffmanBoundary.dat", min__);
+       //       sprintf(title,"output_data_0421212016_threshold_%d_smallSignalBegin.dat", min__);
+       //       sprintf(title,"vic_output_data_0421212016_threshold_%d_bigSignalBegin_Bmean1000_Bvar10000.dat", min__);
+       sprintf(title,"%s_output.dat", nameSetup);
        fd_sn = creat(title,0755);
        printf("fd_sn = %d\n", fd_sn);
        nwrite_2 = write(fd_sn,read_array,dwDMABufSize);
