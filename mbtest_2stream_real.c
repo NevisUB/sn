@@ -949,8 +949,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     
     char oname_snova[100];
     char oname_trig[100];
-    sprintf(oname_snova, "BaselineCable_test_snova_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
-    sprintf(oname_trig, "BaselineCable_test_trig_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
+    sprintf(oname_snova, "ComputingBaseline_test_snova_%d_%d_%d_%d_%d_bipolar0.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
+    sprintf(oname_trig, "ComputingBaseline_test_trig_%d_%d_%d_%d_%d_bipolar0.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
 
     fd_sn_pt = creat(oname_snova,0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
@@ -1567,7 +1567,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	ichip =3;
 	printf("\t==> Loading zero suppression parameter\n");
-	imod=imod_fem;
+	imod=imod_st;
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
@@ -1610,6 +1610,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	//
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no biploar
+	//	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((2 & 0xffff)<< 16); // bipolar
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 	//
