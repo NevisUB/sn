@@ -194,8 +194,7 @@ WD_DMA *pDma_rec_s4;
 /* int main(void) */
 int main(int argc, char **argv)
 {
-  
-
+  if( argc != 6 ) printf("Runit as ./mbtest_2stream_realFixedBaseline amp_thresh base_mean base_var presamples postsamples");
   amp_thresh = atoi(argv[1]);
   base_mean = atoi(argv[2]);
   base_var = atoi(argv[3]);
@@ -1289,6 +1288,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //if 0
       //if 0
       #if 0
+      /*
       imod_last = imod_xmit+1;
       for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
       	imod = imod_fem;
@@ -1302,7 +1302,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	i = pcie_send(hDev3, i, k, px);
       	usleep(200000);  // wait for 200 ms
       	//
-      	/* inpf = fopen("/home/ub/feb_fpga_test","r"); */ // old reference code
+      	// inpf = fopen("/home/ub/feb_fpga_test","r"); // old reference code
       	//inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
       	inpf = fopen("/home/ub/module1x_140820_deb_3_21_2016.rbf","r"); // Chi's new-est FPGA code (Mar 21, 2016)
       	printf("\n\t==> Start booting FEM %d\n", imod);
@@ -1318,7 +1318,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	//      }
 
 
-      	/* read data as characters (28941) */
+      	// read data as characters (28941) 
       	usleep(1000);   // wait fior a while
       	count = 0;
       	counta= 0;
@@ -1379,6 +1379,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
       	fclose(inpf);
       }
+    */
       #endif
 
       
@@ -1436,6 +1437,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //
       
       #if 0
+      // Everything will be ignored until endif
+'
       imod=0;
       ichip=1;
       iframe= iframe_length;   
@@ -1562,7 +1565,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	//vic
 	//start copy
-	
+	'
 	#endif
 
 	ichip =3;
@@ -1631,7 +1634,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	
 	
 #if 0
-	
+      // Everything will be ignored until endif
+'	
 	//vic
 	//end copy
 	//      imod=11;
@@ -1711,7 +1715,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  i = pcie_send(hDev3, i, k, px);
 	}
       }
-
+'
       #endif
       //
       //     now reset all the link port receiver PLL
