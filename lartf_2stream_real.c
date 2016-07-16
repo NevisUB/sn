@@ -194,8 +194,7 @@ WD_DMA *pDma_rec_s4;
 /* int main(void) */
 int main(int argc, char **argv)
 {
-  
-
+  if( argc != 6 ) printf("Runit as ./mbtest_2stream_realFixedBaseline amp_thresh base_mean base_var presamples postsamples");
   amp_thresh = atoi(argv[1]);
   base_mean = atoi(argv[2]);
   base_var = atoi(argv[3]);
@@ -953,8 +952,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     
     char oname_snova[100];
     char oname_trig[100];
-    sprintf(oname_snova, "LArTF_test_snova_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
-    sprintf(oname_trig, "LArTF_test_trig_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
+    sprintf(oname_snova, "20160714LArTF_test_snova_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
+    sprintf(oname_trig, "20160714LArTF_test_trig_%d_%d_%d_%d_%d.dat",amp_thresh,base_mean,base_var,presamples,postsamples);
 
     fd_sn_pt = creat(oname_snova,0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
@@ -1294,6 +1293,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //if 0
       //if 0
       #if 0
+      /*
       imod_last = imod_xmit+1;
       for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
       	imod = imod_fem;
@@ -1307,7 +1307,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	i = pcie_send(hDev3, i, k, px);
       	usleep(200000);  // wait for 200 ms
       	//
-      	/* inpf = fopen("/home/ub/feb_fpga_test","r"); */ // old reference code
+      	// inpf = fopen("/home/ub/feb_fpga_test","r"); // old reference code
       	//inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
       	//inpf = fopen("/home/ub/module1x_140820_deb_3_21_2016.rbf","r"); // Chi's new-est FPGA code (Mar 21, 2016)
 	inpf = fopen("/home/davidc1/firmware/module1x_140820_deb_3_21_2016.rbf","r");
@@ -1324,7 +1324,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	//      }
 
 
-      	/* read data as characters (28941) */
+      	// read data as characters (28941) 
       	usleep(1000);   // wait fior a while
       	count = 0;
       	counta= 0;
@@ -1385,6 +1385,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
       	fclose(inpf);
       }
+    */
       #endif
 
       
@@ -1442,6 +1443,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //
       
       #if 0
+      // Everything will be ignored until endif
+'
       imod=0;
       ichip=1;
       iframe= iframe_length;   
@@ -1568,12 +1571,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	//vic
 	//start copy
-	
+	'
 	#endif
 
 	ichip =3;
 	printf("\t==> Loading zero suppression parameter\n");
-	imod=imod_fem;
+	imod=imod_st;
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
@@ -1636,7 +1639,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	
 	
 #if 0
-	
+	// Everything will be ignored until endif
+'	
 	//vic
 	//end copy
 	//      imod=11;
@@ -1716,7 +1720,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  i = pcie_send(hDev3, i, k, px);
 	}
       }
-
+'
       #endif
       //
       //     now reset all the link port receiver PLL

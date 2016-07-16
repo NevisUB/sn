@@ -1515,7 +1515,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	ichip =3;
 	printf("\t==> Loading zero suppression parameter\n");
-	imod=imod_fem;
+	imod=imod_st;
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
