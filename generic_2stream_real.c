@@ -943,7 +943,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
   printf("\t==> Your only choice ==> (5) SuperNova readout test -- thread \n");
 
-  scanf("%d",&newcmd);
+  //  scanf("%d",&newcmd);
   
   newcmd=5; 
   switch(newcmd) { //useless switch statement
