@@ -13,8 +13,8 @@ AmplitudeThreshold=100 # Amplitude threshold in ADC
 FixBaseline=0 # Use fixed baseline: 0 = no, 1 = yes (FEM FPGA code must allow it)
 #FixBaseline=1 # Use fixed baseline: 0 = no, 1 = yes (FEM FPGA code must allow it)
 BaselinesFile=0 # Path to file with channel baselines
-#BaselinesFile=/home/jcrespo/sn_beamdown/channelBaselines_Crate08_FEM04_good.txt # Path to file with channel baselines
-#BaselinesFile=/home/jcrespo/sn_beamdown/channelBaselines_Crate02_FEM04_good.txt # Path to file with channel baselines
+#BaselinesFile=/home/jcrespo/sn_beamdown/baselines/channelBaselines_Crate08_FEM04_good.txt # Path to file with channel baselines
+#BaselinesFile=/home/jcrespo/sn_beamdown/baselines/channelBaselines_Crate02_FEM04_good.txt # Path to file with channel baselines
 BaselineMeanTolerance=10 # Maximum difference between means to establish baseline
 BaselineVarianceTolerance=100 # Maximum difference between variances to establish baseline
 Presamples=55 # Number of presamples

@@ -21,6 +21,9 @@ Bipolar=0 # Bipolar mode (0: signal is above threshold, 2: signal is either abov
 # Generate a copy of this script (identified by its timestamp) as log
 logname=`date +%Y%m%d%H%M%S`"_"`basename "$0" .sh`".log"
 cp $0 $logname
+# Add machine name to log to identify crate
+machname="\n\nMachine="`uname -n`"\n"
+echo -e $machname >> $logname
 
 # Run Nevis DAQ recipe
 # If a parameter is added, add it last and edit mbtest_2stream_real.c accordingly
