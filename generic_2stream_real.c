@@ -1325,7 +1325,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
       //vic: put it in 
 
-      imod_last = imod_xmit+1;
+      //      imod_last = imod_xmit+1;
       for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
 
       	ik=tpc_adc_setup(hDev3, imod_fem, iframe_length, 1, 1, 4, timesize);
@@ -1382,102 +1382,104 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	ichip =3;
 	printf("\t==> Loading zero suppression parameter\n");
-	imod=imod_st;
-      
-	//vic set threshold to maximum value
-	for (ik=0; ik< 64; ik++) {
-	  //ibase =ik+1;
-	  //ijk=ik+10;     // threshold
-	  //ijk = 3;
-	  //ijk = 0x0; //  threshold of 0
+
+	for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
+	  imod=imod_fem;
 	  
-	  ijk = amplitudeThresh__;
+	  //vic set threshold to maximum value
+	  for (ik=0; ik< 64; ik++) {
+	    //ibase =ik+1;
+	    //ijk=ik+10;     // threshold
+	    //ijk = 3;
+	    //ijk = 0x0; //  threshold of 0
 	  
-	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
+	    ijk = amplitudeThresh__;
+	    
+	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
+	    i = pcie_send(hDev3, 1, 1, px);
+	    usleep(10);
+	  }
+
+	  if( fixBaseline__ == 1 ){
+	    FILE* baselinefile = fopen(baselinesFileName__,"r"); // Baselines for FEM 64 channels at Nevis
+	    if( baselinefile == NULL ){
+	      printf("File %s with channel baselines not found. Exit...\n", baselinesFileName__);
+	      exit(-1);
+	    } else {
+	      printf("Reading channel baselines from file %s\n", baselinesFileName__);
+	    }
+	    
+	    int channelN, baselineValue;
+	    for (is=0; is<64; is++) {
+	      fscanf(baselinefile,"Channel=%d Mean=%d\n",&channelN, &baselineValue);
+	      printf("Loading channel: %d baseline: %d\n", channelN, baselineValue);
+	      if( is != channelN ){
+		printf("Error! Expected channel %d but found %d", is, channelN);
+		exit(0);
+	      }
+	      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_basline_ch)+((is & 0xffff)<<16); // load channe address
+	      i = pcie_send(hDev3, 1, 1, px);
+	      usleep(10);
+	      // int baselineValue = 2042;
+	      //	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline)+(((is+1) & 0xffff)<<16); // load baseline value
+	      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline)+((baselineValue & 0xffff)<<16); // load baseline value
+	      i = pcie_send(hDev3, 1, 1, px);
+	      usleep(10);
+	      //	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline_w)+(((is+1) & 0xffff)<<16); // write value
+	      buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline_w)+((baselineValue & 0xffff)<<16); // write value
+	      i = pcie_send(hDev3, 1, 1, px);
+	      usleep(10);
+	      // printf(" baseline loading is = %x\n", is);
+	      // scanf("%d", &ijk);
+	    }
+	    fclose(baselinefile);
+	  }
+
+	  //nijk=2;
+	  ijk=presamples__;
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
 	  i = pcie_send(hDev3, 1, 1, px);
 	  usleep(10);
-	}
+	  
+	  //ijk=3;     //was 4
+	  ijk=postsamples__;     //was 4
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
+	  i = pcie_send(hDev3, 1, 1, px);
+	  usleep(10);
 
-	if( fixBaseline__ == 1 ){
-	  FILE* baselinefile = fopen(baselinesFileName__,"r"); // Baselines for FEM 64 channels at Nevis
-	  if( baselinefile == NULL ){
-	    printf("File %s with channel baselines not found. Exit...\n", baselinesFileName__);
-	    exit(-1);
-	  } else {
-	    printf("Reading channel baselines from file %s\n", baselinesFileName__);
-	  }
-
-	  int channelN, baselineValue;
-	  for (is=0; is<64; is++) {
-	    fscanf(baselinefile,"Channel=%d Mean=%d\n",&channelN, &baselineValue);
-	    printf("Loading channel: %d baseline: %d\n", channelN, baselineValue);
-	    if( is != channelN ){
-	      printf("Error! Expected channel %d but found %d", is, channelN);
-	      exit(0);
-	    }
-	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_basline_ch)+((is & 0xffff)<<16); // load channe address
-	    i = pcie_send(hDev3, 1, 1, px);
-	    usleep(10);
-	    // int baselineValue = 2042;
-	    //	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline)+(((is+1) & 0xffff)<<16); // load baseline value
-	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline)+((baselineValue & 0xffff)<<16); // load baseline value
-	    i = pcie_send(hDev3, 1, 1, px);
-	    usleep(10);
-	    //	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline_w)+(((is+1) & 0xffff)<<16); // write value
-	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline_w)+((baselineValue & 0xffff)<<16); // write value
-	    i = pcie_send(hDev3, 1, 1, px);
-	    usleep(10);
-	    // printf(" baseline loading is = %x\n", is);
-	    // scanf("%d", &ijk);
-	  }
-	  fclose(baselinefile);
-	}
-
-	//nijk=2;
-	ijk=presamples__;
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
-	i = pcie_send(hDev3, 1, 1, px);
-	usleep(10);
-
-	//ijk=3;     //was 4
-	ijk=postsamples__;     //was 4
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
-	i = pcie_send(hDev3, 1, 1, px);
-	usleep(10);
-
-	//common channel threshold
+	  //common channel threshold
       
-	/* 	static int base_mean; */
-	/* static int base_var; */
-	/* static int amp_thresh; */
-
-
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_comthres)+((1 & 0xffff)<< 16); // channel threshold
-	i = pcie_send(hDev3, 1, 1, px);
-	usleep(10);
-
-	//
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((bipolar__ & 0xffff)<< 16); 
-	//	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no bipolar
-	//	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((2 & 0xffff)<< 16); // bipolar
-	i = pcie_send(hDev3, 1, 1, px);
-	usleep(10);
-	//
-	//
-	
-
-	//	ijk=10;
-	ijk=baseMeanTolerance__; // increased to accept any baseline
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16);
-	i = pcie_send(hDev3, 1, 1, px);
-	usleep(10);
-
-	//ijk=100;
-	ijk=baseVarianceTolerance__; // increased to accept any baseline
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16);
-	i = pcie_send(hDev3, 1, 1, px);
-	usleep(10);
-	
+	  /* 	static int base_mean; */
+	  /* static int base_var; */
+	  /* static int amp_thresh; */
+	  
+	  
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_comthres)+((1 & 0xffff)<< 16); // channel threshold
+	  i = pcie_send(hDev3, 1, 1, px);
+	  usleep(10);
+	  
+	  //
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((bipolar__ & 0xffff)<< 16); 
+	  //	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no bipolar
+	  //	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((2 & 0xffff)<< 16); // bipolar
+	  i = pcie_send(hDev3, 1, 1, px);
+	  usleep(10);
+	  //
+	  //
+	  
+	  
+	  //	ijk=10;
+	  ijk=baseMeanTolerance__; // increased to accept any baseline
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16);
+	  i = pcie_send(hDev3, 1, 1, px);
+	  usleep(10);
+	  
+	  //ijk=100;
+	  ijk=baseVarianceTolerance__; // increased to accept any baseline
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16);
+	  i = pcie_send(hDev3, 1, 1, px);
+	  usleep(10);
+	} // end of loop over all FEMS to load zero suppression parameters
 
       //
       //     now reset all the link port receiver PLL

@@ -6,9 +6,9 @@ XMIT_FPGACode=/home/kterao/local152_code/xmit_fpga_link_header # Path to XMIT FP
 XMIT_Module=3 # Location of XMIT module in crate
 FEM_FPGACode=/home/davidc1/firmware/module1x_140820_deb_3_21_2016.rbf # Path to FEM FPGA code
 #FEM_FPGACode=/home/jcrespo/fpga/module1x_140820_deb_fixbase_6_9_2016.rbf # Path to FEM FPGA code with fixed baseline
-FEM_Module=4 # Location of FEM module in crate
-OutputTriggerFile=test_trig.dat # Name of output file for trigger stream (date will be prepended)
-OutputSupernovaFile=test_snova.dat # Name of output file for supernova stream (date will be prepended)
+FEM_Module=6 # Location of leftmost FEM module in crate to be read (this and all FEMs between this one and the XMIT will be used)
+OutputTriggerFile=test_trig_3mod.dat # Name of output file for trigger stream (date will be prepended)
+OutputSupernovaFile=test_snova_3mod.dat # Name of output file for supernova stream (date will be prepended)
 AmplitudeThreshold=100 # Amplitude threshold in ADC
 FixBaseline=0 # Use fixed baseline: 0 = no, 1 = yes (FEM FPGA code must allow it)
 #FixBaseline=1 # Use fixed baseline: 0 = no, 1 = yes (FEM FPGA code must allow it)

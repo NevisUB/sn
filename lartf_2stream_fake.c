@@ -916,11 +916,13 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //printf(" xmit module address \n");
     //scanf("%d",&imod_xmit);
     //    imod_xmit = 2;
-    imod_xmit = 3;
+    //    imod_xmit = 3; // MicroBooNE SEB 08
+    imod_xmit = 6; // LArTF test stand SEB 01
     //printf(" slot address of the 1st FEM module \n");
     /* scanf("%d",&imod_st); */
     //    imod_st = 3;
-    imod_st = 4;
+    //    imod_st = 9; // MicroBooNE SEB 08
+    imod_st = 9; // LArTF test stand SEB 01
     printf(" number of FEM = %d\n",(imod_st - imod_xmit));
     /* printf(" write the file through thread \n"); */
     /* scanf("%d",&ith_fr); */
@@ -1248,7 +1250,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //
       //    Boot stratix after XMIT module
       //
-      imod_last = imod_xmit+1;
+      //      imod_last = imod_xmit+1;
       for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
 	imod = imod_fem;
 	//
@@ -1519,7 +1521,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
 	ichip =3;
 	printf("\t==> Loading zero suppression parameter\n");
-	imod=imod_st;
+	imod=imod_fem;
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
