@@ -730,6 +730,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 #define  mb_feb_pmt_align_pulse    85
 #define  mb_feb_pmt_rd_counters    86
 
+  // fix baseline instructions
+#define  mb_feb_disc_load_basline_ch   245 // channel you are going to load the baseline to
+#define  mb_feb_disc_load_baseline     246 // baseline value
+#define  mb_feb_disc_load_baseline_w   247 // write baseline
+  // fix baseline instructions
+
 #define  dma_buffer_size        40000000
 
   static DWORD dwAddrSpace;
@@ -928,10 +934,24 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     itrig_type =2 ;
     if(ineu == 1) itrig_type = 3;
 
-    fd_sn_pt = creat("test123_pt_snova.dat",0755);
+    char oname_snova[200];
+    char oname_trig[200];
+
+    char nameDate[100];
+    time_t t = time(NULL);
+    struct tm ltm = *localtime(&t);
+    sprintf(nameDate, "%4i%02i%02i%02i%02i%02i",
+	    ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec
+	    );
+
+    // Output file names
+    sprintf(oname_snova, "%s_%s.dat", "14bittime_test123_pt_snova_th10_fb2042", nameDate);
+    sprintf(oname_trig, "%s_%s.dat", "14bittime_test123_pt_trig", nameDate);
+
+    fd_sn_pt = creat(oname_snova,0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
     if(ineu == 1) {
-      fd_trig_pt = creat("test123_pt_trig.dat",0755);
+      fd_trig_pt = creat(oname_trig,0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
     pt_trig_wdone=1;
@@ -1260,7 +1280,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	//
 	/* inpf = fopen("/home/ub/feb_fpga_test","r"); */ // old reference code
 	//inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
-	inpf = fopen("/home/ub/module1x_140820_deb_3_21_2016.rbf","r"); // Chi's new-est FPGA code (Mar 21, 2016)
+	//inpf = fopen("/home/ub/module1x_140820_deb_3_21_2016.rbf","r"); // Chi's new-est FPGA code (Mar 21, 2016)
+	inpf = fopen("/home/ub/module1x_140820_deb_fixbase_nf_8_30_2016.rbf","r"); // Chi's 14-bit time + fix baseline FPGA code (Aug 30, 2016)
 	printf("\n\t==> Start booting FEM %d\n", imod);
 	ichip=mb_feb_conf_add;
 	buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1475,8 +1496,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  il = is%8;
 	  if(il == 0) printf(" loading channel %d\n",is);
 	  for (ik=0; ik< 256; ik++) {                 // loop over all possible address
-	    ibase = is+1;    // set the base value of the ADC data
-
+	    //ibase = is+1;    // set the base value of the ADC data
+	    ibase = 2040;
+	    
 	    /* if(iround == 3) idir =-1; */
 	    /* if(iround == 0) idir = 1; */
 	    /* iround = iround + idir; */
@@ -1486,16 +1508,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    /* /\* if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase; *\/ */
 	    /* if( (ik >= 200) && (ik <= 207) ) ijk=300+ibase; */
 
-	    /* if(iround == 3) idir =-1; */
-	    if(iround == 12) idir =-4; // Huffman-incompressible baseline
-	    /* if(iround == 0) idir = 1; */
-	    if(iround == 0) idir = +4; // Huffman-incompressible baseline
+	    if(iround == 3) idir =-1;
+	    // if(iround == 12) idir =-4; // Huffman-incompressible baseline
+	    if(iround == 0) idir = 1;
+	    // if(iround == 0) idir = +4; // Huffman-incompressible baseline
 	    iround = iround + idir;
 	    ijk= ibase + iround;
 	    
-	    if( ik < 2 )   ijk += 20;
-	    if( ik > 250 ) ijk += 300; 
-	    
+	    //	    if( ik < 2 )   ijk += 20;
+	    //	    if( ik > 250 ) ijk += 300; 
+	    if( ik > 240 && ik < 250 ) ijk += 300;
 
 	    /* if(iround == 3) idir =-1; */
 	    /* if(iround == 0) idir = 1; */
@@ -1519,22 +1541,53 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
-	  ibase =ik+1;
-	  //ijk=ik+10;     // threshold
+	  //ibase =ik+1;
+	  ijk= 10;     // threshold
 	  //ijk = 3;
-	  ijk = ik + min__; // set the threshold from command line
+	  //ijk = ik + min__; // set the threshold from command line
 	  /* ijk = 0xc17; */
 	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
 	  i = pcie_send(hDev3, 1, 1, px);
 	  usleep(10);
 	}
 
-	ijk=2;
+	int fixBaseline__ = 1;
+
+	// fix baseline
+	if( fixBaseline__ ){
+	  
+	  printf("\n\nUsing fixed baseline. Type 1 to confirm or 0 to abort.\n");
+	  scanf("%d",&fixBaseline__);
+	  if( !fixBaseline__ ) return;
+
+	  for (is=0; is<64; is++) {
+	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_basline_ch)+((is & 0xffff)<<16); // load channe address
+	    i = pcie_send(hDev3, 1, 1, px);
+	    usleep(1);
+	    
+	    int baselineValue = 2042;
+	    // buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline)+(((is+1) & 0xffff)<<16); // load baseline value
+	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline)+((baselineValue & 0xffff)<<16); // load baseline value
+	    i = pcie_send(hDev3, 1, 1, px);
+	    usleep(1);
+	    //	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline_w)+(((is+1) & 0xffff)<<16); // write value
+	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_disc_load_baseline_w)+((baselineValue & 0xffff)<<16); // write value
+	    i = pcie_send(hDev3, 1, 1, px);
+	    usleep(1);
+	    //        printf(" baseline loading is = %x\n", is);
+	    //        scanf("%d", &ijk);
+	  }
+
+	}
+	// end of fix baseline
+
+	ijk=31; // if the firmware only reads the last 3 bits is 7
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
-	ijk=3;     //was 4
+	ijk=31; // if the firmware only reads the last 3 bits is 7
+	//ijk=7;     //was 4
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
@@ -2031,7 +2084,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
  
       while(1) {
-      	usleep(200000);
+      	usleep(2000000);
       	//trigger block
       	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m");
       	imod=0;
