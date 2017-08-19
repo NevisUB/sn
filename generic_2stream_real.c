@@ -1393,8 +1393,24 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    //ijk = 3;
 	    //ijk = 0x0; //  threshold of 0
 	  
-	    ijk = amplitudeThresh__;
-	    
+	    //ijk = 0xfff & amplitudeThresh__;
+
+	    // channelwise polarity
+	    // Last 32 channels have unipolar positive polarity
+	    if( ik > 31 ){ 
+	      ijk = 30;
+	      ijk += 0x1000;
+	    // First 16 odd channels have unipolar negative polarity
+	    }else if( ik % 2){
+	      ijk = 25;
+	      ijk += 0x2000;
+	    // First 16 even channels have bipolar polarity
+	    }else{
+	      ijk = 15;
+	      ijk += 0x3000;
+	    }
+	    if( ik % 8 == 0 ) printf("\tLoading threshold and polarity for channel %d\n", ik);
+
 	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
 	    i = pcie_send(hDev3, 1, 1, px);
 	    usleep(10);
@@ -1874,7 +1890,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
  
       while(1) {
-      	usleep(2000000);
+	usleep(333333); // 3 Hz external trigger
       	//trigger block
       	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m");
       	imod=0;
