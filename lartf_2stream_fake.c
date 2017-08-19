@@ -916,12 +916,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //printf(" xmit module address \n");
     //scanf("%d",&imod_xmit);
     //    imod_xmit = 2;
-    //    imod_xmit = 3; // MicroBooNE SEB 08
+    //    imod_xmit = 3; // MicroBooNE SEB 02 - 08
     imod_xmit = 6; // LArTF test stand SEB 01
     //printf(" slot address of the 1st FEM module \n");
     /* scanf("%d",&imod_st); */
     //    imod_st = 3;
-    //    imod_st = 9; // MicroBooNE SEB 08
+    //    imod_st = 18; // MicroBooNE SEB
     imod_st = 9; // LArTF test stand SEB 01
     printf(" number of FEM = %d\n",(imod_st - imod_xmit));
     /* printf(" write the file through thread \n"); */
@@ -932,10 +932,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     itrig_type =2 ;
     if(ineu == 1) itrig_type = 3;
 
-    fd_sn_pt = creat("test123_pt_snova.dat",0755);
+    fd_sn_pt = creat("fakedata_snova.dat",0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
     if(ineu == 1) {
-      fd_trig_pt = creat("test123_pt_trig.dat",0755);
+      fd_trig_pt = creat("fakedata_trig.dat",0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
     pt_trig_wdone=1;
@@ -1171,7 +1171,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       printf(" boot xmit module \n");
       /* inpf = fopen("/home/ub/xmit_fpga_link","r"); */
       //      inpf = fopen("/home/ub/xmit_fpga_link_header","r");
-      inpf = fopen("/home/kterao/local152_code/xmit_fpga_link_header","r");
+      inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf","r");
       imod=imod_xmit;
       ichip=mb_xmit_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1266,7 +1266,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	/* inpf = fopen("/home/ub/feb_fpga_test","r"); */ // old reference code
 	//inpf = fopen("/home/ub/module1x_140820_deb_3_8_2016.rbf","r"); // Chi's new FPGA code (Jan 25, 2016)
 	//	inpf = fopen("/home/ub/module1x_140820_deb_3_21_2016.rbf","r"); // Chi's new-est FPGA code (Mar 21, 2016)
-	inpf = fopen("/home/davidc1/firmware/module1x_140820_deb_3_21_2016.rbf","r");
+	inpf = fopen("/home/jcrespo/fpga/module1x_140820_deb_nf_pol_1_5_2017.rbf","r"); // Chi's channelwise polarity 14-bit time FPGA code (Jan 5, 2017)
 	printf("\n\t==> Start booting FEM %d\n", imod);
 	ichip=mb_feb_conf_add;
 	buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1481,7 +1481,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  il = is%8;
 	  if(il == 0) printf(" loading channel %d\n",is);
 	  for (ik=0; ik< 256; ik++) {                 // loop over all possible address
-	    ibase = is+1;    // set the base value of the ADC data
+	    //	    ibase = is+1;    // set the base value of the ADC data
 
 	    /* if(iround == 3) idir =-1; */
 	    /* if(iround == 0) idir = 1; */
@@ -1493,14 +1493,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    /* if( (ik >= 200) && (ik <= 207) ) ijk=300+ibase; */
 
 	    /* if(iround == 3) idir =-1; */
-	    if(iround == 12) idir =-4; // Huffman-incompressible baseline
+	    //if(iround == 12) idir =-4; // Huffman-incompressible baseline
 	    /* if(iround == 0) idir = 1; */
-	    if(iround == 0) idir = +4; // Huffman-incompressible baseline
-	    iround = iround + idir;
-	    ijk= ibase + iround;
+	    //if(iround == 0) idir = +4; // Huffman-incompressible baseline
+	    //iround = iround + idir;
+	    //ijk= ibase + iround;
 	    
-	    if( ik < 2 )   ijk += 20;
-	    if( ik > 250 ) ijk += 300; 
+	    //if( ik < 2 )   ijk += 20;
+	    //if( ik > 250 ) ijk += 300; 
 	    
 
 	    /* if(iround == 3) idir =-1; */
@@ -1509,6 +1509,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    /* ijk= ibase + iround; */
 	    /* if( (ik >= 200) && (ik <= 208) ) ijk=300+ibase; */
 	    
+	    // Constant baseline
+	    ijk = 2040;
+	    // Bipolar sawtooth to test channelwise polarity and threshold
+	    if( ik > 201 && ik < 246 ) ijk += ik - 224;
+
 	    k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
 	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
 	    i = pcie_send(hDev3, 1, 1, px);
@@ -1525,22 +1530,34 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
 	//vic set threshold to maximum value
 	for (ik=0; ik< 64; ik++) {
-	  ibase =ik+1;
+	  //ibase =ik+1;
 	  //ijk=ik+10;     // threshold
 	  //ijk = 3;
-	  ijk = ik + min__; // set the threshold from command line
+	  //ijk = ik + min__; // set the threshold from command line
 	  /* ijk = 0xc17; */
+
+	  // 12-bit threshold
+	  ijk = 0xfff & (ik % 21);
+	  // channelwise polarity
+	  // Last 32 channels have unipolar positive polarity
+	  if( ik > 31 ) ijk += 0x1000;
+	  // First 16 odd channels have unipolar negative polarity
+	  else if( ik % 2) ijk += 0x2000;
+	  // First 16 even channels have bipolar polarity
+	  else ijk += 0x3000;
+	  if( ik % 8 == 0 ) printf("\tLoading threshold and polarity for channel %d\n", ik);
+
 	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_threshold+ik)+((ijk & 0xffff)<< 16); // load threshold       
 	  i = pcie_send(hDev3, 1, 1, px);
 	  usleep(10);
 	}
 
-	ijk=2;
+	ijk=7;
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_presample)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
-	ijk=3;     //was 4
+	ijk=7;
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_postsample)+((ijk & 0xffff)<< 16); // load postsample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
@@ -1552,17 +1569,17 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	usleep(10);
 
 	//
-	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no biploar
-	i = pcie_send(hDev3, 1, 1, px);
-	usleep(10);
+	//buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_sel_bipolar)+((0 & 0xffff)<< 16); // no biploar
+	//i = pcie_send(hDev3, 1, 1, px);
+	//usleep(10);
 	//
 	//
-	ijk=10;
+	ijk=2;
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_mean)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
 
-	ijk=100;
+	ijk=3;
 	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_tpc_load_thr_vari)+((ijk & 0xffff)<< 16); // load preample
 	i = pcie_send(hDev3, 1, 1, px);
 	usleep(10);
@@ -2037,7 +2054,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
  
       while(1) {
-      	usleep(200000);
+      	usleep(333333); // 3 Hz external trigger
       	//trigger block
       	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m");
       	imod=0;
