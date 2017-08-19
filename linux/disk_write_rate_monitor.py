@@ -11,12 +11,12 @@ while(1) :
     time.sleep(1)
     size1_sn = os.path.getsize(snfile)
     size1_tr = os.path.getsize(trigfile)
-    time.sleep(2)
+    time.sleep(2.0)
     size2_sn = os.path.getsize(snfile)
     size2_tr = os.path.getsize(trigfile)
 
-    datarate_sn = (float(size2_sn) - float(size1_sn)) / 1000000.
-    datarate_tr = (float(size2_tr) - float(size1_tr)) / 1000000.
+    datarate_sn = (float(size2_sn) - float(size1_sn)) / 2000000.
+    datarate_tr = (float(size2_tr) - float(size1_tr)) / 2000000.
     datarate_total = datarate_sn + datarate_tr
 
     print "\n\nSN data rate (MB/s) ", datarate_sn
