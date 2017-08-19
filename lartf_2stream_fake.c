@@ -879,7 +879,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 
   printf("\t==> Your only choice ==> (5) SuperNova readout test -- thread \n");
 
-  scanf("%d",&newcmd);
+  //  scanf("%d",&newcmd);
   
   newcmd=5; 
   switch(newcmd) { //useless switch statement
@@ -913,16 +913,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     /* printf(" enter 1 to enable the neutrino trigger \n"); */
     /* scanf("%d",&ineu); */
     ineu = 1;
-    //printf(" xmit module address \n");
-    //scanf("%d",&imod_xmit);
+    printf("Enter XMIT module address (e.g. 6 for LArTF test stand, \n7 for MicroBooNE crate 1, \n3 for MicroBooNE crates 2 - 8, \n4 for MicroBooNE crate 9) \n");
+    scanf("%d",&imod_xmit);
     //    imod_xmit = 2;
     //    imod_xmit = 3; // MicroBooNE SEB 02 - 08
-    imod_xmit = 6; // LArTF test stand SEB 01
-    //printf(" slot address of the 1st FEM module \n");
-    /* scanf("%d",&imod_st); */
+    //imod_xmit = 6; // LArTF test stand SEB 01
+    printf("Enter slot address of the leftmost FEM module (e.g. 9 for LArTF test stand, 18 for MicroBooNE) \n");
+    scanf("%d",&imod_st);
     //    imod_st = 3;
     //    imod_st = 18; // MicroBooNE SEB
-    imod_st = 9; // LArTF test stand SEB 01
+    //    imod_st = 9; // LArTF test stand SEB 01
     printf(" number of FEM = %d\n",(imod_st - imod_xmit));
     /* printf(" write the file through thread \n"); */
     /* scanf("%d",&ith_fr); */
@@ -938,6 +938,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       fd_trig_pt = creat("fakedata_trig.dat",0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
+    // Run disk write rate monitor in background
+    system("python disk_write_rate_monitor.py fakedata_disk_write_rate_monitor.log fakedata_snova.dat fakedata_trig.dat &");
     pt_trig_wdone=1;
     pt_snova_wdone=1;
     pt_trig_dmastart=1;

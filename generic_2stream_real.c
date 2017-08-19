@@ -1012,6 +1012,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       fd_trig_pt = creat(oname_trig,0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
+    // Run disk write rate monitor in background
+    char pycmd[500];
+    sprintf(pycmd, "python disk_write_rate_monitor.py %s_disk_write_rate_monitor.log %s %s &", nameDate, oname_snova, oname_trig);
+    system(pycmd);
+
     pt_trig_wdone=1;
     pt_snova_wdone=1;
     pt_trig_dmastart=1;
