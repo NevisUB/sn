@@ -1003,8 +1003,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    );
     
 
-    sprintf(oname_snova, "%s_%s", nameDate, outSnovaFileName__);
-    sprintf(oname_trig, "%s_%s", nameDate, outTrigFileName__);
+    sprintf(oname_snova, "data/%s_%s", nameDate, outSnovaFileName__);
+    sprintf(oname_trig, "data/%s_%s", nameDate, outTrigFileName__);
 
     fd_sn_pt = creat(oname_snova,0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
@@ -1014,7 +1014,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     }
     // Run disk write rate monitor in background
     char pycmd[500];
-    sprintf(pycmd, "python disk_write_rate_monitor.py %s_disk_write_rate_monitor.log %s %s &", nameDate, oname_snova, oname_trig);
+    sprintf(pycmd, "python disk_write_rate_monitor.py data/%s_disk_write_rate_monitor.log %s %s &", nameDate, oname_snova, oname_trig);
     system(pycmd);
 
     pt_trig_wdone=1;

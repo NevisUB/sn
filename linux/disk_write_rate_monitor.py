@@ -21,8 +21,9 @@ with open(sys.argv[1], 'w') as outfile:
         datarate_sn = (float(size2_sn) - float(size1_sn)) / 2000000.
         datarate_tr = (float(size2_tr) - float(size1_tr)) / 2000000.
         datarate_total = datarate_sn + datarate_tr
-        
-        outfile.write("\n\nSN data rate (MB/s) %f" % datarate_sn)
+
+        outfile.write("\n\n%s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        outfile.write("\nSN data rate (MB/s) %f" % datarate_sn)
         outfile.write("\nTrigger data rate (MB/s) %f" % datarate_tr)
         outfile.write("\nTotal data rate (MB/s) %f\n" % datarate_total)
         outfile.flush()

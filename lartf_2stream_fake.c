@@ -932,14 +932,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     itrig_type =2 ;
     if(ineu == 1) itrig_type = 3;
 
-    fd_sn_pt = creat("fakedata_snova.dat",0755);
+    fd_sn_pt = creat("data/fakedata_snova.dat",0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
     if(ineu == 1) {
-      fd_trig_pt = creat("fakedata_trig.dat",0755);
+      fd_trig_pt = creat("data/fakedata_trig.dat",0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
     // Run disk write rate monitor in background
-    system("python disk_write_rate_monitor.py fakedata_disk_write_rate_monitor.log fakedata_snova.dat fakedata_trig.dat &");
+    system("python disk_write_rate_monitor.py data/jcrespo/fakedata_disk_write_rate_monitor.log data/fakedata_snova.dat data/fakedata_trig.dat &");
     pt_trig_wdone=1;
     pt_snova_wdone=1;
     pt_trig_dmastart=1;
