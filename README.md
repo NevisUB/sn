@@ -39,13 +39,20 @@ Consider adding them to your .bashrc file if you use them often.
 
 ###### Frequent issues:
 
-* Windriver license issue. Error looks like:
+* Windriver license issue. Errors looks like:
 ```
 PCIE diagnostic utility.
 Application accesses hardware using WinDriver.
 pcie_diag: Failed to initialize the PCIE library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
 ```
-Solution: become root (you need to be added to the list, open a ticket using the Fermilab Service Desk if needed), and renew the licence:
+or
+```
+PCIE diagnostic utility.
+Application accesses hardware using WinDriver.
+DeviceFind: Failed scanning the PCI bus.
+Error: 0x20000009 - No valid license
+```
+Solution: Abort, become root (you need to be added to the list, open a ticket using the Fermilab Service Desk if needed), and renew the licence:
 ```
 ksu
 source /etc/rc.local
