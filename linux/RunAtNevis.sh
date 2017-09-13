@@ -2,7 +2,8 @@
 
 # Configuration parameters
 Location=Nevis # Choose between Nevis, teststand, MicroBooNE
-XMIT_FPGACode=/home/ub/xmit_fpga_link_header # Path to XMIT FPGA code
+#XMIT_FPGACode=/home/ub/xmit_fpga_link_header # Path to XMIT FPGA code
+XMIT_FPGACode=/home/ub/readcontrol_110601_v3_play_header_8_21_2017.rbf # Path to XMIT FPGA code
 XMIT_Module=2 # Location of XMIT module in crate
 FEM_FPGACode=/home/ub/module1x_140820_deb_nf_pol_1_5_2017.rbf # Path to FEM FPGA code with dynamic baseline
 #FEM_FPGACode=/home/ub/module1x_140820_deb_fixbase_6_9_2016.rbf # Path to FEM FPGA code with fixed baseline

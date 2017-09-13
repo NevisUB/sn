@@ -1,12 +1,13 @@
 # Script to run at LArTF test stand
 
 # Configuration parameters
-Location=teststand # Choose between Nevis, teststand, MicroBooNE
-XMIT_FPGACode=/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf # Path to XMIT FPGA code
+Location=teststand # Choose between Nevis, teststand, MicroBooNE#
+#XMIT_FPGACode=/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf # Path to XMIT FPGA code
+XMIT_FPGACode=/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_21_2017.rbf # Path to new XMIT FPGA code
 XMIT_Module=6 # Location of XMIT module in crate
 FEM_FPGACode=/home/jcrespo/fpga/module1x_140820_deb_nf_pol_1_5_2017.rbf # Path to FEM FPGA code with channelwise polarity and 14-bit time
 # FEM_FPGACode= /home/jcrespo/fpga/module1x_140820_deb_fixbase_6_9_2016.rbf # Path to FEM FPGA code with fixed baseline
-FEM_Module=9 # Location of leftmost FEM module in crate to be read (this and all FEMs between this one and the XMIT will be used)
+FEM_Module=18 # Location of leftmost FEM module in crate to be read (this and all FEMs between this one and the XMIT will be used)
 OutputTriggerFile=test_trig_3mod.dat # Name of output file for trigger stream (date will be prepended)
 OutputSupernovaFile=test_snova_3mod.dat # Name of output file for supernova stream (date will be prepended)
 AmplitudeThreshold=0 # NOT USED # Amplitude threshold in ADC

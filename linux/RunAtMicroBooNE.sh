@@ -2,7 +2,8 @@
 
 # Configuration parameters
 Location=MicroBooNE # Choose between Nevis, teststand, MicroBooNE
-XMIT_FPGACode=/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf # Path to XMIT FPGA code
+#XMIT_FPGACode=/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf # Path to XMIT FPGA code
+XMIT_FPGACode=/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_21_2017.rbf # Path to new XMIT FPGA code
 #XMIT_Module=7 # Location of XMIT module in crate for SEB 01
 XMIT_Module=3 # Location of XMIT module in crate for SEB 02-08
 #XMIT_Module=4 # Location of XMIT module in crate for SEB 09
