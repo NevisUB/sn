@@ -626,6 +626,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 #define  mb_xmit_dpa_fifo_reset    24
 #define  mb_xmit_dpa_word_align    25
 #define  mb_xmit_link_pll_reset    26
+#define  mb_xmit_history_read      29
 
 #define  mb_trig_run                1
 #define  mb_trig_frame_size         2
@@ -918,11 +919,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     //    imod_xmit = 2;
     //    imod_xmit = 3; // MicroBooNE SEB 02 - 08
     //imod_xmit = 6; // LArTF test stand SEB 01
-    printf("Enter slot address of the leftmost FEM module (e.g. 9 for LArTF test stand, 18 for MicroBooNE) \n");
+    printf("Enter slot address of the leftmost FEM module (max. 18)) \n");
     scanf("%d",&imod_st);
     //    imod_st = 3;
     //    imod_st = 18; // MicroBooNE SEB
-    //    imod_st = 9; // LArTF test stand SEB 01
+    //    imod_st = 18; // LArTF test stand SEB 01
     printf(" number of FEM = %d\n",(imod_st - imod_xmit));
     /* printf(" write the file through thread \n"); */
     /* scanf("%d",&ith_fr); */
@@ -932,14 +933,15 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
     itrig_type =2 ;
     if(ineu == 1) itrig_type = 3;
 
-    fd_sn_pt = creat("data/fakedata_snova.dat",0755);
+    fd_sn_pt = creat("data/fakedata_snova_verboseXMITfirmware.dat",0755);
     printf("fd_sn_pt = %d\n", fd_sn_pt);
     if(ineu == 1) {
-      fd_trig_pt = creat("data/fakedata_trig.dat",0755);
+      fd_trig_pt = creat("data/fakedata_trig_verboseXMITfirmware.dat",0755);
       printf("fd_trig_pt = %d\n", fd_trig_pt);
     }
     // Run disk write rate monitor in background
-    system("python disk_write_rate_monitor.py data/jcrespo/fakedata_disk_write_rate_monitor.log data/fakedata_snova.dat data/fakedata_trig.dat &");
+    system("python disk_write_rate_monitor.py data/fakedata_disk_write_rate_monitor_verboseXMITfirmware.log data/fakedata_snova_verboseXMITfirmware.dat data/fakedata_trig_verboseXMITfirmware.dat &");
+
     pt_trig_wdone=1;
     pt_snova_wdone=1;
     pt_trig_dmastart=1;
@@ -1173,7 +1175,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       printf(" boot xmit module \n");
       /* inpf = fopen("/home/ub/xmit_fpga_link","r"); */
       //      inpf = fopen("/home/ub/xmit_fpga_link_header","r");
-      inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf","r");
+      //inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf","r");
+      //inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_21_2017.rbf","r"); // new XMIT firmware
+      inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_hist_v1_08302017.rbf","r"); // new verbose XMIT firmware
       imod=imod_xmit;
       ichip=mb_xmit_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1494,6 +1498,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    /* /\* if( (ik >= 254) || (ik <= 5) ) ijk=300+ibase; *\/ */
 	    /* if( (ik >= 200) && (ik <= 207) ) ijk=300+ibase; */
 
+	    //	    ibase = 2040;
 	    /* if(iround == 3) idir =-1; */
 	    //if(iround == 12) idir =-4; // Huffman-incompressible baseline
 	    /* if(iround == 0) idir = 1; */
@@ -1515,6 +1520,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    ijk = 2040;
 	    // Bipolar sawtooth to test channelwise polarity and threshold
 	    if( ik > 201 && ik < 246 ) ijk += ik - 224;
+	    //if( ik > 201 && ik < 246 ) ijk += 4*(ik - 224); // Huffman incompressible
+	    //if( (is % 10) != 0 ) ijk = 2040; // Have Huffman incompressible data only in channels 0, 10, 20...
 
 	    k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
 	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
@@ -1539,7 +1546,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  /* ijk = 0xc17; */
 
 	  // 12-bit threshold
-	  ijk = 0xfff & (ik % 21);
+	  //	  ijk = 0xfff & (ik % 21);
+	  ijk = 0xfff & 1;
+
 	  // channelwise polarity
 	  // Last 32 channels have unipolar positive polarity
 	  if( ik > 31 ) ijk += 0x1000;
@@ -1829,7 +1838,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       i = pcie_rec(hDev3,0,2,nword,iprint,py);     // read out 2 32 bits words
       printf("xmit status word = %x, %x \n", read_array[0], read_array[1]);
 
-
       for (imod_fem = (imod_xmit+1); imod_fem< (imod_st+1); imod_fem++) {
 	i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
 	imod=imod_fem;
@@ -2054,9 +2062,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       gettimeofday(&starttest1,NULL);
 
       
- 
-      while(1) {
-      	usleep(333333); // 3 Hz external trigger
+      int mytrigger = 0;
+      int mydummy = 0;
+
+      //      while(1) {
+      while(mytrigger < 32400) { // run for 32400 triggers
+      	//usleep(333333); // 3 Hz external trigger
+	usleep(111111); // 9 Hz external trigger
+	//usleep(70000); // 14.3 Hz external trigger
+	//usleep(1500000); // The XMIT counters must be read every ~2 s or less, otherwise the history FIFO is filled and the word count returns 0
+	// E.g. if the counters are read every 10 triggers, the minimum trigger frequency is 5 Hz (actually must be more due to the delays introduced by the code execution)
       	//trigger block
       	printf("\e[1;35m\t(main) ==> Sending trigger !\n\e[0m");
       	imod=0;
@@ -2064,12 +2079,93 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       	buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger
       	i=1;
       	k=1;
-      	i = pcie_send(hDev, i, k, px);
+      	i = pcie_send(hDev3, i, k, px);
       	//end trigger block
-      	printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU!\n\e[0m");
+      	//printf("\e[1;35m\t(main) ==> \e[1;33m NOT Waiting\e[1;35m a bit for NU!\n\e[0m");
       	//printf("\e[1;35m\t(main) ==> \e[1;33mDONE...\e[1;35m waiting a bit for NU!)\e[0m\n");
-      }
+	mytrigger++;
 
+	// Read counters every 10 triggers
+	if( (mytrigger % 10) == 0 ){
+	//if( TRUE ){ // Read counter after every trigger
+
+	  nword = 7;
+	  //
+	  //       since there is module grep the output bus, the bus lis floating high.
+	  //       need to send extra command to get the bus settle down first.
+	  //
+	  imod=imod_xmit;
+	  ichip=3;
+	  buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_rdcounters+(0x1<<16);
+	  i=1;
+	  k=1;
+	  i = pcie_send(hDev3, i, k, px);
+	  //
+	  //     now the xmit is driving the bus
+	  //
+	  i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
+	  imod=imod_xmit;
+	  ichip=3;
+	  buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_rdcounters+(0x1<<16);
+	  i=1;
+	  k=1;
+	  i = pcie_send(hDev3, i, k, px);
+	  usleep(1);
+
+	  i = pcie_rec(hDev3,0,2,nword,iprint,py);     // read out 2 32 bits words
+
+	  printf(" ***** Slow Ctrl Monitoring: XMIT Readout Counters Info *****\n");
+	  printf("    buffer counter words = %x, %x, %x, %x, %x, %x, %x\n", read_array[0], read_array[1],
+		 read_array[2], read_array[3], read_array[4], read_array[5], read_array[6]);
+	  printf("    crate %d, header %x \n",(read_array[0] & 0x1f) ,((read_array[0] >> 8) & 0xff));
+	  printf("    supernova frame count %d \n", read_array[1]);
+	  printf("    neutrino event count %d \n", read_array[2]);
+	  printf("    neutrino read count %d \n", read_array[3]);
+	  printf("    supernova read count %d \n", read_array[4]);
+	  printf("    hamming codes: neutrino detect %x correct %x, supernova detect %x correct %x \n", (read_array[5] & 0xFF), ((read_array[5] >> 8) & 0xFF), ((read_array[5] >> 16) & 0xFF), ((read_array[5] >> 24) & 0xFF) );
+	  printf("    history FIFO word count %d \n", (read_array[6] & 0x3FF) );
+
+	  //printf("Enter any number to continue");
+	  //scanf("%d",&mydummy);
+
+	  ijk = (0x3FF & read_array[6]); // history FIFO word coun
+	  iprint =0;
+	  // Read words from history FIFO
+	  for (ia=0; ia<ijk; ia++) {
+	    nword = 2;
+	    i = pcie_rec(hDev3,0,1,nword,iprint,py);     // init the receiver
+	    imod=imod_xmit;
+	    ichip=3;
+	    buf_send[0]=(imod<<11)+(ichip<<8)+mb_xmit_history_read+(0x1<<16);
+	    i=1;
+	    k=1;
+	    i = pcie_send(hDev3, i, k, px);
+	    usleep(1);
+	    i = pcie_rec(hDev3,0,2,nword,iprint,py);     // read out 2 32 bits words
+	    printf("history word seq = %d %x, %x\n", ia,read_array[0], read_array[1]);
+
+	    printf(" ***** Slow Ctrl Monitoring: XMIT Readout History Info *****\n");
+	    printf("    buffer history words = %x, %x\n", read_array[0], read_array[1]);
+	    printf("    crate %d, header %x \n",(read_array[0] & 0x1f) ,((read_array[0] >> 8) & 0xff));
+	    printf("    header %x, %x \n", ((read_array[0] >> 16) & 0xFF) ,((read_array[0] >> 24) & 0xff));
+	    i = read_array[1];
+	    printf("    token NU %d \n", ( (i >> 31) &0x1 ) );
+	    printf("    token SN %d \n", ( (i >> 30) &0x1 ) );
+	    printf("    trig %d \n", ( (i >> 29) &0x1 ) );
+	    printf("    busy NU rising edge %d \n", ( (i >> 28) &0x1 ) );
+	    printf("    busy SN rising edge %d \n", ( (i >> 27) &0x1 ) );
+	    printf("    frame counter    %d \n", ( i & 0xFFFFFF ) );
+	    printf("\n");
+	  }
+
+	  //printf("Enter any number to continue");
+	  //scanf("%d",&mydummy);
+	}
+
+
+      }
+      printf("REACHED END OF TEST");
+      exit(0); // end of test
       usleep(10000000000000); //30 minutes?
     }
     break;
@@ -2359,7 +2455,7 @@ void *pt_sn_dma(void *threadarg)
     else if(iused == 3) ch=2;
 
     
-    printf("\e[1;32m\n DMA done --\e[1;34mSN on buffer: %d \n\e[0m",ch);
+    //printf("\e[1;32m\n DMA done --\e[1;34mSN on buffer: %d \n\e[0m",ch);
 
   }
 
@@ -2597,7 +2693,7 @@ void *pt_trig_dma(void *threadarg)
     if     (iused == 0) idone=1;
     else if(iused == 1) idone=0;
     
-    printf("\e[1;32m\n DMA done --\e[1;31m Neu on buffer: %d \e[0m\n",idone);
+    //printf("\e[1;32m\n DMA done --\e[1;31m Neu on buffer: %d \e[0m\n",idone);
     /* usleep(2000000); */
   }
 
