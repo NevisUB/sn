@@ -2123,12 +2123,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	  printf("    neutrino read count %d \n", read_array[3]);
 	  printf("    supernova read count %d \n", read_array[4]);
 	  printf("    hamming codes: neutrino detect %x correct %x, supernova detect %x correct %x \n", (read_array[5] & 0xFF), ((read_array[5] >> 8) & 0xFF), ((read_array[5] >> 16) & 0xFF), ((read_array[5] >> 24) & 0xFF) );
-	  printf("    history FIFO word count %d \n", (read_array[6] & 0x3FF) );
+	  printf("    history FIFO word count %d \n", (read_array[6] & 0x7FF) );
 
 	  //printf("Enter any number to continue");
 	  //scanf("%d",&mydummy);
 
-	  ijk = (0x3FF & read_array[6]); // history FIFO word coun
+	  ijk = (0x7FF & read_array[6]); // history FIFO word coun
 	  iprint =0;
 	  // Read words from history FIFO
 	  for (ia=0; ia<ijk; ia++) {
