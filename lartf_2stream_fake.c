@@ -1177,7 +1177,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       //      inpf = fopen("/home/ub/xmit_fpga_link_header","r");
       //inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_19_2013.rbf","r");
       //inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_8_21_2017.rbf","r"); // new XMIT firmware
-      inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_hist_v1_08302017.rbf","r"); // new verbose XMIT firmware
+      //inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_hist_v1_08302017.rbf","r"); // new verbose XMIT firmware
+      inpf = fopen("/home/jcrespo/fpga/readcontrol_110601_v3_play_header_hist_09282017.rbf","r"); // new verbose XMIT firmware
+
       imod=imod_xmit;
       ichip=mb_xmit_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1521,7 +1523,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    // Bipolar sawtooth to test channelwise polarity and threshold
 	    if( ik > 201 && ik < 246 ) ijk += ik - 224;
 	    //if( ik > 201 && ik < 246 ) ijk += 4*(ik - 224); // Huffman incompressible
-	    //if( (is % 10) != 0 ) ijk = 2040; // Have Huffman incompressible data only in channels 0, 10, 20...
+	    if( (is % 5) != 0 ) ijk = 2040; // Have Huffman incompressible data only in channels 0, 10, 20...
 
 	    k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
 	    buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); // load test data
@@ -2064,6 +2066,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
       
       int mytrigger = 0;
       int mydummy = 0;
+      int absframe = 0;
+      int prevrelframe = 0;
 
       //      while(1) {
       while(mytrigger < 32400) { // run for 32400 triggers
@@ -2154,8 +2158,17 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev1 ,WDC_DEVI
 	    printf("    trig %d \n", ( (i >> 29) &0x1 ) );
 	    printf("    busy NU rising edge %d \n", ( (i >> 28) &0x1 ) );
 	    printf("    busy SN rising edge %d \n", ( (i >> 27) &0x1 ) );
-	    printf("    frame counter    %d \n", ( i & 0xFFFFFF ) );
+	    printf("    rel. frame counter    %d \n", ( (i >> 16) & 0xFF ) );
+	    printf("    clock counter    %d \n", ( i & 0xFFFF ) );
+	    int relframe = ((i >> 16) & 0xFF);
+	    if( relframe >= prevrelframe){
+	      absframe += relframe - prevrelframe;
+	    }else{
+	      absframe += 256 + relframe - prevrelframe;
+	    }
+	    printf("    abs. frame counter    %d \n", absframe );
 	    printf("\n");
+	    prevrelframe = relframe;
 	  }
 
 	  //printf("Enter any number to continue");
